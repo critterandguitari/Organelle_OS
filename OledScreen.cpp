@@ -2,6 +2,39 @@
 
 #include "OledScreen.h"
 #include "fonts.h"
+#include <string.h>
+
+void OledScreen::setLine(int lineNum, char * line) {
+
+    int i, len;
+
+    lineNum -= 1;
+
+    println_8("                         ", 21,  2, (lineNum * 11) + 10);
+   
+    len = strlen(line);
+    if (len > 21)
+        println_8(line, 21,  2, (lineNum * 11) + 10);
+    else
+        println_8(line, len,  2, (lineNum * 11) + 10);
+
+
+}
+
+void OledScreen::drawInfoScreen(char * line){
+
+    int i, len;
+
+    for (i=0; i<5; i++) {
+        println_8("                         ", 21,  2, (i * 11) + 10);
+    }
+   
+    len = strlen(line);
+    if (len > 21)
+        println_8(line, 21,  2, 10);
+    else
+        println_8(line, len,  2, 10);
+}
 
 
 void OledScreen::draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y){

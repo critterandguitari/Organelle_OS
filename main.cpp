@@ -19,9 +19,65 @@ static const uint8_t eot = 0300;
 
 void updateScreen();
 void updateScreenPage(uint8_t page);
+void setOledLine(int lineNum, OSCMessage &msg);
 
-// example handler
-void gotone(OSCMessage &msg){
+
+void setOledLine1(OSCMessage &msg){
+    setOledLine(1, msg);
+}
+
+void setOledLine2(OSCMessage &msg){
+    setOledLine(2, msg);
+}
+
+
+void setOledLine3(OSCMessage &msg){
+    setOledLine(3, msg);
+}
+
+
+void setOledLine4(OSCMessage &msg){
+    setOledLine(4, msg);
+}
+
+
+void setOledLine5(OSCMessage &msg){
+    setOledLine(5, msg);
+}
+
+
+void setOledLine(int lineNum, OSCMessage &msg){
+
+    char str[256];
+    char screenLine[256];
+    int i = 0;
+
+    screenLine[0] = 0;
+
+    while (msg.isString(i) || msg.isFloat(i) || msg.isInt(i)){
+        if (msg.isString(i)){
+            msg.getString(i, str, 256);
+            strcat(screenLine, str);
+            strcat(screenLine, " ");
+        }
+        if (msg.isFloat(i)){
+            sprintf(str, "%g ", msg.getFloat(i));
+            strcat(screenLine, str);
+        }
+        if (msg.isInt(i)){
+            sprintf(str, "%d ", msg.getInt(i));
+            strcat(screenLine, str);
+        }
+        i++;
+    }
+    
+    screen.setLine(lineNum, screenLine);
+    updateScreen();
+//    printf("%s\n", screenLine);
+}
+
+// vu handler
+void vuMeter(OSCMessage &msg){
     static int count;
 
     char line[1024];
@@ -124,7 +180,6 @@ int main(int argc, char* argv[]) {
     // screen.put_char_arial32('O', 10, 10, 1);
     // screen.put_char_small('E', 50, 50, 1);
     
-   // screen.invert_screen();
     updateScreen();
 
     // full udp -> serial -> serial -> udp
@@ -134,15 +189,20 @@ int main(int argc, char* argv[]) {
         if (len > 0){
             for (i = 0; i < len; i++){
                 msgIn.fill(udpPacketIn[i]);
-            }
+            }    
             if(!msgIn.hasError()){
-                msgIn.dispatch("/vumeter", gotone, 0);
+                msgIn.dispatch("/oled/vumeter", vuMeter, 0);
+                msgIn.dispatch("/oled/line/1", setOledLine1, 0);
+                msgIn.dispatch("/oled/line/2", setOledLine2, 0);
+                msgIn.dispatch("/oled/line/3", setOledLine3, 0);
+                msgIn.dispatch("/oled/line/4", setOledLine4, 0);
+                msgIn.dispatch("/oled/line/5", setOledLine5, 0);
                 // send it along
                 msgIn.send(dump);
                 slip.sendMessage(dump.buffer, dump.length, serial);
             }
             else {
-                printf("bad message");
+                printf("bad message\n");
             }
             msgIn.empty();
         }   

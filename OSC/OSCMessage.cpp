@@ -23,6 +23,7 @@
  For bug reports and feature requests please email me at yotam@cnmat.berkeley.edu
  */
 
+#include <stdio.h>
 #include "OSCMessage.h"
 #include "OSCMatch.h"
 #include "OSCTiming.h"
@@ -383,6 +384,7 @@ bool OSCMessage::hasError(){
         retError |= datum->error != OSC_OK;
     }
 	return retError;
+    //return false;
 }
 
 OSCErrorCode OSCMessage::getError(){
@@ -652,8 +654,15 @@ void OSCMessage::decode(uint8_t incomingByte){
                     OSCData * datum = getOSCData(i);
                     if (datum->error == OSC_OK){
                         //compute the padding size for the data
+
                         int dataPad = padSize(datum->bytes);
-                        if (incomingBufferSize == dataPad){
+                        //printf("pad: %d for bytes: %d\n", dataPad, datum->bytes);
+                        
+                        // if pad is 0, then the data is already aligned and the buffer should not be cleared
+                        if(dataPad == 0) {
+                            decodeState = DATA;
+                        }
+                        else if (incomingBufferSize == dataPad){
                             clearIncomingBuffer();
                             decodeState = DATA;
                         }
