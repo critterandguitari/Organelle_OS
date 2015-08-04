@@ -43,7 +43,8 @@ void PatchMenu::encoderPress(void){
 
     char cmd[256];
     //sprintf(cmd, "/usr/bin/pd -rt -nogui /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
-    sprintf(cmd, "/usr/bin/pd -rt /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+    //sprintf(cmd, "/usr/bin/pd -rt /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+    sprintf(cmd, "/root/pd-0.46-6/bin/pd -jack -nogui -rt /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
 
     // first kill any other PD
     system("killall pd");

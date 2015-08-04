@@ -157,6 +157,7 @@ void encoderButton(OSCMessage &msg){
     }
     patchScreenEnabled = 1;
     patchScreen.clear();
+    menuScreen.clear();
     needNewScreen = 1;  // send full screen to clear it
 }
 
