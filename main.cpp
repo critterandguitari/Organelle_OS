@@ -70,10 +70,8 @@ void setOledLine(int lineNum, OSCMessage &msg){
         }
         i++;
     }
-    
     screen.setLine(lineNum, screenLine);
-    updateScreen();
-//    printf("%s\n", screenLine);
+    //    printf("%s\n", screenLine);
 }
 
 // vu handler
@@ -89,7 +87,7 @@ void vuMeter(OSCMessage &msg){
     if (msg.isInt(3)) outL = msg.getInt(3);
 
     screen.drawInfoBar(inR, inL, outR, outL);
-    updateScreenPage(0);
+   // updateScreenPage(0);
 
 /*
     if (msg.isString(0)){
@@ -120,7 +118,7 @@ void updateScreenPage(uint8_t page){
         slip.sendMessage(dump.buffer, dump.length, serial);
         oledMsg.empty();
 }
-
+/*
 void updateScreen(){
     
     uint8_t oledPage[128];
@@ -139,7 +137,29 @@ void updateScreen(){
         oledMsg.empty();
         usleep(5000);
     }
+}*/
+
+void sendReady(OSCMessage &msg){
+    
+    printf("sending ready...\n");
+    OSCMessage rdyMsg("/ready");
+    rdyMsg.add(1);
+    rdyMsg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+    rdyMsg.empty();
 }
+
+void sendGetKnobs(OSCMessage &msg){
+    msg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+}
+
+void sendLED(OSCMessage &msg){
+    msg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+}
+
+
 
 int main(int argc, char* argv[]) {
       
@@ -148,39 +168,12 @@ int main(int argc, char* argv[]) {
     //uint8_t osc_packet_in[256];
     uint8_t i = 0;
     int len = 0;
-
+    int count = 0;
+    int page = 0;
 
     UdpSocket udpSock(4001);
     udpSock.setDestination(4000, "localhost");
     OSCMessage msgIn;
-    
-    printf("cool\n");
-
-    // make an osc object
-    // the message wants an OSC address as first argument
-    OSCMessage msg("/sys/renumber");
-    msg.add(13);
-       
-    // this just dumps it into the simple writer dump
-    msg.send(dump);
-
-    printf("\n msg is %d bytes\n", dump.length);
-
-    // print it out
-
-    // UDP send
-    //    udpSock.writeBuffer(dump.buffer, dump.length);
-
-    // serial send
-    //    slip.sendMessage(dump.buffer, dump.length, serial);
-
-    //    usleep(1000000);
-    printf("\nnow gonna send oled\n");
-    
-    // screen.put_char_arial32('O', 10, 10, 1);
-    // screen.put_char_small('E', 50, 50, 1);
-    
-    updateScreen();
 
     // full udp -> serial -> serial -> udp
     for (;;){
@@ -197,9 +190,12 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/line/3", setOledLine3, 0);
                 msgIn.dispatch("/oled/line/4", setOledLine4, 0);
                 msgIn.dispatch("/oled/line/5", setOledLine5, 0);
+                msgIn.dispatch("/ready", sendReady, 0);
+                msgIn.dispatch("/led", sendLED, 0);
+                msgIn.dispatch("/getknobs", sendGetKnobs, 0);
                 // send it along
-                msgIn.send(dump);
-                slip.sendMessage(dump.buffer, dump.length, serial);
+            //    msgIn.send(dump);
+            //    slip.sendMessage(dump.buffer, dump.length, serial);
             }
             else {
                 printf("bad message\n");
@@ -214,6 +210,16 @@ int main(int argc, char* argv[]) {
 
         // sleep for 1ms
         usleep(1000);
+        
+        // every 16 ms send a new screen page
+        if (count > 16){
+            count = 0;
+            updateScreenPage(page);
+            page++;
+            page %= 8;
+        }
+        count++;
+    
     } // for;;
 }
 

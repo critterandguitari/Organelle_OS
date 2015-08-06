@@ -83,8 +83,8 @@ Serial::Serial()
     fcntl(serial_fd, F_SETFL, FNDELAY);
     
     printf("opened serial, setting up... \n");    
-    //set_interface_attribs (serial_fd, B500000);  // set speed to 115,200 bps, 8n1 (no parity)
-    set_interface_attribs (serial_fd, B115200);  // set speed to 115,200 bps, 8n1 (no parity)
+    set_interface_attribs (serial_fd, B500000);  // set speed to 115,200 bps, 8n1 (no parity)
+    //set_interface_attribs (serial_fd, B115200);  // set speed to 115,200 bps, 8n1 (no parity)
     // Flush the port's buffers (in and out) before we start using it
     tcflush(serial_fd, TCIOFLUSH);
     printf("done opening serial \n");    
