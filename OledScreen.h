@@ -32,7 +32,6 @@ class OledScreen
 
         unsigned int put_char_small(unsigned char c, unsigned int y, unsigned int x, unsigned int color);
 
-
         void println_16(char * line, int len, int x, int y);
 
         void println_8(char * line, int len, int x, int y);

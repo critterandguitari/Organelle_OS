@@ -1,4 +1,4 @@
-#N canvas 500 66 1318 967 10;
+#N canvas 273 78 1318 967 10;
 #X msg 200 253 port 4000;
 #X msg 233 298 status;
 #X obj 472 567 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
@@ -9,7 +9,7 @@
 #X obj 222 378 unpackOSC;
 #X obj 469 411 packOSC;
 #X obj 472 524 udpsend;
-#X msg 807 312 send /led \$1;
+#X msg 797 298 send /led \$1;
 #X obj 241 543 timer;
 #X floatatom 241 565 5 0 0 0 - - -, f 5;
 #X obj 270 513 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
@@ -33,15 +33,15 @@
 #X floatatom 561 229 5 10 1000 0 - - -, f 5;
 #X obj 703 549 routeOSC /knobs;
 #X obj 745 634 vsl 15 128 0 1023 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 6654 1;
+-1 -1 4420 1;
 #X obj 772 633 vsl 15 128 0 1023 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 4929 1;
+-1 -1 9112 1;
 #X obj 798 636 vsl 15 128 0 1023 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 2731 1;
+-1 -1 5276 1;
 #X obj 821 636 vsl 15 128 0 1023 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 3302 1;
+-1 -1 1192 1;
 #X obj 844 636 vsl 15 128 0 1023 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 8194 1;
+-1 -1 3911 1;
 #X obj 734 590 unpack 0 0 0 0 0;
 #X obj 395 198 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
@@ -53,7 +53,7 @@
 #X floatatom 802 791 5 0 0 0 - - -, f 5;
 #X floatatom 840 815 5 0 0 0 - - -, f 5;
 #X floatatom 843 790 5 0 0 0 - - -, f 5;
-#X obj 197 416 routeOSC /thousand;
+#X obj 233 426 routeOSC /thousand;
 #X obj 128 521 unpack;
 #X floatatom 123 549 5 0 0 0 - - -, f 5;
 #X floatatom 170 551 5 0 0 0 - - -, f 5;
@@ -134,14 +134,13 @@
 #X obj 419 785 udpsend;
 #X obj 292 772 print;
 #X msg 499 680 connect localhost 6000;
-#X obj 1014 77 f 0;
+#X obj 998 79 f 0;
 #X obj 1060 80 + 1;
-#X obj 1001 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 1001 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 851 47 r bpm;
 #X obj 868 75 int;
 #X msg 929 290 send /oled/line/3 3: Delay \$1 sec;
-#X msg 922 186 send /oled/line/2 2: Not Used;
 #X msg 914 338 send /oled/line/4 4: Not Used;
 #X msg 937 394 send /oled/line/5 No Aux Button;
 #X msg 918 137 send /oled/line/1 1: \$1 Tempo BPM;
@@ -150,9 +149,11 @@
 #X msg 1048 434 \; oledLine5 No Aux Button \; screenLine5 Thing \;
 ;
 #X obj 921 462 r screenLine5;
-#X obj 1010 43 metro 100;
 #X msg 658 219 send /ready;
-#X obj 832 283 % 8;
+#X obj 822 269 % 8;
+#X msg 922 186 send /oled/line/2 2: \$1;
+#X obj 1010 43 metro 150;
+#X obj 157 426 print;
 #X connect 0 0 5 0;
 #X connect 1 0 5 0;
 #X connect 3 0 8 0;
@@ -208,7 +209,6 @@
 #X connect 47 0 48 0;
 #X connect 49 0 50 0;
 #X connect 51 0 54 0;
-#X connect 51 0 79 1;
 #X connect 52 0 55 0;
 #X connect 53 0 56 0;
 #X connect 57 0 47 1;
@@ -220,20 +220,21 @@
 #X connect 64 0 66 0;
 #X connect 68 0 66 0;
 #X connect 69 0 70 0;
-#X connect 69 0 85 0;
+#X connect 69 0 78 0;
+#X connect 69 0 84 0;
+#X connect 69 0 83 0;
 #X connect 70 0 69 1;
-#X connect 71 0 83 0;
+#X connect 71 0 85 0;
 #X connect 72 0 73 0;
-#X connect 73 0 78 0;
+#X connect 73 0 77 0;
 #X connect 74 0 7 0;
 #X connect 75 0 7 0;
 #X connect 76 0 7 0;
 #X connect 77 0 7 0;
-#X connect 78 0 7 0;
-#X connect 78 0 65 0;
-#X connect 79 0 74 0;
-#X connect 82 0 80 0;
-#X connect 83 0 69 0;
-#X connect 83 0 79 0;
+#X connect 77 0 65 0;
+#X connect 78 0 74 0;
+#X connect 81 0 79 0;
+#X connect 82 0 7 0;
+#X connect 83 0 9 0;
 #X connect 84 0 7 0;
-#X connect 85 0 9 0;
+#X connect 85 0 69 0;

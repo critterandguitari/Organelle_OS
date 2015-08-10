@@ -9,13 +9,15 @@
 #include "UdpSocket.h"
 #include "SLIPEncodedSerial.h"
 #include "OledScreen.h"
+#include "PatchMenu.h"
 
 Serial serial;
 SLIPEncodedSerial slip;
 SimpleWriter dump;
 OledScreen screen;
+PatchMenu menu;
 
-static const uint8_t eot = 0300;
+int needNewScreen = 0;
 
 void updateScreen();
 void updateScreenPage(uint8_t page);
@@ -160,6 +162,15 @@ void sendLED(OSCMessage &msg){
 }
 
 
+void encoderInput(OSCMessage &msg){
+    
+    if (msg.isInt(0)){
+        if (msg.getInt(0) == 1) menu.up();
+        if (msg.getInt(0) == 0) menu.down();
+    }
+    menu.drawPatchList(screen);
+    needNewScreen = 1;
+}
 
 int main(int argc, char* argv[]) {
       
@@ -170,16 +181,30 @@ int main(int argc, char* argv[]) {
     int len = 0;
     int count = 0;
     int page = 0;
+    int count20fps = 0;
 
     UdpSocket udpSock(4001);
     udpSock.setDestination(4000, "localhost");
     OSCMessage msgIn;
+
+    menu.getPatchList();
+    menu.drawPatchList(screen);
+
+
+    // send ready 
+    OSCMessage rdyMsg("/ready");
+    rdyMsg.add(1);
+    rdyMsg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+    rdyMsg.empty();
+
 
     // full udp -> serial -> serial -> udp
     for (;;){
         // receive udp, send to serial
         len = udpSock.readBuffer(udpPacketIn, 256, 0);
         if (len > 0){
+            msgIn.empty();
             for (i = 0; i < len; i++){
                 msgIn.fill(udpPacketIn[i]);
             }    
@@ -206,6 +231,12 @@ int main(int argc, char* argv[]) {
         // receive serial, send udp
         if(slip.recvMessage(serial)) {
             udpSock.writeBuffer(slip.decodedBuf, slip.decodedLength);
+            
+            // check if we need to do something with this message
+            msgIn.empty();
+            msgIn.fill(slip.decodedBuf, slip.decodedLength);
+            msgIn.dispatch("/enc", encoderInput, 0);
+            msgIn.empty();
         }
 
         // sleep for 1ms
@@ -214,12 +245,28 @@ int main(int argc, char* argv[]) {
         // every 16 ms send a new screen page
         if (count > 16){
             count = 0;
+            
             updateScreenPage(page);
             page++;
             page %= 8;
         }
         count++;
-    
+
+        // we can do a whole screen,  but not faster than 20fps
+        if (count20fps > 50){
+            count20fps = 0;
+            if (needNewScreen){
+                needNewScreen = 0;
+                updateScreenPage(1);
+                updateScreenPage(2);
+                updateScreenPage(3);
+                updateScreenPage(4);
+                updateScreenPage(5);
+                updateScreenPage(6);
+                updateScreenPage(7);
+            }
+        }
+        count20fps++;
     } // for;;
 }
 
