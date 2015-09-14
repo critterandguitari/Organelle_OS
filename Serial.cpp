@@ -20,7 +20,7 @@
 
 
 
-static int set_interface_attribs (int fd, int speed, int parity)
+static int set_interface_attribs (int fd, int speed)
 {
     struct termios tty;
     memset (&tty, 0, sizeof tty);
@@ -33,24 +33,29 @@ static int set_interface_attribs (int fd, int speed, int parity)
     cfsetospeed (&tty, speed);
     cfsetispeed (&tty, speed);
 
+    // control flags
     tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
-    // disable IGNBRK for mismatched speed tests; otherwise receive break
-    // as \000 chars
-    tty.c_iflag &= ~IGNBRK;         // ignore break signal
-    tty.c_lflag = 0;                // no signaling chars, no echo,
-                                    // no canonical processing
-    tty.c_oflag = 0;                // no remapping, no delays
-    tty.c_cc[VMIN]  = 0;            // read doesn't block
-    tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
-
-    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
-
-    tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
-                                    // enable reading
+    tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls, enable reading
     tty.c_cflag &= ~(PARENB | PARODD);      // shut off parity
-    tty.c_cflag |= parity;
     tty.c_cflag &= ~CSTOPB;
     tty.c_cflag &= ~CRTSCTS;
+    
+    // input flags
+    //tty.c_iflag &= ~IGNBRK;         // ignore break signal
+    tty.c_iflag = 0;         // disable everything
+    
+    
+    // local flags
+    tty.c_lflag = 0;                // no signaling chars, no echo, no canonical processing
+    
+    // output flags
+    tty.c_oflag = 0;                // no remapping, no delays
+   
+    // blocking
+    tty.c_cc[VMIN]  = 0;            // read doesn't block  (block until 0 characters received)
+    tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout   --- this might cuase block up to .5 sec?
+
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
 
     if (tcsetattr (fd, TCSANOW, &tty) != 0)
     {
@@ -58,23 +63,6 @@ static int set_interface_attribs (int fd, int speed, int parity)
         return -1;
     }
     return 0;
-}
-
-static void set_blocking (int fd, int should_block)
-{
-    struct termios tty;
-    memset (&tty, 0, sizeof tty);
-    if (tcgetattr (fd, &tty) != 0)
-    {
-        //error_message ("error %d from tggetattr", errno);
-        return;
-    }
-
-    tty.c_cc[VMIN]  = should_block ? 1 : 0;
-    tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
-
-    if (tcsetattr (fd, TCSANOW, &tty) != 0) ;
-        //error_message ("error %d setting term attributes", errno);
 }
 
 Serial::Serial()
@@ -95,9 +83,8 @@ Serial::Serial()
     fcntl(serial_fd, F_SETFL, FNDELAY);
     
     printf("opened serial, setting up... \n");    
-    set_interface_attribs (serial_fd, B500000, 0);  // set speed to 115,200 bps, 8n1 (no parity)
-    //set_interface_attribs (serial_fd, B115200, 0);  // set speed to 115,200 bps, 8n1 (no parity)
-    set_blocking (serial_fd, 0);                // set no blocking
+    //set_interface_attribs (serial_fd, B500000);  // set speed to 115,200 bps, 8n1 (no parity)
+    set_interface_attribs (serial_fd, B115200);  // set speed to 115,200 bps, 8n1 (no parity)
     // Flush the port's buffers (in and out) before we start using it
     tcflush(serial_fd, TCIOFLUSH);
     printf("done opening serial \n");    

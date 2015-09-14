@@ -3,6 +3,101 @@
 #include "OledScreen.h"
 #include "fonts.h"
 
+
+void OledScreen::draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y){
+    uint8_t i, j;
+
+    for (i = 0; i<sizey; i++)
+        for (j = 0; j<sizex; j++)
+            put_pixel(1, x+i, y+j);
+   
+}
+
+
+void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
+
+    int i;    
+
+    // first clear it out
+    for (i = 0; i < 128; i++)
+        pix_buf[i] = 0;
+
+    // draw input output
+    put_char_small('I', 0, 0, 1);
+    put_char_small('O', 48, 0, 1);
+
+    
+    // VU meter
+    // after I
+    // little guys
+    draw_box(1, 2, 7, 1); 
+    draw_box(1, 2, 12, 1); 
+    draw_box(1, 2, 17, 1); 
+    draw_box(1, 2, 22, 1); 
+    draw_box(1, 2, 28, 1); 
+    draw_box(1, 2, 33, 1); 
+    draw_box(1, 2, 38, 1); 
+
+    draw_box(1, 2, 7, 5);
+    draw_box(1, 2, 12, 5);
+    draw_box(1, 2, 17, 5);
+    draw_box(1, 2, 22, 5);
+    draw_box(1, 2, 28, 5);
+    draw_box(1, 2, 33, 5);
+    draw_box(1, 2, 38, 5);
+
+    // big guys
+    for (i = 0; i < (inR % 8); i++){
+        draw_box(3, 4, 7 + (5 * i), 0); 
+    }
+
+    for (i = 0; i < (inL % 8); i++){
+        draw_box(3, 4, 7 + (5 * i), 4);
+    }
+
+    // after O
+    // small guys
+    draw_box(1, 2, 55, 1); 
+    draw_box(1, 2, 60, 1); 
+    draw_box(1, 2, 65, 1); 
+    draw_box(1, 2, 70, 1); 
+    draw_box(1, 2, 75, 1); 
+    draw_box(1, 2, 80, 1); 
+    draw_box(1, 2, 85, 1); 
+
+    draw_box(1, 2, 55, 5);
+    draw_box(1, 2, 60, 5);
+    draw_box(1, 2, 65, 5);
+    draw_box(1, 2, 70, 5);
+    draw_box(1, 2, 75, 5);
+    draw_box(1, 2, 80, 5);
+    draw_box(1, 2, 85, 5);
+
+    // big guys
+    for (i = 0; i < (outR % 8); i++){
+        draw_box(3, 4, 55 + (5 * i), 0); 
+    }
+
+    for (i = 0; i < (outL % 8); i++){
+        draw_box(3, 4, 55 + (5 * i), 4);
+    }
+
+    // other info
+/*    put_char_small('M', 95, 0, 1);
+    draw_box(1, 3, 103, 0);
+    draw_box(1, 1, 104, 1);
+    draw_box(1, 3, 103, 2);
+
+    draw_box(1, 1, 104, 4);
+    draw_box(1, 1, 103, 5);
+    draw_box(1, 1, 105, 5);
+    draw_box(1, 1, 104, 6);
+    
+    put_char_small('D', 110, 0, 1);
+    put_char_small('F', 116, 0, 1);*/
+
+}
+
 void OledScreen::println_16(char * line, int len, int x, int y){
     int i, deltax;
     deltax = x;
@@ -31,18 +126,22 @@ void OledScreen::put_pixel(unsigned int on, unsigned int x, unsigned int y){
     y &= 0x3f;
 
     // subtract cause its flipped
-    page = 7 - (y / 8);
-    column = 127 - x;
+    //page = 7 - (y / 8);
+    //column = 127 - x;
+
+    page = y / 8;
+    column = x;
+
 
     tmp8 = pix_buf[(page * 128) + column];
     
     if (on){
-       //tmp8 |= (1 << (y & 0x7)); 
-       tmp8 |= (1 << (7 - (y & 0x7))); 
+       tmp8 |= (1 << (y & 0x7)); 
+       //tmp8 |= (1 << (7 - (y & 0x7))); 
     }
     else{
-       //tmp8 &= ~(1 << (y & 0x7));
-       tmp8 &= ~(1 << (7 - (y & 0x7)));
+       tmp8 &= ~(1 << (y & 0x7));
+       //tmp8 &= ~(1 << (7 - (y & 0x7)));
    }
 
    pix_buf[(page * 128) + column] = tmp8;
