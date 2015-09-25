@@ -165,11 +165,19 @@ void sendLED(OSCMessage &msg){
 void encoderInput(OSCMessage &msg){
     
     if (msg.isInt(0)){
-        if (msg.getInt(0) == 1) menu.up();
-        if (msg.getInt(0) == 0) menu.down();
+        if (msg.getInt(0) == 1) menu.encoderUp();
+        if (msg.getInt(0) == 0) menu.encoderDown();
     }
     menu.drawPatchList(screen);
     needNewScreen = 1;
+}
+
+void encoderButton(OSCMessage &msg){
+    
+    if (msg.isInt(0)){
+        if (msg.getInt(0) == 1) menu.encoderPress();
+        if (msg.getInt(0) == 0) menu.encoderRelease();
+    }
 }
 
 int main(int argc, char* argv[]) {
@@ -236,6 +244,7 @@ int main(int argc, char* argv[]) {
             msgIn.empty();
             msgIn.fill(slip.decodedBuf, slip.decodedLength);
             msgIn.dispatch("/enc", encoderInput, 0);
+            msgIn.dispatch("/encbut", encoderButton, 0);
             msgIn.empty();
         }
 

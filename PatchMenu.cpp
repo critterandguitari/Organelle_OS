@@ -9,15 +9,51 @@
 #include "PatchMenu.h"
 
 
-void PatchMenu::up(void) {
-    if (!(patchlist_offset >= (num_patches - 1))) patchlist_offset++;
-    printf("patch: %d\n", patchlist_offset);
+PatchMenu::PatchMenu(){
+
+    num_patches = 0;
+    selected_patch = 0;
+    patchlist_offset = 0;
+    curser_offset = 0;
+ 
 }
 
-void PatchMenu::down(void) {
-    if (!(patchlist_offset < 1)) patchlist_offset--;
-    printf("patch: %d\n", patchlist_offset);
+void PatchMenu::encoderUp(void) {
+//    if (!(patchlist_offset >= (num_patches - 1))) patchlist_offset++;
+//    printf("patch: %d\n", patchlist_offset);
+    if (curser_offset == 4) {
+        if (!(patchlist_offset >= (num_patches - 1))) patchlist_offset++;
+    }
+    if (!(curser_offset >= 4)) curser_offset++;
+    
 }
+
+void PatchMenu::encoderDown(void) {
+//    if (!(patchlist_offset < 1)) patchlist_offset--;
+//    printf("patch: %d\n", patchlist_offset);
+    if (curser_offset == 0) {
+        if (!(patchlist_offset < 1)) patchlist_offset--;
+    }
+    if (!(curser_offset < 1)) curser_offset--;
+}
+
+void PatchMenu::encoderPress(void){
+    selected_patch =  patchlist_offset + curser_offset;
+    printf("selected patch: %d, %s\n", selected_patch, patches[selected_patch]);
+
+    char cmd[256];
+    sprintf(cmd, "/usr/bin/pd -rt -nogui /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+
+    // first kill any other PD
+    system("killall pd");
+    system(cmd);
+}
+
+void PatchMenu::encoderRelease(void){
+
+}
+
+
 
 void PatchMenu::drawPatchList(OledScreen &screen){
     char line[256];
@@ -26,6 +62,9 @@ void PatchMenu::drawPatchList(OledScreen &screen){
         sprintf(line, "%s", patches[i + patchlist_offset]);
         screen.setLine(i + 1, line);
     }
+
+    screen.invertLine(curser_offset);   
+
 }
 
 void PatchMenu::getPatchList(void){
@@ -35,11 +74,7 @@ void PatchMenu::getPatchList(void){
     struct dirent **namelist;
     int n;
     int i;
-
-    num_patches = 0;
-    selected_patch = 0;
-    patchlist_offset = 10;
-   
+  
     // clear em out
     for (i = 0; i < 127; i++){
         strcpy(patches[i], "");

@@ -10,8 +10,8 @@ void OledScreen::setLine(int lineNum, char * line) {
 
     lineNum -= 1;
 
-    println_8("                         ", 21,  2, (lineNum * 11) + 10);
-   
+    clearLine(lineNum);
+
     len = strlen(line);
     if (len > 21)
         println_8(line, 21,  2, (lineNum * 11) + 10);
@@ -21,21 +21,19 @@ void OledScreen::setLine(int lineNum, char * line) {
 
 }
 
-void OledScreen::drawInfoScreen(char * line){
+void OledScreen::clearLine(int lineNum){
+    uint8_t i, j;
 
-    int i, len;
+    for (i = 0; i<128; i++)
+        for (j = 0; j<11; j++)
+            put_pixel(0, i, j+9+(lineNum * 11));
 
-    for (i=0; i<5; i++) {
-        println_8("                         ", 21,  2, (i * 11) + 10);
-    }
-   
-    len = strlen(line);
-    if (len > 21)
-        println_8(line, 21,  2, 10);
-    else
-        println_8(line, len,  2, 10);
 }
 
+void OledScreen::invertLine(int lineNum){
+
+    invert_area(9 + lineNum * 11, 20 + lineNum * 11);
+}
 
 void OledScreen::draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y){
     uint8_t i, j;
@@ -215,12 +213,16 @@ unsigned int OledScreen::get_pixel(unsigned int x, unsigned int y){
     y &= 0x3f;
 
     // subtract cause its flipped
-    page = 7 - (y / 8);
-    column = 127 - x;
+    //page = 7 - (y / 8);
+    //column = 127 - x;
+    page = y / 8;
+    column = x;
+
 
     tmp8 = pix_buf[(page * 128) + column];
     
-    return (tmp8 >> (7 - (y & 0x7))) & 1; 
+    //return (tmp8 >> (7 - (y & 0x7))) & 1; 
+    return (tmp8 >> ((y & 0x7))) & 1; 
  }
 
 
