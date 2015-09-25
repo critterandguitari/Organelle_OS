@@ -4,6 +4,11 @@
 #include "fonts.h"
 #include <string.h>
 
+void OledScreen::clear(void){
+    int i;
+    for (i = 0; i < 1024; i++) pix_buf[i] = 0;
+}
+
 void OledScreen::setLine(int lineNum, char * line) {
 
     int i, len;

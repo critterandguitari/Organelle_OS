@@ -11,16 +11,21 @@
 #include "OledScreen.h"
 #include "PatchMenu.h"
 
+#define MENU_TIMEOUT 2000  // m sec timeout when screen switches back to patch detail
+
 Serial serial;
 SLIPEncodedSerial slip;
 SimpleWriter dump;
-OledScreen screen;
+OledScreen menuScreen;
+OledScreen patchScreen;
 PatchMenu menu;
 
 int needNewScreen = 0;
+int patchScreenEnabled = 0;
+int menuScreenTimeout = MENU_TIMEOUT;
 
 void updateScreen();
-void updateScreenPage(uint8_t page);
+void updateScreenPage(uint8_t page, OledScreen &screen);
 void setOledLine(int lineNum, OSCMessage &msg);
 
 
@@ -72,7 +77,7 @@ void setOledLine(int lineNum, OSCMessage &msg){
         }
         i++;
     }
-    screen.setLine(lineNum, screenLine);
+    patchScreen.setLine(lineNum, screenLine);
     //    printf("%s\n", screenLine);
 }
 
@@ -88,21 +93,11 @@ void vuMeter(OSCMessage &msg){
     if (msg.isInt(2)) outR = msg.getInt(2);
     if (msg.isInt(3)) outL = msg.getInt(3);
 
-    screen.drawInfoBar(inR, inL, outR, outL);
-   // updateScreenPage(0);
+    patchScreen.drawInfoBar(inR, inL, outR, outL);
 
-/*
-    if (msg.isString(0)){
-       len =  msg.getString(0, line, 1024);
-    }
-
-    line[len] = 0;
-    printf("line %s len: %d \n", line, len);
-    screen.println_16(line, len-1, 0, 0);
-    updateScreen();*/
 }
 
-void updateScreenPage(uint8_t page){
+void updateScreenPage(uint8_t page, OledScreen &screen){
     
     uint8_t oledPage[128];
     uint32_t i, j;
@@ -120,26 +115,6 @@ void updateScreenPage(uint8_t page){
         slip.sendMessage(dump.buffer, dump.length, serial);
         oledMsg.empty();
 }
-/*
-void updateScreen(){
-    
-    uint8_t oledPage[128];
-    uint32_t i, j;
-
-    for (i=0;i<8;i++){
-        // copy 128 byte page from the screen buffer
-        for (j=0; j<128; j++){
-            oledPage[j] = screen.pix_buf[j + (i * 128)];
-        }
-        OSCMessage oledMsg("/oled");
-        oledMsg.add(i);
-        oledMsg.add(oledPage, 128);
-        oledMsg.send(dump);
-        slip.sendMessage(dump.buffer, dump.length, serial);
-        oledMsg.empty();
-        usleep(5000);
-    }
-}*/
 
 void sendReady(OSCMessage &msg){
     
@@ -168,8 +143,10 @@ void encoderInput(OSCMessage &msg){
         if (msg.getInt(0) == 1) menu.encoderUp();
         if (msg.getInt(0) == 0) menu.encoderDown();
     }
-    menu.drawPatchList(screen);
+    menu.drawPatchList(menuScreen);
     needNewScreen = 1;
+    patchScreenEnabled = 0;
+    menuScreenTimeout = MENU_TIMEOUT;
 }
 
 void encoderButton(OSCMessage &msg){
@@ -178,6 +155,9 @@ void encoderButton(OSCMessage &msg){
         if (msg.getInt(0) == 1) menu.encoderPress();
         if (msg.getInt(0) == 0) menu.encoderRelease();
     }
+    patchScreenEnabled = 1;
+    patchScreen.clear();
+    needNewScreen = 1;  // send full screen to clear it
 }
 
 int main(int argc, char* argv[]) {
@@ -196,7 +176,7 @@ int main(int argc, char* argv[]) {
     OSCMessage msgIn;
 
     menu.getPatchList();
-    menu.drawPatchList(screen);
+    menu.drawPatchList(menuScreen);
 
 
     // send ready 
@@ -251,28 +231,34 @@ int main(int argc, char* argv[]) {
         // sleep for 1ms
         usleep(1000);
         
-        // every 16 ms send a new screen page
-        if (count > 16){
-            count = 0;
+        // if patch detail is enabled
+        if (patchScreenEnabled) {
+            // every 16 ms send a new screen page
+            if (count > 16){
+                count = 0;
             
-            updateScreenPage(page);
-            page++;
-            page %= 8;
+                updateScreenPage(page, patchScreen);
+                page++;
+                page %= 8;
+            }
+            count++;
         }
-        count++;
 
+        if (menuScreenTimeout) menuScreenTimeout--;
+        else patchScreenEnabled = 1;
+        
         // we can do a whole screen,  but not faster than 20fps
         if (count20fps > 50){
             count20fps = 0;
             if (needNewScreen){
                 needNewScreen = 0;
-                updateScreenPage(1);
-                updateScreenPage(2);
-                updateScreenPage(3);
-                updateScreenPage(4);
-                updateScreenPage(5);
-                updateScreenPage(6);
-                updateScreenPage(7);
+                updateScreenPage(1, menuScreen);
+                updateScreenPage(2, menuScreen);
+                updateScreenPage(3, menuScreen);
+                updateScreenPage(4, menuScreen);
+                updateScreenPage(5, menuScreen);
+                updateScreenPage(6, menuScreen);
+                updateScreenPage(7, menuScreen);
             }
         }
         count20fps++;

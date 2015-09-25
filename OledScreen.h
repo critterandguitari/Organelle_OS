@@ -17,6 +17,7 @@ class OledScreen
         void invertLine(int lineNum);
 
         
+        void clear(void);
         
         void draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y);
         void drawInfoBar(int inR, int inL, int outR, int outL);
