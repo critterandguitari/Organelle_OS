@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sched.h>
 
 #include "OSC/OSCMessage.h"
 #include "OSC/SimpleWriter.h"
@@ -171,6 +172,16 @@ int main(int argc, char* argv[]) {
     int count = 0;
     int page = 0;
     int count20fps = 0;
+    
+    // for setting real time scheduling
+    /*struct sched_param par;
+
+    par.sched_priority = 10;
+    printf("settin priority to: %d\n", 10);
+    if (sched_setscheduler(0,SCHED_FIFO,&par) < 0){
+        printf("failed to set rt scheduling\n");
+    }*/
+
 
     UdpSocket udpSock(4001);
     udpSock.setDestination(4000, "localhost");
