@@ -38,28 +38,42 @@ void PatchMenu::encoderDown(void) {
 }
 
 void PatchMenu::encoderPress(void){
+    char cmd[256];
+    
     selected_patch =  patchlist_offset + curser_offset;
     printf("selected patch: %d, %s\n", selected_patch, patches[selected_patch]);
 
-
-    char cmd[256];
     
-    // check for x
-    if(system("/root/check-for-x.sh")){
-        printf("starting in GUI mode");
-        sprintf(cmd, "/usr/bin/pd -rt /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+    if (!strcmp(patches[selected_patch], "Reload")){
+        printf("RELOADING !!!!!");
+        getPatchList();
     }
-    else {
-        printf("starting in NON GUI mode");
-        sprintf(cmd, "/usr/bin/pd -rt -nogui /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+    
+ 
+    if (!strcmp(patches[selected_patch], "Shutdown")){
+        printf("SHUTTING DOWN !!!!!");
+        sprintf(cmd, "shutdown -h now");
+        system(cmd);
     }
+    
+    if (selected_patch >= 8) { 
+        // check for x
+        if(system("/root/check-for-x.sh")){
+            printf("starting in GUI mode");
+            sprintf(cmd, "/usr/bin/pd -rt /mnt/usbdrive/patches/mother.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+        }
+        else {
+            printf("starting in NON GUI mode");
+            sprintf(cmd, "/usr/bin/pd -rt -nogui /mnt/usbdrive/patches/mother.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+        }
 
-    //sprintf(cmd, "/usr/bin/pd -rt -nogui /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
-    //sprintf(cmd, "/root/pd-0.46-6/bin/pd -jack -nogui -rt /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+        //sprintf(cmd, "/usr/bin/pd -rt -nogui /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+        //sprintf(cmd, "/root/pd-0.46-6/bin/pd -jack -nogui -rt /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
 
-    // first kill any other PD
-    system("killall pd");
-    system(cmd);
+        // first kill any other PD
+        system("killall pd");
+        system(cmd);
+    }
 }
 
 void PatchMenu::encoderRelease(void){
