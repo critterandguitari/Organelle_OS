@@ -172,7 +172,8 @@ int main(int argc, char* argv[]) {
     int count = 0;
     int page = 0;
     int count20fps = 0;
-    
+    int countReadyPing = 0;
+
     // for setting real time scheduling
     /*struct sched_param par;
 
@@ -196,7 +197,7 @@ int main(int argc, char* argv[]) {
     rdyMsg.add(1);
     rdyMsg.send(dump);
     slip.sendMessage(dump.buffer, dump.length, serial);
-    rdyMsg.empty();
+    //rdyMsg.empty();
 
 
     // full udp -> serial -> serial -> udp
@@ -274,6 +275,13 @@ int main(int argc, char* argv[]) {
             }
         }
         count20fps++;
+
+        if (countReadyPing >1000){
+            countReadyPing = 0;
+            rdyMsg.send(dump);
+            slip.sendMessage(dump.buffer, dump.length, serial);
+        }
+        countReadyPing++;
     } // for;;
 }
 

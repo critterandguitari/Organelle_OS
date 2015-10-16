@@ -1,0 +1,2 @@
+killall mother
+killall pd
