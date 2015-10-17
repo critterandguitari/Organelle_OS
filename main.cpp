@@ -14,19 +14,26 @@
 #include "Timer.h"
 #include "AppData.h"
 
+// for communicating with OSC over serial with MCU
 Serial serial;
 SLIPEncodedSerial slip;
 SimpleWriter dump;
 
-// for communicating with Pd or other program
+/* 
+sockets for communicating OSC with other programs we need 3: 
+    1) this program receives on 4001
+    2) sends to Pd on 4000
+    3) sends to Aux program (scripts in the System menu) on 4002
+(the destinations are set below)
+*/
 UdpSocket udpSock(4001);
-UdpSocket udpSockAux(4003); // sends to aux program reciever
+UdpSocket udpSockAux(4003);
 
-// global app data, state, flags, screens
+// global app states, flags, screens, etc...
 AppData app;
 
 // main menu
-MainMenu menu(&app);
+MainMenu menu;
 
 // exit flag
 int quit = 0;

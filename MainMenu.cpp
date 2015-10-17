@@ -8,12 +8,13 @@
 
 #include "MainMenu.h"
 
-MainMenu::MainMenu(AppData * appGlobal){
+extern AppData app; 
+
+MainMenu::MainMenu(){
     numPatches = 0;
     numMenuEntries = 0;
     menuOffset = 9;
     cursorOffset = 1;
-    app = appGlobal;
 }
 
 int MainMenu::checkFileExists (const char * filename){
@@ -61,7 +62,7 @@ void MainMenu::encoderRelease(void){
 
 void MainMenu::runSystemCommand(void){
     char cmd[256];
-    app->auxScreenEncoderOverride = 0;
+    app.auxScreenEncoderOverride = 0;
     if (!strcmp(menuItems[selectedEntry], "Reload")){
         printf("Reloading... \n");
         sprintf(cmd, "/root/scripts/mount.sh");
@@ -78,8 +79,8 @@ void MainMenu::runSystemCommand(void){
     
     else if (!strcmp(menuItems[selectedEntry], "Info")){
         printf("Displaying system info... \n");
-        app->auxScreen.clear();
-        app->auxScreen.drawNotification("     System Info     ");
+        app.auxScreen.clear();
+        app.auxScreen.drawNotification("     System Info     ");
         sprintf(cmd, "/root/scripts/info.sh &");
         system(cmd);
 
@@ -91,12 +92,17 @@ void MainMenu::runSystemCommand(void){
         system(cmd);
     }
      
-    else if (!strcmp(menuItems[selectedEntry], "Save Preset")){
+/*    else if (!strcmp(menuItems[selectedEntry], "Save Preset")){
         printf("Saving Prest... \n");
-        sprintf(cmd, "/root/scripts/savepre.sh \"%s\" &", app->currentPatch);
+        sprintf(cmd, "/root/scripts/savepre.sh \"%s\" &", app.currentPatch);
         system(cmd);
         printf("%s \n", cmd);
     }
+    else {
+        sprintf(cmd, "\""SYSTEMS_PATH"/%s/run.sh\" &", menuItems[selectedEntry]);
+        system(cmd);
+        printf("%s \n", cmd);
+   }*/
 
 }
 
@@ -129,21 +135,21 @@ void MainMenu::runPatch(void){
         system("/root/scripts/killpd.sh");
 
         // disable encoder override
-        app->patchScreenEncoderOverride = 0;
+        app.patchScreenEncoderOverride = 0;
         
         // start patch
         system(cmd);
 
         // update stuff
-        app->patchIsRunning = 1;
-        app->patchScreen.clear();
-        app->currentScreen = PATCH;
-        app->newScreen = 1;
-        strcpy(app->currentPatch, menuItems[selectedEntry]);
+        app.patchIsRunning = 1;
+        app.patchScreen.clear();
+        app.currentScreen = PATCH;
+        app.newScreen = 1;
+        strcpy(app.currentPatch, menuItems[selectedEntry]);
 
         // put the patch name on the menu screen
         sprintf(cmd, "> %s", menuItems[selectedEntry]);
-        app->menuScreen.drawNotification(cmd);
+        app.menuScreen.drawNotification(cmd);
     } else {
         printf("Patch File Not Found: %s\n", cmd);
     }
@@ -167,21 +173,21 @@ void MainMenu::drawPatchList(void){
     int i;
     for (i=0; i<5; i++) {
         sprintf(line, "%s", menuItems[i + menuOffset]);
-        app->menuScreen.setLine(i + 1, line);
+        app.menuScreen.setLine(i + 1, line);
     }
  
     // dont invert patch lines if there are no patches
     if ((selectedEntry >= patchMenuOffset) && !numPatches) {
     }
     else {
-        app->menuScreen.invertLine(cursorOffset);   
+        app.menuScreen.invertLine(cursorOffset);   
     }
 
-    if (!app->patchIsRunning) {
-        app->menuScreen.drawNotification("Select a patch...");
+    if (!app.patchIsRunning) {
+        app.menuScreen.drawNotification("Select a patch...");
     }
 
-    app->newScreen = 1;
+    app.newScreen = 1;
 //    printf("c %d, p %d\n", cursorOffset, menuOffset);
 }
 
@@ -224,10 +230,10 @@ void MainMenu::buildMenu(void){
     strcpy(menuItems[numMenuEntries++], "Reload");
     strcpy(menuItems[numMenuEntries++], "Info");
     strcpy(menuItems[numMenuEntries++], "Shutdown");
-    strcpy(menuItems[numMenuEntries++], "Save Preset");
- 
+ //   strcpy(menuItems[numMenuEntries++], "Save Preset");
+ /*
     // system scripts from USB
-    // set locale so sorting happ->ns in right order
+    // set locale so sorting happ.ns in right order
     // not sure this does anything
     systemUserMenuOffset = numMenuEntries; // the starting point of user system entries
     std::setlocale(LC_ALL, "en_US.UTF-8");
@@ -245,7 +251,7 @@ void MainMenu::buildMenu(void){
             free(namelist[i]);
         }
         free(namelist);
-    }
+    }*/
 
     // padding
     strcpy(menuItems[numMenuEntries++], "");
@@ -254,7 +260,7 @@ void MainMenu::buildMenu(void){
     strcpy(menuItems[numMenuEntries++], "------ PATCHES ------");
     patchMenuOffset = numMenuEntries;
 
-    // set locale so sorting happ->ns in right order
+    // set locale so sorting happ.ns in right order
     // not sure this does anything
     std::setlocale(LC_ALL, "en_US.UTF-8");
     n = scandir(PATCHES_PATH, &namelist, NULL, alphasort);
@@ -277,12 +283,12 @@ void MainMenu::buildMenu(void){
 
 
     // Preset
-    strcpy(menuItems[numMenuEntries++], "");
+   /* strcpy(menuItems[numMenuEntries++], "");
     strcpy(menuItems[numMenuEntries++], "");
     strcpy(menuItems[numMenuEntries++], "------ PRESETS ------");
     presetMenuOffset = numMenuEntries;
     strcpy(menuItems[numMenuEntries++], "1 cool");
-    strcpy(menuItems[numMenuEntries++], "2 cool");
+    strcpy(menuItems[numMenuEntries++], "2 cool");*/
 
     for (i=0; i<numMenuEntries; i++) {
         printf("patch[%d]: %s\n", i, menuItems[i]);
@@ -304,7 +310,7 @@ void MainMenu::buildMenu(void){
     printf("stopping pd... \n");
     sprintf(cmd, "/root/scripts/killpd.sh ");
     system(cmd);
-    app->patchIsRunning = 0;
+    app.patchIsRunning = 0;
 
 }
 

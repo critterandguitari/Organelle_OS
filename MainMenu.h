@@ -10,7 +10,7 @@
 class MainMenu
 {
     public:
-        MainMenu(AppData * appGlobal);
+        MainMenu();
         int numMenuEntries;
         char menuItems[128][256];     // holds names of patches
         int selectedEntry;          // index in patches
@@ -39,7 +39,6 @@ class MainMenu
         // other stuff...
         int checkFileExists (const char * filename);
 
-        AppData * app;
 
 };
 
