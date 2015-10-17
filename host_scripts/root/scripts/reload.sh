@@ -1,4 +1,4 @@
 #!/bin/sh
-killall pd
-/root/automount/mount.sh sda1
+/root/scripts/killpd.sh
+/root/automount/mount.sh 
 oscsend localhost 4001 /reload i 1

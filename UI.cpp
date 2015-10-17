@@ -117,7 +117,7 @@ void UI::encoderPress(void){
         }
 
         // first kill any other PD
-        system("killall pd");
+        system("/root/scripts/killpd.sh");
         system(cmd);
         patchIsRunning = 1;
         patchScreen.clear();
@@ -219,6 +219,10 @@ void UI::getPatchList(void){
     for (i=0; i<numPatches; i++) {
         printf("patch[%d]: %s\n", i, patches[i]);
     }
+
+    // set cursor to beg
+    patchlistOffset = 9;
+    cursorOffset = 1;
 }
 
 

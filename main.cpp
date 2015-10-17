@@ -17,21 +17,36 @@ Serial serial;
 SLIPEncodedSerial slip;
 SimpleWriter dump;
 
+// for communicating with Pd or other program
+UdpSocket udpSock(4001);
+
 // main menu interface program
 UI ui;
 
+// exit flag
+int quit = 0;
+
 /** OSC messages received internally (from PD or other program) **/
-void setPatchScreenOledLine1(OSCMessage &msg);
-void setPatchScreenOledLine2(OSCMessage &msg);
-void setPatchScreenOledLine3(OSCMessage &msg);
-void setPatchScreenOledLine4(OSCMessage &msg);
-void setPatchScreenOledLine5(OSCMessage &msg);
+void setPatchScreenLine1(OSCMessage &msg);
+void setPatchScreenLine2(OSCMessage &msg);
+void setPatchScreenLine3(OSCMessage &msg);
+void setPatchScreenLine4(OSCMessage &msg);
+void setPatchScreenLine5(OSCMessage &msg);
+
+void setAuxScreenLine0(OSCMessage &msg);
+void setAuxScreenLine1(OSCMessage &msg);
+void setAuxScreenLine2(OSCMessage &msg);
+void setAuxScreenLine3(OSCMessage &msg);
+void setAuxScreenLine4(OSCMessage &msg);
+void setAuxScreenLine5(OSCMessage &msg);
+
 void setLED(OSCMessage &msg);
 void vuMeter(OSCMessage &msg);
-void setAuxScreen(OSCMessage &msg);
+void setScreen(OSCMessage &msg);
 void reload(OSCMessage &msg);
 void sendReady(OSCMessage &msg);
 void sendShutdown(OSCMessage &msg);
+void quitMother(OSCMessage &msg);
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
@@ -41,7 +56,7 @@ void encoderButton(OSCMessage &msg);
 
 /* helpers */
 void updateScreenPage(uint8_t page, OledScreen &screen);
-void setPatchScreenOledLine(int lineNum, OSCMessage &msg);
+void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg);
 void sendGetKnobs(void);
 /* end helpers */
 
@@ -67,7 +82,6 @@ int main(int argc, char* argv[]) {
         printf("failed to set rt scheduling\n");
     }*/
 
-    UdpSocket udpSock(4001);
     udpSock.setDestination(4000, "localhost");
     OSCMessage msgIn;
 
@@ -87,6 +101,7 @@ int main(int argc, char* argv[]) {
     }
     
     //playFirst();
+    quit = 0;
 
     // full udp -> serial -> serial -> udp
     for (;;){
@@ -99,16 +114,23 @@ int main(int argc, char* argv[]) {
             }    
             if(!msgIn.hasError()){
                 msgIn.dispatch("/oled/vumeter", vuMeter, 0);
-                msgIn.dispatch("/oled/line/1", setPatchScreenOledLine1, 0);
-                msgIn.dispatch("/oled/line/2", setPatchScreenOledLine2, 0);
-                msgIn.dispatch("/oled/line/3", setPatchScreenOledLine3, 0);
-                msgIn.dispatch("/oled/line/4", setPatchScreenOledLine4, 0);
-                msgIn.dispatch("/oled/line/5", setPatchScreenOledLine5, 0);
+                msgIn.dispatch("/oled/line/1", setPatchScreenLine1, 0);
+                msgIn.dispatch("/oled/line/2", setPatchScreenLine2, 0);
+                msgIn.dispatch("/oled/line/3", setPatchScreenLine3, 0);
+                msgIn.dispatch("/oled/line/4", setPatchScreenLine4, 0);
+                msgIn.dispatch("/oled/line/5", setPatchScreenLine5, 0);
+                msgIn.dispatch("/oled/aux/line/1", setAuxScreenLine1, 0);
+                msgIn.dispatch("/oled/aux/line/2", setAuxScreenLine2, 0);
+                msgIn.dispatch("/oled/aux/line/3", setAuxScreenLine3, 0);
+                msgIn.dispatch("/oled/aux/line/4", setAuxScreenLine4, 0);
+                msgIn.dispatch("/oled/aux/line/5", setAuxScreenLine5, 0);
+                
                 msgIn.dispatch("/ready", sendReady, 0);
                 msgIn.dispatch("/shutdown", sendShutdown, 0);
                 msgIn.dispatch("/led", setLED, 0);
-                msgIn.dispatch("/auxscreen", setAuxScreen, 0);
+                msgIn.dispatch("/oled/setscreen", setScreen, 0);
                 msgIn.dispatch("/reload", reload, 0);
+                msgIn.dispatch("/quitmother", quitMother, 0);
             }
             else {
                 printf("bad message\n");
@@ -199,29 +221,52 @@ int main(int argc, char* argv[]) {
             sendGetKnobs();
         }
         countKnobPoll++;
+        
+        // check exit flag
+        if (quit) {
+            printf("quitting\n");
+            return 0;
+        }
     } // for;;
 }
 
 /** OSC messages received internally (from PD or other program) **/
-
-void setPatchScreenOledLine1(OSCMessage &msg){
-    setPatchScreenOledLine(1, msg);
+// settin patch screen
+void setPatchScreenLine1(OSCMessage &msg){
+    setScreenLine(ui.patchScreen, 1, msg);
+}
+void setPatchScreenLine2(OSCMessage &msg){
+    setScreenLine(ui.patchScreen, 2, msg);
+}
+void setPatchScreenLine3(OSCMessage &msg){
+    setScreenLine(ui.patchScreen, 3, msg);
+}
+void setPatchScreenLine4(OSCMessage &msg){
+    setScreenLine(ui.patchScreen, 4, msg);
+}
+void setPatchScreenLine5(OSCMessage &msg){
+    setScreenLine(ui.patchScreen, 5, msg);
 }
 
-void setPatchScreenOledLine2(OSCMessage &msg){
-    setPatchScreenOledLine(2, msg);
+// setting aux screen
+void setAuxScreenLine1(OSCMessage &msg) {
+    setScreenLine(ui.auxScreen, 1, msg);
+}
+void setAuxScreenLine2(OSCMessage &msg) {
+    setScreenLine(ui.auxScreen, 2, msg);
+}
+void setAuxScreenLine3(OSCMessage &msg) {
+    setScreenLine(ui.auxScreen, 3, msg);
+}
+void setAuxScreenLine4(OSCMessage &msg) {
+    setScreenLine(ui.auxScreen, 4, msg);
+}
+void setAuxScreenLine5(OSCMessage &msg) {
+    setScreenLine(ui.auxScreen, 5, msg);
 }
 
-void setPatchScreenOledLine3(OSCMessage &msg){
-    setPatchScreenOledLine(3, msg);
-}
-
-void setPatchScreenOledLine4(OSCMessage &msg){
-    setPatchScreenOledLine(4, msg);
-}
-
-void setPatchScreenOledLine5(OSCMessage &msg){
-    setPatchScreenOledLine(5, msg);
+void quitMother(OSCMessage &msg){
+    quit = 1;
 }
 
 void setLED(OSCMessage &msg){
@@ -244,8 +289,8 @@ void vuMeter(OSCMessage &msg){
 
 }
 
-void setAuxScreen(OSCMessage &msg){
-    ui.currentScreen = AUX;
+void setScreen(OSCMessage &msg){
+    if (msg.isInt(0)) ui.currentScreen = msg.getInt(0);
     ui.newScreen = 1;
 }
 
@@ -289,7 +334,7 @@ void encoderButton(OSCMessage &msg){
 /* end OSC messages received from MCU */
 
 /* helpers */
-void setPatchScreenOledLine(int lineNum, OSCMessage &msg){
+void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg){
 
     char str[256];
     char screenLine[256];
@@ -315,7 +360,7 @@ void setPatchScreenOledLine(int lineNum, OSCMessage &msg){
         }
         i++;
     }
-    ui.patchScreen.setLine(lineNum, screenLine);
+    screen.setLine(lineNum, screenLine);
     //    printf("%s\n", screenLine);
 }
 

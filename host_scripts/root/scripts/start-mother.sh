@@ -1,8 +1,8 @@
 #!/bin/sh
-killall mother
-killall pd
-/root/scripts/setup.sh
 clear
+/root/scripts/killpd.sh
+/root/scripts/killmother.sh
+/root/scripts/setup.sh
 #/root/scripts/check-for-usb-drive.sh
 /root/scripts/mount.sh 
 # check if mother is present in /mnt/usbdrive/System
