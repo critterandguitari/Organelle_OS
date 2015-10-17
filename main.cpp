@@ -39,6 +39,7 @@ void setAuxScreenLine2(OSCMessage &msg);
 void setAuxScreenLine3(OSCMessage &msg);
 void setAuxScreenLine4(OSCMessage &msg);
 void setAuxScreenLine5(OSCMessage &msg);
+void auxScreenClear(OSCMessage &msg);
 
 void setLED(OSCMessage &msg);
 void vuMeter(OSCMessage &msg);
@@ -85,7 +86,7 @@ int main(int argc, char* argv[]) {
     udpSock.setDestination(4000, "localhost");
     OSCMessage msgIn;
 
-    ui.getPatchList();
+    ui.loadPatchList();
     ui.drawPatchList();
 
     // send ready to wake up MCU
@@ -124,6 +125,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/aux/line/3", setAuxScreenLine3, 0);
                 msgIn.dispatch("/oled/aux/line/4", setAuxScreenLine4, 0);
                 msgIn.dispatch("/oled/aux/line/5", setAuxScreenLine5, 0);
+                msgIn.dispatch("/oled/aux/clear", auxScreenClear, 0);
                 
                 msgIn.dispatch("/ready", sendReady, 0);
                 msgIn.dispatch("/shutdown", sendShutdown, 0);
@@ -264,6 +266,9 @@ void setAuxScreenLine4(OSCMessage &msg) {
 void setAuxScreenLine5(OSCMessage &msg) {
     setScreenLine(ui.auxScreen, 5, msg);
 }
+void auxScreenClear(OSCMessage &msg) {
+    ui.auxScreen.clear();
+}
 
 void quitMother(OSCMessage &msg){
     quit = 1;
@@ -295,7 +300,7 @@ void setScreen(OSCMessage &msg){
 }
 
 void reload(OSCMessage &msg){
-    ui.getPatchList();
+    ui.loadPatchList();
 }
 
 void sendReady(OSCMessage &msg){   

@@ -59,12 +59,9 @@ void UI::encoderPress(void){
     
     if (!strcmp(patches[selectedPatch], "Reload")){
         printf("Reloading... ");
-        selectedPatch = 0;
-        patchlistOffset = 9;
-        cursorOffset = 1;
         sprintf(cmd, "/root/scripts/mount.sh");
         system(cmd);
-        getPatchList();
+        loadPatchList();
         drawPatchList();
     }
  
@@ -154,8 +151,9 @@ void UI::drawPatchList(void){
     //printf("c %d, p %d\n", cursorOffset, patchlistOffset);
 }
 
-void UI::getPatchList(void){
+void UI::loadPatchList(void){
 
+    char cmd[256];
 
     // find patches
     struct dirent **namelist;
@@ -223,6 +221,15 @@ void UI::getPatchList(void){
     // set cursor to beg
     patchlistOffset = 9;
     cursorOffset = 1;
+
+    // kill pd 
+    printf("stopping pd... \n");
+    sprintf(cmd, "/root/scripts/killpd.sh ");
+    system(cmd);
+    
+    selectedPatch = 0;
+    patchIsRunning = 0;
+
 }
 
 

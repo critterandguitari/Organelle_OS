@@ -37,7 +37,7 @@ class UI
         void encoderDown(void);
 
 
-        void getPatchList(void);
+        void loadPatchList(void);
         void drawPatchList(void);
 
         OledScreen menuScreen;
