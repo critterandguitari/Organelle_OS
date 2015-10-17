@@ -92,12 +92,16 @@ void MainMenu::runSystemCommand(void){
         system(buf);
     }
      
-/*    else if (!strcmp(menuItems[selectedEntry], "Save Preset")){
-        printf("Saving Prest... \n");
-        sprintf(buf, "/root/scripts/savepre.sh \"%s\" &", app.currentPatch);
+    else if (!strcmp(menuItems[selectedEntry], "Save")){
+        printf("Saving... \n");
+        sprintf(buf, "/root/scripts/save-patch.sh &");
         system(buf);
-        printf("%s \n", buf);
-    }*/
+    }
+    else if (!strcmp(menuItems[selectedEntry], "Save New")){
+        printf("Saving new... \n");
+        sprintf(buf, "/root/scripts/save-new-patch.sh &");
+        system(buf);
+    }
     else {
         sprintf(buf, "\""SYSTEMS_PATH"/%s/run.sh\" &", menuItems[selectedEntry]);
         system(buf);
@@ -123,7 +127,7 @@ void MainMenu::runPatch(void){
         if(system("/root/scripts/check-for-x.sh")){
             printf("starting in GMainMenu mode\n");
             if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
-            else sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" /root/presetter.pd &", menuItems[selectedEntry]);
+            else sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
         }
         else {
             printf("starting in NON GMainMenu mode\n");
@@ -236,6 +240,8 @@ void MainMenu::buildMenu(void){
     strcpy(menuItems[numMenuEntries++], "Reload");
     strcpy(menuItems[numMenuEntries++], "Info");
     strcpy(menuItems[numMenuEntries++], "Shutdown");
+    strcpy(menuItems[numMenuEntries++], "Save");
+    strcpy(menuItems[numMenuEntries++], "Save New");
  //   strcpy(menuItems[numMenuEntries++], "Save Preset");
  
     // system scripts from USB
