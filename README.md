@@ -1,3 +1,4 @@
-# OSC-SimpleExample
+# Organelle UI Program
 
-The OSC library (in /OSC) is from the CNMAT Arduino OSC implementation, with slight modifications to make it platform independent.  The OSC messages may then be sent and received using any kind of transport.  The main.cpp demonstrates sending and receiving over SLIP serial and UDP.
+Provides communication betweem MCU (OSC over serial) and Pd (OSC over UDP), handles OLED and menu interface.
+

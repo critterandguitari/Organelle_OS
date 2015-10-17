@@ -1,5 +1,5 @@
-#ifndef PATCHMENU_H
-#define PATCHMENU_H
+#ifndef MAINMENU_H
+#define MAINMENU_H
 
 
 #include "OledScreen.h"
@@ -8,10 +8,10 @@
 #include <string>
 
 
-class PatchMenu
+class MainMenu
 {
     public:
-        PatchMenu();
+        MainMenu();
         int num_patches;
         char patches[128][256];  // holds names of patches
         int selected_patch;

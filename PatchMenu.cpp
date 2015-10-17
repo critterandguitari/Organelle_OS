@@ -6,19 +6,19 @@
 #include <string.h>
 
 
-#include "PatchMenu.h"
+#include "MainMenu.h"
 
 
-PatchMenu::PatchMenu(){
+MainMenu::MainMenu(){
 
     num_patches = 0;
     selected_patch = 0;
-    patchlist_offset = 0;
-    curser_offset = 0;
+    patchlist_offset = 5;
+    curser_offset = 3;
  
 }
 
-void PatchMenu::encoderUp(void) {
+void MainMenu::encoderUp(void) {
 //    if (!(patchlist_offset >= (num_patches - 1))) patchlist_offset++;
 //    printf("patch: %d\n", patchlist_offset);
     if (curser_offset == 4) {
@@ -28,7 +28,7 @@ void PatchMenu::encoderUp(void) {
     
 }
 
-void PatchMenu::encoderDown(void) {
+void MainMenu::encoderDown(void) {
 //    if (!(patchlist_offset < 1)) patchlist_offset--;
 //    printf("patch: %d\n", patchlist_offset);
     if (curser_offset == 0) {
@@ -37,7 +37,7 @@ void PatchMenu::encoderDown(void) {
     if (!(curser_offset < 1)) curser_offset--;
 }
 
-void PatchMenu::encoderPress(void){
+void MainMenu::encoderPress(void){
     char cmd[256];
     
     selected_patch =  patchlist_offset + curser_offset;
@@ -76,13 +76,13 @@ void PatchMenu::encoderPress(void){
     }
 }
 
-void PatchMenu::encoderRelease(void){
+void MainMenu::encoderRelease(void){
 
 }
 
 
 
-void PatchMenu::drawPatchList(OledScreen &screen){
+void MainMenu::drawPatchList(OledScreen &screen){
     char line[256];
     int i;
     for (i=0; i<5; i++) {
@@ -94,7 +94,7 @@ void PatchMenu::drawPatchList(OledScreen &screen){
 
 }
 
-void PatchMenu::getPatchList(void){
+void MainMenu::getPatchList(void){
 
 
     // find patches

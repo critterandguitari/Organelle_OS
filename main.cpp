@@ -10,7 +10,7 @@
 #include "UdpSocket.h"
 #include "SLIPEncodedSerial.h"
 #include "OledScreen.h"
-#include "PatchMenu.h"
+#include "MainMenu.h"
 
 #define MENU_TIMEOUT 2000  // m sec timeout when screen switches back to patch detail
 
@@ -19,7 +19,7 @@ SLIPEncodedSerial slip;
 SimpleWriter dump;
 OledScreen menuScreen;
 OledScreen patchScreen;
-PatchMenu menu;
+MainMenu menu;
 
 int needNewScreen = 0;
 int patchScreenEnabled = 0;
@@ -162,6 +162,16 @@ void encoderButton(OSCMessage &msg){
     needNewScreen = 1;  // send full screen to clear it
 }
 
+void playFirst(void){
+    
+    patchScreenEnabled = 1;
+    patchScreen.clear();
+    menuScreen.clear();
+    needNewScreen = 1;  // send full screen to clear it
+    menu.encoderPress();
+}
+
+
 int main(int argc, char* argv[]) {
       
     uint32_t seconds = 0;
@@ -198,7 +208,10 @@ int main(int argc, char* argv[]) {
     rdyMsg.send(dump);
     slip.sendMessage(dump.buffer, dump.length, serial);
     //rdyMsg.empty();
-
+    
+    // this starts playing the first patch
+    // the patch is already defalted to 1 in MainMenu
+    playFirst();
 
     // full udp -> serial -> serial -> udp
     for (;;){
