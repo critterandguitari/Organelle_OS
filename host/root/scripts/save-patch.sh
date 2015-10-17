@@ -21,7 +21,6 @@ sleep .5
 # copy knobstate.txt and any other files saved by the patch
 cp -r /tmp/state/* "/tmp/patch"
 
-# retrun to menu
-oscsend localhost 4001 /gohome i 1
-
+# retrun to patch
+oscsend localhost 4001 /oled/setscreen i 3
 
