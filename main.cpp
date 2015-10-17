@@ -300,6 +300,7 @@ void setScreen(OSCMessage &msg){
 }
 
 void reload(OSCMessage &msg){
+    printf("received reload msg\n");
     ui.loadPatchList();
 }
 

@@ -38,15 +38,15 @@ fi
 # 
 case "$ID_FS_TYPE" in
 
-   vfat)  mount -t vfat -o async,noatime,uid=1000 /dev/${DEVICE} "/mnt/usbdrive"
+   vfat)  mount -t vfat -o async,noatime,uid=1000 /dev/${DEVICE} "/usbdrive"
           ;;
 
           # I like the locale setting for ntfs
-   ntfs)  mount -t auto -o async,noatime,uid=1000,locale=en_US.UTF-8 /dev/${DEVICE} "/mnt/usbdrive"
+   ntfs)  mount -t auto -o async,noatime,uid=1000,locale=en_US.UTF-8 /dev/${DEVICE} "/usbdrive"
           ;;
 
           # ext2/3/4 don't like uid option
-   ext*)  mount -t auto -o async,noatime /dev/${DEVICE} "/mnt/usbdrive"
+   ext*)  mount -t auto -o async,noatime /dev/${DEVICE} "/usbdrive"
           ;;
 esac
 

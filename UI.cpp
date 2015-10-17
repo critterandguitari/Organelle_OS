@@ -104,13 +104,13 @@ void UI::encoderPress(void){
         // the rest of the settings are in /root/.pdsettings
         if(system("/root/scripts/check-for-x.sh")){
             printf("starting in GUI mode");
-            if (checkFileExists("/mnt/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /mnt/usbdrive/patches/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
-            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
+            if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
+            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
         }
         else {
             printf("starting in NON GUI mode");
-            if (checkFileExists("/mnt/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /mnt/usbdrive/patches/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
-            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
+            if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
+            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
         }
 
         // first kill any other PD
@@ -198,7 +198,7 @@ void UI::loadPatchList(void){
     setlocale(LC_ALL, "en_US.UTF-8");
 
     //n = scandir("/home/debian/Desktop/patches", &namelist, NULL, alphasort);
-    n = scandir("/mnt/usbdrive/patches", &namelist, NULL, alphasort);
+    n = scandir("/usbdrive/patches", &namelist, NULL, alphasort);
     if (n<0)
         perror("scandir");
     else {

@@ -2,7 +2,7 @@
 
 for i in 1 2 3 4 5
 do
-    if grep -qs " /mnt/usbdrive" /proc/mounts; then
+    if grep -qs " /usbdrive" /proc/mounts; then
         echo "USB drive mounted"
         exit 1
     else
