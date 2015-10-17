@@ -88,14 +88,8 @@ void UI::encoderPress(void){
      
     if (!strcmp(patches[selectedPatch], "Eject")){
         printf("Ejecting USB drive... ");
-
-        auxScreen.clear();
-        auxScreen.drawNotification("          ");
-
-        auxScreen.setLine(1, "this will eject USB ...");
-        
-        newScreen = 1;
-        currentScreen = AUX;
+        sprintf(cmd, "/root/scripts/eject.sh &");
+        system(cmd);
     }
 
     if (selectedPatch >= 10) { 
@@ -226,8 +220,6 @@ void UI::loadPatchList(void){
     printf("stopping pd... \n");
     sprintf(cmd, "/root/scripts/killpd.sh ");
     system(cmd);
-    
-    selectedPatch = 0;
     patchIsRunning = 0;
 
 }
