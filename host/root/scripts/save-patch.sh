@@ -8,10 +8,12 @@ oscsend localhost 4001 /enableauxsub i 1
 # clear aux screen
 oscsend localhost 4001 /oled/aux/clear i 1
 oscsend localhost 4001 /oled/aux/line/1 s "Saving..."
-oscsend localhost 4000 /saveState i 1
 
 # set to aux screen, signals screen update
 oscsend localhost 4001 /oled/setscreen i 1
+
+# signal patch to save state
+oscsend localhost 4000 /saveState i 1
 
 # allow patch to save stuff in state folder if it wants
 sleep .5

@@ -7,14 +7,14 @@
 #include <stdint.h> 
 #include <string>
 
-#define MAX_MENU_ENTRIES 128
+#define MAX_MENU_ENTRIES 1024
 
 class MainMenu
 {
     public:
         MainMenu();
         int numMenuEntries;
-        char menuItems[128][256];     // holds names of patches
+        char menuItems[MAX_MENU_ENTRIES][256];     // holds names of patches
         int selectedEntry;          // index in patches
         int menuOffset;        // position of cursor
         int cursorOffset;

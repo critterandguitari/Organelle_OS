@@ -288,8 +288,10 @@ void MainMenu::buildMenu(void){
             if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
                 strcpy(menuItems[numMenuEntries], namelist[i]->d_name);
                 numMenuEntries++;
-                numPatches++;
-                numMenuEntries &= 0x7f;  // TODO break if max reached, don't do this...
+                // for the uncommon situation of having many system scripts
+                if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
+                    numMenuEntries = MAX_MENU_ENTRIES - 100;
+                }
             }
             free(namelist[i]);
         }
@@ -315,7 +317,10 @@ void MainMenu::buildMenu(void){
                 strcpy(menuItems[numMenuEntries], namelist[i]->d_name);
                 numMenuEntries++;
                 numPatches++;
-                numMenuEntries &= 0x7f;  // 128 max num patches
+                // for the uncommon situation of having many system scripts
+                if (numMenuEntries > MAX_MENU_ENTRIES - 10) {
+                    numMenuEntries = MAX_MENU_ENTRIES - 10;
+                }
             }
             free(namelist[i]);
         }
@@ -323,15 +328,6 @@ void MainMenu::buildMenu(void){
     }
 
     // end patches
-
-
-    // Preset
-   /* strcpy(menuItems[numMenuEntries++], "");
-    strcpy(menuItems[numMenuEntries++], "");
-    strcpy(menuItems[numMenuEntries++], "------ PRESETS ------");
-    presetMenuOffset = numMenuEntries;
-    strcpy(menuItems[numMenuEntries++], "1 cool");
-    strcpy(menuItems[numMenuEntries++], "2 cool");*/
 
     for (i=0; i<numMenuEntries; i++) {
         printf("patch[%d]: %s\n", i, menuItems[i]);
@@ -341,12 +337,12 @@ void MainMenu::buildMenu(void){
     printf("patch menu offset %d\n", patchMenuOffset);
 
     // notify if no patches found
-    //if (!numPatches){
-    //    strcpy(menuItems[10], "No patches found!");
-    //    strcpy(menuItems[11], "Insert USB drive ");
-    //    strcpy(menuItems[12], "with 'Patches' Folder.");
-    //    strcpy(menuItems[13], "Then select Reload.");
-   // }
+    if (!numPatches){
+        strcpy(menuItems[numMenuEntries++], "No patches found!");
+        strcpy(menuItems[numMenuEntries++], "Insert USB drive ");
+        strcpy(menuItems[numMenuEntries++], "with Patches folder.");
+        strcpy(menuItems[numMenuEntries++], "Then select Reload.");
+    }
 
     // set cursor to beg
     menuOffset = patchMenuOffset - 1;
