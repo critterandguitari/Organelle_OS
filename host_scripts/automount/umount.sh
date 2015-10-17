@@ -7,8 +7,6 @@
 # type, creates /media/LABEL and mounts the partition.  Mount options
 # are hard-coded below.
 
-#mkdir /root/automount/unmounting
-
 DEVICE=$1
 
 # check input
@@ -25,6 +23,7 @@ fi
 
 # test mountpoint - it should exist
 if [ -e "${MOUNTPT}" ]; then
+#   mkdir /root/automount/unmounting
    # very naive; just run and pray
    umount -l "${MOUNTPT}" && exit 0 
 

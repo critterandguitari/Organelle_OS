@@ -32,7 +32,7 @@ umount "/mnt/usbdrive"
 # mount the device
 # 
 # If expecting thumbdrives, you probably want 
-#      mount -t auto -o sync,noatime [...]
+#      mount -t auto -o async,noatime [...]
 # 
 # If drive is VFAT/NFTS, this mounts the filesystem such that all files
 # are owned by a std user instead of by root.  Change to your user's UID

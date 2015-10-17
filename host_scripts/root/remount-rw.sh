@@ -1,1 +1,0 @@
-mount / -o remount,rw
