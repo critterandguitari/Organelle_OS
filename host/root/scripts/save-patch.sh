@@ -14,4 +14,4 @@ oscsend localhost 4001 /oled/setscreen i 1
 
 sleep 1
 
-oscsend localhost 4001 /gohome i 1
+oscsend localhost 4001 /oled/setscreen i 3

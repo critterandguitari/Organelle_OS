@@ -162,9 +162,21 @@ void MainMenu::runPatch(void){
         app.currentScreen = PATCH;
         app.newScreen = 1;
         strcpy(app.currentPatch, menuItems[selectedEntry]);
-
-        // put the patch name on the menu screen
-        sprintf(buf, "> %s", menuItems[selectedEntry]);
+        
+        // put the patch name on top of screen
+        // truncate long file names
+        int len = strlen(menuItems[selectedEntry]);
+        if (len > 20) {
+           sprintf(buf, "> %s", menuItems[selectedEntry]);
+           buf[11] = '.';
+           buf[12] = '.';
+           buf[13] = '.';
+           strcpy(&buf[14], &menuItems[selectedEntry][len-7]);
+           
+        }
+        else {
+            sprintf(buf, "> %s", menuItems[selectedEntry]);
+        }
         app.menuScreen.drawNotification(buf);
     } else {
         printf("Patch File Not Found: %s\n", buf);
@@ -187,8 +199,21 @@ void MainMenu::programChange(int pgm){
 void MainMenu::drawPatchList(void){
     char line[256];
     int i;
+    int len;
     for (i=0; i<5; i++) {
-        sprintf(line, "%s", menuItems[i + menuOffset]);
+        // truncate long file names
+        len = strlen(menuItems[i + menuOffset]);
+        if (len > 21) {
+           strcpy(line, menuItems[i + menuOffset]);
+           line[9] = '.';
+           line[10] = '.';
+           line[11] = '.';
+           strcpy(&line[12], &menuItems[i + menuOffset][len-9]);
+           
+        }
+        else {
+            sprintf(line, "%s", menuItems[i + menuOffset]);
+        }
         app.menuScreen.setLine(i + 1, line);
     }
  
