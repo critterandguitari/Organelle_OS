@@ -44,6 +44,8 @@ class UI
         OledScreen patchScreen;
         OledScreen auxScreen;
 
+        // other stuff...
+        int checkFileExists (const char * filename);
 };
 
 

@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <locale.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "UI.h"
 
@@ -24,6 +25,12 @@ UI::UI(){
     menuScreen.clear();
     patchScreen.clear();
     auxScreen.clear();
+}
+
+int UI::checkFileExists (const char * filename){
+    struct stat st;
+    int result = stat(filename, &st);
+    return result == 0;
 }
 
 void UI::encoderUp(void) {
@@ -95,13 +102,16 @@ void UI::encoderPress(void){
     if (selectedPatch >= 10) { 
         // check for X,
         // run pd with nogui if no X. also use smaller audio buf with nogui
-        if(system("/root/check-for-x.sh")){
+        // the rest of the settings are in /root/.pdsettings
+        if(system("/root/scripts/check-for-x.sh")){
             printf("starting in GUI mode");
-            sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /mnt/usbdrive/patches/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
+            if (checkFileExists("/mnt/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /mnt/usbdrive/patches/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
+            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
         }
         else {
             printf("starting in NON GUI mode");
-            sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /mnt/usbdrive/patches/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
+            if (checkFileExists("/mnt/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /mnt/usbdrive/patches/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
+            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
         }
 
         // first kill any other PD
@@ -133,7 +143,7 @@ void UI::drawPatchList(void){
     menuScreen.invertLine(cursorOffset);   
 
     if (!patchIsRunning) {
-        menuScreen.drawNotification("Select a patch...");
+        menuScreen.drawNotification("Select a patch cool...");
     }
 
     newScreen = 1;
