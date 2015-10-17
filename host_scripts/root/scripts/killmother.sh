@@ -1,11 +1,12 @@
 #!/bin/sh
-# quit Pd in 3 steps
-
-# give pd a chance to shut itself off
+# quit Pd 
+/root/scripts/killpd.sh
+# then mother
+# give a chance to shut itself off
 oscsend localhost 4001 /quitmother i 1
 sleep .1
 
-# kill pd SIGTERM 
+# kill SIGTERM 
 killall mother
 sleep .1
 
