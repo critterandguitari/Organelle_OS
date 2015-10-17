@@ -29,7 +29,8 @@ void updateScreen();
 void updateScreenPage(uint8_t page, OledScreen &screen);
 void setOledLine(int lineNum, OSCMessage &msg);
 
-
+// should be routing the osc message instead of dispatching 
+// but this works ...
 void setOledLine1(OSCMessage &msg){
     setOledLine(1, msg);
 }
@@ -43,17 +44,16 @@ void setOledLine3(OSCMessage &msg){
     setOledLine(3, msg);
 }
 
-
 void setOledLine4(OSCMessage &msg){
     setOledLine(4, msg);
 }
-
 
 void setOledLine5(OSCMessage &msg){
     setOledLine(5, msg);
 }
 
-
+// since there are no strings in pd, the line message will be made of different types
+// cat the line together, then throw it up on the patch screen
 void setOledLine(int lineNum, OSCMessage &msg){
 
     char str[256];
@@ -83,6 +83,7 @@ void setOledLine(int lineNum, OSCMessage &msg){
 }
 
 // vu handler
+// receive the in/out levels and draw them
 void vuMeter(OSCMessage &msg){
     static int count;
 
@@ -98,6 +99,7 @@ void vuMeter(OSCMessage &msg){
 
 }
 
+// updates 1/8th section of oled
 void updateScreenPage(uint8_t page, OledScreen &screen){
     
     uint8_t oledPage[128];
@@ -117,6 +119,7 @@ void updateScreenPage(uint8_t page, OledScreen &screen){
         oledMsg.empty();
 }
 
+// to keep the mcu alive
 void sendReady(OSCMessage &msg){
     
     printf("sending ready...\n");
@@ -136,7 +139,6 @@ void sendLED(OSCMessage &msg){
     msg.send(dump);
     slip.sendMessage(dump.buffer, dump.length, serial);
 }
-
 
 void encoderInput(OSCMessage &msg){
     
@@ -202,16 +204,19 @@ int main(int argc, char* argv[]) {
     menu.drawPatchList(menuScreen);
 
 
-    // send ready 
+    // send ready to wake up MCU
+    // MCU is ignoring stuff over serial port until this message comes through
+    // don't empty the message because it gets sent out periodically incase MCU resets
     OSCMessage rdyMsg("/ready");
     rdyMsg.add(1);
     rdyMsg.send(dump);
-    slip.sendMessage(dump.buffer, dump.length, serial);
-    //rdyMsg.empty();
+    // send it a few times just in case
+    for(i = 0; i<4; i++) {
+       slip.sendMessage(dump.buffer, dump.length, serial);
+       usleep(20000); // wait 20 ms
+    }
     
-    // this starts playing the first patch
-    // the patch is already defalted to 1 in MainMenu
-    playFirst();
+    //playFirst();
 
     // full udp -> serial -> serial -> udp
     for (;;){
@@ -232,9 +237,6 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/ready", sendReady, 0);
                 msgIn.dispatch("/led", sendLED, 0);
                 msgIn.dispatch("/getknobs", sendGetKnobs, 0);
-                // send it along
-            //    msgIn.send(dump);
-            //    slip.sendMessage(dump.buffer, dump.length, serial);
             }
             else {
                 printf("bad message\n");
@@ -262,7 +264,6 @@ int main(int argc, char* argv[]) {
             // every 16 ms send a new screen page
             if (count > 16){
                 count = 0;
-            
                 updateScreenPage(page, patchScreen);
                 page++;
                 page %= 8;

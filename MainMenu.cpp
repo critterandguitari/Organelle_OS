@@ -56,7 +56,7 @@ void MainMenu::encoderPress(void){
         system(cmd);
     }
     
-    if (selected_patch >= 8) { 
+    if (selected_patch >= 10) { 
         // check for x
         if(system("/root/check-for-x.sh")){
             printf("starting in GUI mode");
@@ -113,18 +113,26 @@ void MainMenu::getPatchList(void){
     num_patches++;
     strcpy(patches[1], "");
     num_patches++;
-    strcpy(patches[2], "--- SYSTEM ---");
+    strcpy(patches[2], "------ SYSTEM -------");
     num_patches++;
 
-    strcpy(patches[3], "Reload");
+    strcpy(patches[3], "Eject");
     num_patches++;
-    strcpy(patches[4], "Shutdown");
+
+    strcpy(patches[4], "Reload");
     num_patches++;
-    strcpy(patches[5], "");
+
+    strcpy(patches[5], "Info");
     num_patches++;
-    strcpy(patches[6], "");
+
+    strcpy(patches[6], "Shutdown");
     num_patches++;
-    strcpy(patches[7], "--- PATCHES ---");
+
+    strcpy(patches[7], "");
+    num_patches++;
+    strcpy(patches[8], "");
+    num_patches++;
+    strcpy(patches[9], "------ PATCHES ------");
     num_patches++;
 
 
