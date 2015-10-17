@@ -8,12 +8,11 @@ echo "Updating OS"
 # copy files
 cp -f root/mother.pd /root
 cp -f root/mother /root
-cp root/.bash_profile /root
-cp root/.jwmrc /root
-cp root/.pdsettings /root
-cp root/scripts/* /root/scripts
-cp root/Desktop/* /root/Desktop
-cp root/version /root/version
+cp -f root/.bash_profile /root
+cp -f root/.jwmrc /root
+cp -f root/.pdsettings /root
+cp -f root/scripts/* /root/scripts
+cp -f root/version /root/version
 
 # sync
 sync 

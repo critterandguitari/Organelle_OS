@@ -84,6 +84,7 @@
         <TaskList maxwidth="256"/>
 
         <Dock/>
+        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/emotes/face-uncertain.png" popup="Reset Menu">exec:/root/scripts/restart-mother.sh</TrayButton>
         <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/actions/process-stop.png" popup="Exit Gui">exec:/root/scripts/stop-gui.sh</TrayButton>
         <!--Clock>xclock</Clock-->
 

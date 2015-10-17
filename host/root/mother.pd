@@ -1,15 +1,15 @@
-#N canvas 857 61 935 625 10;
+#N canvas 861 50 935 625 10;
 #X msg 86 184 \; pd dsp 1, f 10;
 #X obj 86 116 loadbang;
 #X obj 358 162 r knob1;
 #X obj 358 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 3808 1;
+-1 -1 9300 1;
 #X obj 421 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 6387 1;
+-1 -1 300 1;
 #X obj 482 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 7677 1;
+-1 -1 0 1;
 #X obj 544 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 6362 1;
+-1 -1 12500 1;
 #X obj 421 162 r knob2;
 #X obj 482 162 r knob3;
 #X obj 544 162 r knob4;
@@ -20,7 +20,7 @@
 #X floatatom 470 443 5 0 0 0 - - -, f 5;
 #X floatatom 509 443 5 0 0 0 - - -, f 5;
 #X obj 366 394 r aux;
-#X obj 366 420 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 366 420 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
 #X obj 654 340 r fs;
 #X obj 654 368 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
@@ -59,7 +59,7 @@
 run through a compressor to provide some headroom if things get too
 loud. Also sends values to the Organelle's OLED VU meter.;
 #X obj 742 360 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 12688 1;
+-1 -1 6759 1;
 #X obj 742 326 r vol;
 #X obj 74 431 timer;
 #X floatatom 74 453 5 0 0 0 - - -, f 5;
@@ -112,7 +112,7 @@ loud. Also sends values to the Organelle's OLED VU meter.;
 #X connect 38 0 10 1;
 #X connect 38 0 9 1;
 #X restore 84 275 pd audioIO;
-#N canvas 28 50 1265 661 messageIO 0;
+#N canvas 30 50 1265 661 messageIO 0;
 #X msg 568 179 port 4000;
 #X obj 244 251 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
@@ -516,7 +516,7 @@ exchanges messages with this patch using OSC over UDP.;
 #X connect 13 0 10 0;
 #X connect 13 0 14 0;
 #X restore 84 302 pd messageIO;
-#N canvas 92 92 1779 821 MIDI 0;
+#N canvas 94 86 1779 821 MIDI 0;
 #X obj 51 227 spigot 1;
 #X obj 139 183 r midiInGate;
 #X obj 51 257 t f b;
@@ -607,7 +607,7 @@ exchanges messages with this patch using OSC over UDP.;
 #X obj 1285 266 change;
 #X obj 1092 239 >= 64;
 #X obj 1092 271 change;
-#N canvas 272 50 529 478 program-change-in 0;
+#N canvas 589 72 529 478 program-change-in 0;
 #X obj 116 35 pgmin;
 #X obj 141 361 s oscOut;
 #X msg 141 332 send /pgmchg \$1;
@@ -622,7 +622,7 @@ exchanges messages with this patch using OSC over UDP.;
 #X text 43 4 program change in loads new patch;
 #X obj 141 265 t f b b;
 #X obj 141 298 i;
-#N canvas 10 91 309 238 chsel 0;
+#N canvas 11 88 309 238 chsel 0;
 #X obj 169 73 r midiCh;
 #X obj 76 61 swap;
 #X obj 76 86 pack;
@@ -747,7 +747,7 @@ midiInGate respectively.;
 #X restore 250 145 pd chsel;
 #X obj 250 119 ctlin 22;
 #X obj 444 128 ctlin 23;
-#N canvas 314 50 904 602 load-set-ch 0;
+#N canvas 315 50 904 602 load-set-ch 0;
 #X obj 159 103 t b b b b b;
 #X msg 207 194 rewind;
 #X obj 200 290 textfile;
@@ -1043,7 +1043,7 @@ main menu.;
 #X connect 11 0 8 0;
 #X connect 11 1 10 0;
 #X restore 83 357 pd menuControl;
-#N canvas 234 50 1020 875 knobState 0;
+#N canvas 235 50 1020 875 knobState 0;
 #X obj 239 523 textfile;
 #X obj 504 154 sel 1;
 #X msg 177 177 rewind;

@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Reset Menu
-Icon=/usr/share/icons/Adwaita/32x32/emotes/face-uncertain.png
-Exec=/root/scripts/restart-mother.sh
-Terminal=false
