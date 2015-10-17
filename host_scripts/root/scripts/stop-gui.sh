@@ -1,4 +1,3 @@
-#/root/stop-mother.sh
-#pkill x
+#!/bin/sh
 jwm -exit
 /root/scripts/start-mother.sh
