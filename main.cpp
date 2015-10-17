@@ -44,6 +44,7 @@ void setPatchScreenLine2(OSCMessage &msg);
 void setPatchScreenLine3(OSCMessage &msg);
 void setPatchScreenLine4(OSCMessage &msg);
 void setPatchScreenLine5(OSCMessage &msg);
+void invertScreenLine(OSCMessage &msg);
 
 void setAuxScreenLine0(OSCMessage &msg);
 void setAuxScreenLine1(OSCMessage &msg);
@@ -51,6 +52,7 @@ void setAuxScreenLine2(OSCMessage &msg);
 void setAuxScreenLine3(OSCMessage &msg);
 void setAuxScreenLine4(OSCMessage &msg);
 void setAuxScreenLine5(OSCMessage &msg);
+void invertAuxScreenLine(OSCMessage &msg);
 void auxScreenClear(OSCMessage &msg);
 
 void setLED(OSCMessage &msg);
@@ -65,7 +67,6 @@ void programChange(OSCMessage &msg);
 void goHome(OSCMessage &msg);
 void enablePatchSubMenu(OSCMessage &msg);
 void enableAuxSubMenu(OSCMessage &msg);
-void invertScreenLine(OSCMessage &msg);
 void loadPatch(OSCMessage &msg);
 /* end internal OSC messages received */
 
@@ -152,6 +153,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/aux/line/3", setAuxScreenLine3, 0);
                 msgIn.dispatch("/oled/aux/line/4", setAuxScreenLine4, 0);
                 msgIn.dispatch("/oled/aux/line/5", setAuxScreenLine5, 0);
+                msgIn.dispatch("/oled/aux/invertline", invertAuxScreenLine, 0);
                 msgIn.dispatch("/oled/aux/clear", auxScreenClear, 0);
                 
                 msgIn.dispatch("/ready", sendReady, 0);
@@ -195,7 +197,7 @@ int main(int argc, char* argv[]) {
                 screenFpsTimer.reset();
                 if (app.newScreen){
                     app.newScreen = 0;
-                    updateScreenPage(0, app.auxScreen);//menuScreen);
+                    updateScreenPage(0, app.auxScreen);
                     updateScreenPage(1, app.auxScreen);
                     updateScreenPage(2, app.auxScreen);
                     updateScreenPage(3, app.auxScreen);
@@ -212,7 +214,7 @@ int main(int argc, char* argv[]) {
                 screenFpsTimer.reset();
                 if (app.newScreen){
                     app.newScreen = 0;
-                    updateScreenPage(0, app.menuScreen);//menuScreen);
+                    updateScreenPage(0, app.menuScreen);
                     updateScreenPage(1, app.menuScreen);
                     updateScreenPage(2, app.menuScreen);
                     updateScreenPage(3, app.menuScreen);
@@ -236,7 +238,7 @@ int main(int argc, char* argv[]) {
                 screenFpsTimer.reset();
                 if (app.newScreen){
                     app.newScreen = 0;
-                    updateScreenPage(0, app.patchScreen);//menuScreen);
+                    updateScreenPage(0, app.patchScreen);
                     updateScreenPage(1, app.patchScreen);
                     updateScreenPage(2, app.patchScreen);
                     updateScreenPage(3, app.patchScreen);
@@ -296,21 +298,27 @@ void setPatchScreenLine5(OSCMessage &msg){
 // setting aux screen
 void setAuxScreenLine1(OSCMessage &msg) {
     setScreenLine(app.auxScreen, 1, msg);
+    app.newScreen = 1;
 }
 void setAuxScreenLine2(OSCMessage &msg) {
     setScreenLine(app.auxScreen, 2, msg);
+    app.newScreen = 1;
 }
 void setAuxScreenLine3(OSCMessage &msg) {
     setScreenLine(app.auxScreen, 3, msg);
+    app.newScreen = 1;
 }
 void setAuxScreenLine4(OSCMessage &msg) {
     setScreenLine(app.auxScreen, 4, msg);
+    app.newScreen = 1;
 }
 void setAuxScreenLine5(OSCMessage &msg) {
     setScreenLine(app.auxScreen, 5, msg);
+    app.newScreen = 1;
 }
 void auxScreenClear(OSCMessage &msg) {
     app.auxScreen.clear();
+    app.newScreen = 1;
 }
 
 void screenShot(OSCMessage &msg){
@@ -398,19 +406,23 @@ void loadPatch(OSCMessage &msg){
                 break;
             }
         }
-    
-
     }
-
-
 }
 
 void invertScreenLine(OSCMessage &msg){
-    
     if (msg.isInt(0)){
         int line = msg.getInt(0);
         //printf("inverting %d\n", line);
         app.patchScreen.invertLine(line % 5);
+        app.newScreen = 1;
+    }
+}
+
+void invertAuxScreenLine(OSCMessage &msg){
+    if (msg.isInt(0)){
+        int line = msg.getInt(0);
+        //printf("inverting %d\n", line);
+        app.auxScreen.invertLine(line % 5);
         app.newScreen = 1;
     }
 }
