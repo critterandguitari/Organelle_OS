@@ -130,7 +130,9 @@ void sendReady(OSCMessage &msg){
     rdyMsg.empty();
 }
 
-void sendGetKnobs(OSCMessage &msg){
+void sendGetKnobs(void){
+    OSCMessage msg("/getknobs");
+    msg.add(1);
     msg.send(dump);
     slip.sendMessage(dump.buffer, dump.length, serial);
 }
@@ -185,6 +187,7 @@ int main(int argc, char* argv[]) {
     int page = 0;
     int count20fps = 0;
     int countReadyPing = 0;
+    int countKnobPoll = 0;
 
     // for setting real time scheduling
     /*struct sched_param par;
@@ -202,6 +205,7 @@ int main(int argc, char* argv[]) {
 
     menu.getPatchList();
     menu.drawPatchList(menuScreen);
+    needNewScreen = 1;
 
 
     // send ready to wake up MCU
@@ -236,7 +240,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/line/5", setOledLine5, 0);
                 msgIn.dispatch("/ready", sendReady, 0);
                 msgIn.dispatch("/led", sendLED, 0);
-                msgIn.dispatch("/getknobs", sendGetKnobs, 0);
+ //               msgIn.dispatch("/getknobs", sendGetKnobs, 0);
             }
             else {
                 printf("bad message\n");
@@ -259,8 +263,8 @@ int main(int argc, char* argv[]) {
         // sleep for 1ms
         usleep(1000);
         
-        // if patch detail is enabled
-        if (patchScreenEnabled) {
+        // if patch detail is enabled and there is a patch loaded
+        if (patchScreenEnabled && menu.patchIsRunning) {
             // every 16 ms send a new screen page
             if (count > 16){
                 count = 0;
@@ -279,6 +283,7 @@ int main(int argc, char* argv[]) {
             count20fps = 0;
             if (needNewScreen){
                 needNewScreen = 0;
+                updateScreenPage(0, menuScreen);
                 updateScreenPage(1, menuScreen);
                 updateScreenPage(2, menuScreen);
                 updateScreenPage(3, menuScreen);
@@ -296,6 +301,12 @@ int main(int argc, char* argv[]) {
             slip.sendMessage(dump.buffer, dump.length, serial);
         }
         countReadyPing++;
+
+        if (countKnobPoll > 50){
+            countKnobPoll = 0;
+            sendGetKnobs();
+        }
+        countKnobPoll++;
     } // for;;
 }
 

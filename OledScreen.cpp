@@ -50,6 +50,24 @@ void OledScreen::draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y){
 }
 
 
+
+void OledScreen::drawNotification( char * line ) {
+
+    int i, len;
+
+    // first clear it out
+    for (i = 0; i < 128; i++)
+        pix_buf[i] = 0;
+
+    len = strlen(line);
+    if (len > 21)
+        println_8(line, 21,  2, 0);
+    else
+        println_8(line, len,  2, 0);
+
+}
+
+
 void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
 
     int i;    

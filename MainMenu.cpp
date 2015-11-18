@@ -13,8 +13,9 @@ MainMenu::MainMenu(){
 
     num_patches = 0;
     selected_patch = 0;
-    patchlist_offset = 5;
-    curser_offset = 3;
+    patchlist_offset = 9;
+    curser_offset = 1;
+    patchIsRunning = 0;
  
 }
 
@@ -60,11 +61,11 @@ void MainMenu::encoderPress(void){
         // check for x
         if(system("/root/check-for-x.sh")){
             printf("starting in GUI mode");
-            sprintf(cmd, "/usr/bin/pd -rt /mnt/usbdrive/patches/mother.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+            sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /mnt/usbdrive/patches/mother.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
         }
         else {
             printf("starting in NON GUI mode");
-            sprintf(cmd, "/usr/bin/pd -rt -nogui /mnt/usbdrive/patches/mother.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
+            sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /mnt/usbdrive/patches/mother.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
         }
 
         //sprintf(cmd, "/usr/bin/pd -rt -nogui /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selected_patch]);
@@ -73,6 +74,7 @@ void MainMenu::encoderPress(void){
         // first kill any other PD
         system("killall pd");
         system(cmd);
+        patchIsRunning = 1;
     }
 }
 
@@ -92,6 +94,14 @@ void MainMenu::drawPatchList(OledScreen &screen){
 
     screen.invertLine(curser_offset);   
 
+    if (!patchIsRunning) {
+        screen.drawNotification("Select a patch...");
+    }
+    else {
+        sprintf(line, "> %s", patches[selected_patch]);
+        screen.drawNotification(line);
+    }
+    //printf("c %d, p %d\n", curser_offset, patchlist_offset);
 }
 
 void MainMenu::getPatchList(void){

@@ -18,6 +18,7 @@ class MainMenu
         int patchlist_offset;
         int curser_offset;
         char current_patch[256];
+        int patchIsRunning;
 
         void encoderPress(void);
         void encoderRelease(void);
