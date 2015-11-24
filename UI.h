@@ -23,15 +23,18 @@ class UI
         char currentPatch[256];
         int patchIsRunning;         // if an actual patch is running
         int newScreen;              // flag indicating screen changed and needs to be sent to oled
-        int currentScreen;
+        int currentScreen;          // the current screen (ALERT, MENU or PATCH)
+        int encoderEnabled;         // when 1, encoder input is ignored
 
+        // encoder events
         void encoderPress(void);
         void encoderRelease(void);
+        void encoderUp(void);
+        void encoderDown(void);
+
 
         void getPatchList(void);
         void drawPatchList(void);
-        void encoderUp(void);
-        void encoderDown(void);
 
         OledScreen menuScreen;
         OledScreen patchScreen;

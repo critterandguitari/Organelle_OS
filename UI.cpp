@@ -15,6 +15,8 @@ UI::UI(){
     cursorOffset = 1;
     patchIsRunning = 0;
 
+    encoderEnabled = 1;     // encoder input is enabled
+
     newScreen = 0;
     currentScreen = MENU;
 
@@ -30,6 +32,7 @@ void UI::encoderUp(void) {
     if (!(cursorOffset >= 4)) cursorOffset++;
     
     drawPatchList();
+    currentScreen = MENU;
 }
 
 void UI::encoderDown(void) {
@@ -39,6 +42,7 @@ void UI::encoderDown(void) {
     if (!(cursorOffset < 1)) cursorOffset--;
     
     drawPatchList();
+    currentScreen = MENU;
 }
 
 void UI::encoderPress(void){
@@ -46,13 +50,11 @@ void UI::encoderPress(void){
     
     selectedPatch =  patchlistOffset + cursorOffset;
     printf("selected patch: %d, %s\n", selectedPatch, patches[selectedPatch]);
-
     
     if (!strcmp(patches[selectedPatch], "Reload")){
         printf("RELOADING !!!!!");
         getPatchList();
     }
-    
  
     if (!strcmp(patches[selectedPatch], "Shutdown")){
         printf("SHUTTING DOWN !!!!!");
@@ -71,13 +73,11 @@ void UI::encoderPress(void){
             sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /mnt/usbdrive/patches/mother.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selectedPatch]);
         }
 
-        //sprintf(cmd, "/usr/bin/pd -rt -nogui /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selectedPatch]);
-        //sprintf(cmd, "/root/pd-0.46-6/bin/pd -jack -nogui -rt /mnt/usbdrive/Mother_Linux/tester.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selectedPatch]);
-
         // first kill any other PD
         system("killall pd");
         system(cmd);
         patchIsRunning = 1;
+        currentScreen = PATCH;
     }
 }
 
