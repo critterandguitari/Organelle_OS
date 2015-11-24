@@ -5,9 +5,9 @@
 #include <locale.h>
 #include <string.h>
 
-#include "MenuProgram.h"
+#include "UI.h"
 
-MenuProgram::MenuProgram(){
+UI::UI(){
 
     numPatches = 0;
     selectedPatch = 0;
@@ -23,7 +23,7 @@ MenuProgram::MenuProgram(){
     alertScreen.clear();
 }
 
-void MenuProgram::encoderUp(void) {
+void UI::encoderUp(void) {
     if (cursorOffset == 4) {
         if (!(patchlistOffset >= (numPatches - 1))) patchlistOffset++;
     }
@@ -32,7 +32,7 @@ void MenuProgram::encoderUp(void) {
     drawPatchList();
 }
 
-void MenuProgram::encoderDown(void) {
+void UI::encoderDown(void) {
     if (cursorOffset == 0) {
         if (!(patchlistOffset < 1)) patchlistOffset--;
     }
@@ -41,7 +41,7 @@ void MenuProgram::encoderDown(void) {
     drawPatchList();
 }
 
-void MenuProgram::encoderPress(void){
+void UI::encoderPress(void){
     char cmd[256];
     
     selectedPatch =  patchlistOffset + cursorOffset;
@@ -81,13 +81,13 @@ void MenuProgram::encoderPress(void){
     }
 }
 
-void MenuProgram::encoderRelease(void){
+void UI::encoderRelease(void){
 
 }
 
 
 
-void MenuProgram::drawPatchList(void){
+void UI::drawPatchList(void){
     char line[256];
     int i;
     for (i=0; i<5; i++) {
@@ -109,7 +109,7 @@ void MenuProgram::drawPatchList(void){
     //printf("c %d, p %d\n", cursorOffset, patchlistOffset);
 }
 
-void MenuProgram::getPatchList(void){
+void UI::getPatchList(void){
 
 
     // find patches

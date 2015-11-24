@@ -10,7 +10,7 @@
 #include "UdpSocket.h"
 #include "SLIPEncodedSerial.h"
 #include "OledScreen.h"
-#include "MenuProgram.h"
+#include "UI.h"
 
 #define MENU_TIMEOUT 2000  // m sec timeout when screen switches back to patch detail
 
@@ -18,7 +18,7 @@ Serial serial;
 SLIPEncodedSerial slip;
 SimpleWriter dump;
 
-MenuProgram menu;
+UI ui;
 
 //int menuScreenTimeout = MENU_TIMEOUT;
 
@@ -75,7 +75,7 @@ void setOledLine(int lineNum, OSCMessage &msg){
         }
         i++;
     }
-    menu.patchScreen.setLine(lineNum, screenLine);
+    ui.patchScreen.setLine(lineNum, screenLine);
     //    printf("%s\n", screenLine);
 }
 
@@ -92,7 +92,7 @@ void vuMeter(OSCMessage &msg){
     if (msg.isInt(2)) outR = msg.getInt(2);
     if (msg.isInt(3)) outL = msg.getInt(3);
 
-    menu.patchScreen.drawInfoBar(inR, inL, outR, outL);
+    ui.patchScreen.drawInfoBar(inR, inL, outR, outL);
 
 }
 
@@ -141,15 +141,15 @@ void sendLED(OSCMessage &msg){
 
 void encoderInput(OSCMessage &msg){
     if (msg.isInt(0)){
-        if (msg.getInt(0) == 1) menu.encoderUp();
-        if (msg.getInt(0) == 0) menu.encoderDown();
+        if (msg.getInt(0) == 1) ui.encoderUp();
+        if (msg.getInt(0) == 0) ui.encoderDown();
     }
 }
 
 void encoderButton(OSCMessage &msg){
     if (msg.isInt(0)){
-        if (msg.getInt(0) == 1) menu.encoderPress();
-        if (msg.getInt(0) == 0) menu.encoderRelease();
+        if (msg.getInt(0) == 1) ui.encoderPress();
+        if (msg.getInt(0) == 0) ui.encoderRelease();
     }
 }
 
@@ -180,8 +180,8 @@ int main(int argc, char* argv[]) {
     udpSock.setDestination(4000, "localhost");
     OSCMessage msgIn;
 
-    menu.getPatchList();
-    menu.drawPatchList();
+    ui.getPatchList();
+    ui.drawPatchList();
 
     // send ready to wake up MCU
     // MCU is ignoring stuff over serial port until this message comes through
@@ -238,33 +238,33 @@ int main(int argc, char* argv[]) {
         usleep(1000);
         
 
-        if (menu.currentScreen == ALERT) {
+        if (ui.currentScreen == ALERT) {
 
         }
-        else if (menu.currentScreen == MENU) {
+        else if (ui.currentScreen == MENU) {
              // we can do a whole screen,  but not faster than 20fps
             if (count20fps > 50){
                 count20fps = 0;
-                if (menu.newScreen){
-                    menu.newScreen = 0;
-                    updateScreenPage(0, menu.menuScreen);//menuScreen);
-                    updateScreenPage(1, menu.menuScreen);
-                    updateScreenPage(2, menu.menuScreen);
-                    updateScreenPage(3, menu.menuScreen);
-                    updateScreenPage(4, menu.menuScreen);
-                    updateScreenPage(5, menu.menuScreen);
-                    updateScreenPage(6, menu.menuScreen);
-                    updateScreenPage(7, menu.menuScreen);
+                if (ui.newScreen){
+                    ui.newScreen = 0;
+                    updateScreenPage(0, ui.menuScreen);//menuScreen);
+                    updateScreenPage(1, ui.menuScreen);
+                    updateScreenPage(2, ui.menuScreen);
+                    updateScreenPage(3, ui.menuScreen);
+                    updateScreenPage(4, ui.menuScreen);
+                    updateScreenPage(5, ui.menuScreen);
+                    updateScreenPage(6, ui.menuScreen);
+                    updateScreenPage(7, ui.menuScreen);
                 }
             }
             count20fps++;
         }
-        else if (menu.currentScreen == PATCH) {
-            if (menu.patchIsRunning) {
+        else if (ui.currentScreen == PATCH) {
+            if (ui.patchIsRunning) {
                 // every 16 ms send a new screen page
                 if (count > 16){
                     count = 0;
-                    updateScreenPage(page, menu.patchScreen);
+                    updateScreenPage(page, ui.patchScreen);
                     page++;
                     page %= 8;
                 }
