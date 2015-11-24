@@ -7,9 +7,10 @@
 #include <stdint.h> 
 #include <string>
 
-#define ALERT 1
-#define MENU 2
-#define PATCH 3
+// the UI provides 3 screens
+#define AUX 1       // for alerts and info 
+#define MENU 2      // for main menu
+#define PATCH 3     // for patch details
 
 #define MENU_TIMEOUT 2000  // m sec timeout when screen switches back to patch detail
 
@@ -25,7 +26,7 @@ class UI
         char currentPatch[256];
         int patchIsRunning;         // if an actual patch is running
         int newScreen;              // flag indicating screen changed and needs to be sent to oled
-        int currentScreen;          // the current screen (ALERT, MENU or PATCH)
+        int currentScreen;          // the current screen (AUX, MENU or PATCH)
         int encoderEnabled;         // when 1, encoder input is ignored
         int menuScreenTimeout;
 
@@ -41,7 +42,7 @@ class UI
 
         OledScreen menuScreen;
         OledScreen patchScreen;
-        OledScreen alertScreen;
+        OledScreen auxScreen;
 
 };
 

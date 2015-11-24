@@ -235,8 +235,23 @@ int main(int argc, char* argv[]) {
         usleep(1000);
         
 
-        if (ui.currentScreen == ALERT) {
-
+        if (ui.currentScreen == AUX) {
+             // we can do a whole screen,  but not faster than 20fps
+            if (count20fps > 50){
+                count20fps = 0;
+                if (ui.newScreen){
+                    ui.newScreen = 0;
+                    updateScreenPage(0, ui.auxScreen);//menuScreen);
+                    updateScreenPage(1, ui.auxScreen);
+                    updateScreenPage(2, ui.auxScreen);
+                    updateScreenPage(3, ui.auxScreen);
+                    updateScreenPage(4, ui.auxScreen);
+                    updateScreenPage(5, ui.auxScreen);
+                    updateScreenPage(6, ui.auxScreen);
+                    updateScreenPage(7, ui.auxScreen);
+                }
+            }
+            count20fps++;
         }
         else if (ui.currentScreen == MENU) {
              // we can do a whole screen,  but not faster than 20fps

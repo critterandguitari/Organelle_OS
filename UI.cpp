@@ -23,7 +23,7 @@ UI::UI(){
 
     menuScreen.clear();
     patchScreen.clear();
-    alertScreen.clear();
+    auxScreen.clear();
 }
 
 void UI::encoderUp(void) {
@@ -61,15 +61,24 @@ void UI::encoderPress(void){
         system(cmd);
     }
     
+    if (!strcmp(patches[selectedPatch], "Info")){
+        printf("displaying system info");
+
+        auxScreen.drawNotification("System Info...");
+        newScreen = 1;
+        currentScreen = AUX;
+    }
+    
     if (selectedPatch >= 10) { 
-        // check for x
+        // check for X,
+        // run pd with nogui if no X. also use smaller audio buf with nogui
         if(system("/root/check-for-x.sh")){
             printf("starting in GUI mode");
-            sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /mnt/usbdrive/patches/mother.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selectedPatch]);
+            sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /mnt/usbdrive/patches/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
         }
         else {
             printf("starting in NON GUI mode");
-            sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /mnt/usbdrive/patches/mother.pd /mnt/usbdrive/patches/%s/main.pd &", patches[selectedPatch]);
+            sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /mnt/usbdrive/patches/mother.pd \"/mnt/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
         }
 
         // first kill any other PD
