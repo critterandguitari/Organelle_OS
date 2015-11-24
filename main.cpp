@@ -10,20 +10,17 @@
 #include "UdpSocket.h"
 #include "SLIPEncodedSerial.h"
 #include "OledScreen.h"
-#include "MainMenu.h"
+#include "MenuProgram.h"
 
 #define MENU_TIMEOUT 2000  // m sec timeout when screen switches back to patch detail
 
 Serial serial;
 SLIPEncodedSerial slip;
 SimpleWriter dump;
-OledScreen menuScreen;
-OledScreen patchScreen;
-MainMenu menu;
 
-int needNewScreen = 0;
-int patchScreenEnabled = 0;
-int menuScreenTimeout = MENU_TIMEOUT;
+MenuProgram menu;
+
+//int menuScreenTimeout = MENU_TIMEOUT;
 
 void updateScreen();
 void updateScreenPage(uint8_t page, OledScreen &screen);
@@ -78,7 +75,7 @@ void setOledLine(int lineNum, OSCMessage &msg){
         }
         i++;
     }
-    patchScreen.setLine(lineNum, screenLine);
+    menu.patchScreen.setLine(lineNum, screenLine);
     //    printf("%s\n", screenLine);
 }
 
@@ -95,7 +92,7 @@ void vuMeter(OSCMessage &msg){
     if (msg.isInt(2)) outR = msg.getInt(2);
     if (msg.isInt(3)) outL = msg.getInt(3);
 
-    patchScreen.drawInfoBar(inR, inL, outR, outL);
+    menu.patchScreen.drawInfoBar(inR, inL, outR, outL);
 
 }
 
@@ -143,38 +140,18 @@ void sendLED(OSCMessage &msg){
 }
 
 void encoderInput(OSCMessage &msg){
-    
     if (msg.isInt(0)){
         if (msg.getInt(0) == 1) menu.encoderUp();
         if (msg.getInt(0) == 0) menu.encoderDown();
     }
-    menu.drawPatchList(menuScreen);
-    needNewScreen = 1;
-    patchScreenEnabled = 0;
-    menuScreenTimeout = MENU_TIMEOUT;
 }
 
 void encoderButton(OSCMessage &msg){
-    
     if (msg.isInt(0)){
         if (msg.getInt(0) == 1) menu.encoderPress();
         if (msg.getInt(0) == 0) menu.encoderRelease();
     }
-    patchScreenEnabled = 1;
-    patchScreen.clear();
-    menuScreen.clear();
-    needNewScreen = 1;  // send full screen to clear it
 }
-
-void playFirst(void){
-    
-    patchScreenEnabled = 1;
-    patchScreen.clear();
-    menuScreen.clear();
-    needNewScreen = 1;  // send full screen to clear it
-    menu.encoderPress();
-}
-
 
 int main(int argc, char* argv[]) {
       
@@ -204,9 +181,7 @@ int main(int argc, char* argv[]) {
     OSCMessage msgIn;
 
     menu.getPatchList();
-    menu.drawPatchList(menuScreen);
-    needNewScreen = 1;
-
+    menu.drawPatchList();
 
     // send ready to wake up MCU
     // MCU is ignoring stuff over serial port until this message comes through
@@ -240,7 +215,6 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/line/5", setOledLine5, 0);
                 msgIn.dispatch("/ready", sendReady, 0);
                 msgIn.dispatch("/led", sendLED, 0);
- //               msgIn.dispatch("/getknobs", sendGetKnobs, 0);
             }
             else {
                 printf("bad message\n");
@@ -263,38 +237,45 @@ int main(int argc, char* argv[]) {
         // sleep for 1ms
         usleep(1000);
         
-        // if patch detail is enabled and there is a patch loaded
-        if (patchScreenEnabled && menu.patchIsRunning) {
-            // every 16 ms send a new screen page
-            if (count > 16){
-                count = 0;
-                updateScreenPage(page, patchScreen);
-                page++;
-                page %= 8;
+
+        if (menu.currentScreen == ALERT) {
+
+        }
+        else if (menu.currentScreen == MENU) {
+             // we can do a whole screen,  but not faster than 20fps
+            if (count20fps > 50){
+                count20fps = 0;
+                if (menu.newScreen){
+                    menu.newScreen = 0;
+                    updateScreenPage(0, menu.menuScreen);//menuScreen);
+                    updateScreenPage(1, menu.menuScreen);
+                    updateScreenPage(2, menu.menuScreen);
+                    updateScreenPage(3, menu.menuScreen);
+                    updateScreenPage(4, menu.menuScreen);
+                    updateScreenPage(5, menu.menuScreen);
+                    updateScreenPage(6, menu.menuScreen);
+                    updateScreenPage(7, menu.menuScreen);
+                }
             }
-            count++;
+            count20fps++;
+        }
+        else if (menu.currentScreen == PATCH) {
+            if (menu.patchIsRunning) {
+                // every 16 ms send a new screen page
+                if (count > 16){
+                    count = 0;
+                    updateScreenPage(page, menu.patchScreen);
+                    page++;
+                    page %= 8;
+                }
+                count++;
+            }
         }
 
-        if (menuScreenTimeout) menuScreenTimeout--;
-        else patchScreenEnabled = 1;
+        //if (menuScreenTimeout) menuScreenTimeout--;
+        //else patchScreenEnabled = 1;
         
-        // we can do a whole screen,  but not faster than 20fps
-        if (count20fps > 50){
-            count20fps = 0;
-            if (needNewScreen){
-                needNewScreen = 0;
-                updateScreenPage(0, menuScreen);
-                updateScreenPage(1, menuScreen);
-                updateScreenPage(2, menuScreen);
-                updateScreenPage(3, menuScreen);
-                updateScreenPage(4, menuScreen);
-                updateScreenPage(5, menuScreen);
-                updateScreenPage(6, menuScreen);
-                updateScreenPage(7, menuScreen);
-            }
-        }
-        count20fps++;
-
+        // every 1 second send a ping in case MCU resets
         if (countReadyPing >1000){
             countReadyPing = 0;
             rdyMsg.send(dump);
@@ -302,6 +283,7 @@ int main(int argc, char* argv[]) {
         }
         countReadyPing++;
 
+        // poll for knobs
         if (countKnobPoll > 50){
             countKnobPoll = 0;
             sendGetKnobs();
