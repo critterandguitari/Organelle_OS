@@ -14,6 +14,7 @@ UI::UI(){
     patchlistOffset = 9;
     cursorOffset = 1;
     patchIsRunning = 0;
+    menuScreenTimeout = MENU_TIMEOUT;
 
     encoderEnabled = 1;     // encoder input is enabled
 
@@ -32,7 +33,6 @@ void UI::encoderUp(void) {
     if (!(cursorOffset >= 4)) cursorOffset++;
     
     drawPatchList();
-    currentScreen = MENU;
 }
 
 void UI::encoderDown(void) {
@@ -42,7 +42,6 @@ void UI::encoderDown(void) {
     if (!(cursorOffset < 1)) cursorOffset--;
     
     drawPatchList();
-    currentScreen = MENU;
 }
 
 void UI::encoderPress(void){
@@ -77,6 +76,7 @@ void UI::encoderPress(void){
         system("killall pd");
         system(cmd);
         patchIsRunning = 1;
+        patchScreen.clear();
         currentScreen = PATCH;
     }
 }
@@ -84,8 +84,6 @@ void UI::encoderPress(void){
 void UI::encoderRelease(void){
 
 }
-
-
 
 void UI::drawPatchList(void){
     char line[256];
@@ -106,6 +104,8 @@ void UI::drawPatchList(void){
     }
 
     newScreen = 1;
+    menuScreenTimeout = MENU_TIMEOUT;
+    currentScreen = MENU;
     //printf("c %d, p %d\n", cursorOffset, patchlistOffset);
 }
 

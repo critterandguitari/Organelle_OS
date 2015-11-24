@@ -12,15 +12,12 @@
 #include "OledScreen.h"
 #include "UI.h"
 
-#define MENU_TIMEOUT 2000  // m sec timeout when screen switches back to patch detail
 
 Serial serial;
 SLIPEncodedSerial slip;
 SimpleWriter dump;
 
 UI ui;
-
-//int menuScreenTimeout = MENU_TIMEOUT;
 
 void updateScreen();
 void updateScreenPage(uint8_t page, OledScreen &screen);
@@ -258,6 +255,10 @@ int main(int argc, char* argv[]) {
                 }
             }
             count20fps++;
+
+            // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
+            if (ui.menuScreenTimeout) ui.menuScreenTimeout--;
+            else ui.currentScreen = PATCH;
         }
         else if (ui.currentScreen == PATCH) {
             if (ui.patchIsRunning) {
@@ -271,10 +272,7 @@ int main(int argc, char* argv[]) {
                 count++;
             }
         }
-
-        //if (menuScreenTimeout) menuScreenTimeout--;
-        //else patchScreenEnabled = 1;
-        
+       
         // every 1 second send a ping in case MCU resets
         if (countReadyPing >1000){
             countReadyPing = 0;
