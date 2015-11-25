@@ -51,24 +51,47 @@ void UI::encoderPress(void){
     printf("selected patch: %d, %s\n", selectedPatch, patches[selectedPatch]);
     
     if (!strcmp(patches[selectedPatch], "Reload")){
-        printf("RELOADING !!!!!");
+        printf("Reloading... ");
+        selectedPatch = 0;
+        patchlistOffset = 9;
+        cursorOffset = 1;
         getPatchList();
+        drawPatchList();
     }
  
     if (!strcmp(patches[selectedPatch], "Shutdown")){
-        printf("SHUTTING DOWN !!!!!");
+        printf("Shutting down... ");
         sprintf(cmd, "shutdown -h now");
         system(cmd);
     }
     
     if (!strcmp(patches[selectedPatch], "Info")){
-        printf("displaying system info");
+        printf("Displaying system info... ");
 
-        auxScreen.drawNotification("System Info...");
+        auxScreen.clear();
+        auxScreen.drawNotification("     System Info     ");
+
+        auxScreen.setLine(1, "Software Version: 1");
+        auxScreen.setLine(2, "USB: ...");
+        auxScreen.setLine(3, "MIDI: ...");
+        auxScreen.setLine(4, "CPU Load: ...");
+        
         newScreen = 1;
         currentScreen = AUX;
     }
-    
+     
+    if (!strcmp(patches[selectedPatch], "Eject")){
+        printf("Ejecting USB drive... ");
+
+        auxScreen.clear();
+        auxScreen.drawNotification("          ");
+
+        auxScreen.setLine(1, "this will eject USB ...");
+        
+        newScreen = 1;
+        currentScreen = AUX;
+    }
+
     if (selectedPatch >= 10) { 
         // check for X,
         // run pd with nogui if no X. also use smaller audio buf with nogui
@@ -87,6 +110,11 @@ void UI::encoderPress(void){
         patchIsRunning = 1;
         patchScreen.clear();
         currentScreen = PATCH;
+        
+        // put the patch name on the menu screen
+        sprintf(cmd, "> %s", patches[selectedPatch]);
+        menuScreen.drawNotification(cmd);
+
     }
 }
 
@@ -106,10 +134,6 @@ void UI::drawPatchList(void){
 
     if (!patchIsRunning) {
         menuScreen.drawNotification("Select a patch...");
-    }
-    else {
-        sprintf(line, "> %s", patches[selectedPatch]);
-        menuScreen.drawNotification(line);
     }
 
     newScreen = 1;
@@ -183,8 +207,6 @@ void UI::getPatchList(void){
     for (i=0; i<numPatches; i++) {
         printf("patch[%d]: %s\n", i, patches[i]);
     }
-    
-   
 }
 
 
