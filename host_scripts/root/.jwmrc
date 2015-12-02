@@ -62,14 +62,11 @@
     </Group>
 
     <Group>
-        <Name>wish</Name>
+        <Class>PatchWindow</Class>
         <Option>icon:pd.png</Option>
     </Group>
 
-    <Group>
-        <Name>pd-gui</Name>
-        <Option>icon:pd.png</Option>
-    </Group>
+
 
 
 

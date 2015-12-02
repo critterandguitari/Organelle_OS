@@ -62,13 +62,15 @@ void UI::encoderPress(void){
         selectedPatch = 0;
         patchlistOffset = 9;
         cursorOffset = 1;
+        sprintf(cmd, "/root/scripts/mount.sh");
+        system(cmd);
         getPatchList();
         drawPatchList();
     }
  
     if (!strcmp(patches[selectedPatch], "Shutdown")){
         printf("Shutting down... ");
-        sprintf(cmd, "shutdown -h now");
+        sprintf(cmd, "/root/scripts/shutdown.sh &");
         system(cmd);
     }
     

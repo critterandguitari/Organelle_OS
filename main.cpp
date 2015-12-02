@@ -124,6 +124,17 @@ void sendReady(OSCMessage &msg){
     rdyMsg.empty();
 }
 
+// to keep the mcu alive
+void sendShutdown(OSCMessage &msg){
+    
+    printf("sending shutdown...\n");
+    OSCMessage rdyMsg("/shutdown");
+    rdyMsg.add(1);
+    rdyMsg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+    rdyMsg.empty();
+}
+
 void sendGetKnobs(void){
     OSCMessage msg("/getknobs");
     msg.add(1);
@@ -211,6 +222,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/line/4", setOledLine4, 0);
                 msgIn.dispatch("/oled/line/5", setOledLine5, 0);
                 msgIn.dispatch("/ready", sendReady, 0);
+                msgIn.dispatch("/shutdown", sendShutdown, 0);
                 msgIn.dispatch("/led", sendLED, 0);
             }
             else {
