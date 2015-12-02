@@ -17,149 +17,33 @@ Serial serial;
 SLIPEncodedSerial slip;
 SimpleWriter dump;
 
+// main menu interface program
 UI ui;
 
-void updateScreen();
+/** OSC messages received internally (from PD or other program) **/
+void setPatchScreenOledLine1(OSCMessage &msg);
+void setPatchScreenOledLine2(OSCMessage &msg);
+void setPatchScreenOledLine3(OSCMessage &msg);
+void setPatchScreenOledLine4(OSCMessage &msg);
+void setPatchScreenOledLine5(OSCMessage &msg);
+void setLED(OSCMessage &msg);
+void vuMeter(OSCMessage &msg);
+void setAuxScreen(OSCMessage &msg);
+void reload(OSCMessage &msg);
+void sendReady(OSCMessage &msg);
+void sendShutdown(OSCMessage &msg);
+/* end internal OSC messages received */
+
+/* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
+void encoderInput(OSCMessage &msg);
+void encoderButton(OSCMessage &msg);
+/* end OSC messages received from MCU */
+
+/* helpers */
 void updateScreenPage(uint8_t page, OledScreen &screen);
-void setOledLine(int lineNum, OSCMessage &msg);
-
-// should be routing the osc message instead of dispatching 
-// but this works ...
-void setOledLine1(OSCMessage &msg){
-    setOledLine(1, msg);
-}
-
-void setOledLine2(OSCMessage &msg){
-    setOledLine(2, msg);
-}
-
-
-void setOledLine3(OSCMessage &msg){
-    setOledLine(3, msg);
-}
-
-void setOledLine4(OSCMessage &msg){
-    setOledLine(4, msg);
-}
-
-void setOledLine5(OSCMessage &msg){
-    setOledLine(5, msg);
-}
-
-// since there are no strings in pd, the line message will be made of different types
-// cat the line together, then throw it up on the patch screen
-void setOledLine(int lineNum, OSCMessage &msg){
-
-    char str[256];
-    char screenLine[256];
-    int i = 0;
-
-    screenLine[0] = 0;
-
-    while (msg.isString(i) || msg.isFloat(i) || msg.isInt(i)){
-        if (msg.isString(i)){
-            msg.getString(i, str, 256);
-            strcat(screenLine, str);
-            strcat(screenLine, " ");
-        }
-        if (msg.isFloat(i)){
-            sprintf(str, "%g ", msg.getFloat(i));
-            strcat(screenLine, str);
-        }
-        if (msg.isInt(i)){
-            sprintf(str, "%d ", msg.getInt(i));
-            strcat(screenLine, str);
-        }
-        i++;
-    }
-    ui.patchScreen.setLine(lineNum, screenLine);
-    //    printf("%s\n", screenLine);
-}
-
-// vu handler
-// receive the in/out levels and draw them
-void vuMeter(OSCMessage &msg){
-    static int count;
-
-    char line[1024];
-    int len, i, outR, outL, inR, inL;    
-
-    if (msg.isInt(0)) inR = msg.getInt(0);
-    if (msg.isInt(1)) inL = msg.getInt(1);
-    if (msg.isInt(2)) outR = msg.getInt(2);
-    if (msg.isInt(3)) outL = msg.getInt(3);
-
-    ui.patchScreen.drawInfoBar(inR, inL, outR, outL);
-
-}
-
-// updates 1/8th section of oled
-void updateScreenPage(uint8_t page, OledScreen &screen){
-    
-    uint8_t oledPage[128];
-    uint32_t i, j;
-
-    i = page;
-
-        // copy 128 byte page from the screen buffer
-        for (j=0; j<128; j++){
-            oledPage[j] = screen.pix_buf[j + (i * 128)];
-        }
-        OSCMessage oledMsg("/oled");
-        oledMsg.add(i);
-        oledMsg.add(oledPage, 128);
-        oledMsg.send(dump);
-        slip.sendMessage(dump.buffer, dump.length, serial);
-        oledMsg.empty();
-}
-
-// to keep the mcu alive
-void sendReady(OSCMessage &msg){
-    
-    printf("sending ready...\n");
-    OSCMessage rdyMsg("/ready");
-    rdyMsg.add(1);
-    rdyMsg.send(dump);
-    slip.sendMessage(dump.buffer, dump.length, serial);
-    rdyMsg.empty();
-}
-
-// to keep the mcu alive
-void sendShutdown(OSCMessage &msg){
-    
-    printf("sending shutdown...\n");
-    OSCMessage rdyMsg("/shutdown");
-    rdyMsg.add(1);
-    rdyMsg.send(dump);
-    slip.sendMessage(dump.buffer, dump.length, serial);
-    rdyMsg.empty();
-}
-
-void sendGetKnobs(void){
-    OSCMessage msg("/getknobs");
-    msg.add(1);
-    msg.send(dump);
-    slip.sendMessage(dump.buffer, dump.length, serial);
-}
-
-void sendLED(OSCMessage &msg){
-    msg.send(dump);
-    slip.sendMessage(dump.buffer, dump.length, serial);
-}
-
-void encoderInput(OSCMessage &msg){
-    if (msg.isInt(0)){
-        if (msg.getInt(0) == 1) ui.encoderUp();
-        if (msg.getInt(0) == 0) ui.encoderDown();
-    }
-}
-
-void encoderButton(OSCMessage &msg){
-    if (msg.isInt(0)){
-        if (msg.getInt(0) == 1) ui.encoderPress();
-        if (msg.getInt(0) == 0) ui.encoderRelease();
-    }
-}
+void setPatchScreenOledLine(int lineNum, OSCMessage &msg);
+void sendGetKnobs(void);
+/* end helpers */
 
 int main(int argc, char* argv[]) {
       
@@ -182,7 +66,6 @@ int main(int argc, char* argv[]) {
     if (sched_setscheduler(0,SCHED_FIFO,&par) < 0){
         printf("failed to set rt scheduling\n");
     }*/
-
 
     UdpSocket udpSock(4001);
     udpSock.setDestination(4000, "localhost");
@@ -216,14 +99,16 @@ int main(int argc, char* argv[]) {
             }    
             if(!msgIn.hasError()){
                 msgIn.dispatch("/oled/vumeter", vuMeter, 0);
-                msgIn.dispatch("/oled/line/1", setOledLine1, 0);
-                msgIn.dispatch("/oled/line/2", setOledLine2, 0);
-                msgIn.dispatch("/oled/line/3", setOledLine3, 0);
-                msgIn.dispatch("/oled/line/4", setOledLine4, 0);
-                msgIn.dispatch("/oled/line/5", setOledLine5, 0);
+                msgIn.dispatch("/oled/line/1", setPatchScreenOledLine1, 0);
+                msgIn.dispatch("/oled/line/2", setPatchScreenOledLine2, 0);
+                msgIn.dispatch("/oled/line/3", setPatchScreenOledLine3, 0);
+                msgIn.dispatch("/oled/line/4", setPatchScreenOledLine4, 0);
+                msgIn.dispatch("/oled/line/5", setPatchScreenOledLine5, 0);
                 msgIn.dispatch("/ready", sendReady, 0);
                 msgIn.dispatch("/shutdown", sendShutdown, 0);
-                msgIn.dispatch("/led", sendLED, 0);
+                msgIn.dispatch("/led", setLED, 0);
+                msgIn.dispatch("/auxscreen", setAuxScreen, 0);
+                msgIn.dispatch("/reload", reload, 0);
             }
             else {
                 printf("bad message\n");
@@ -316,5 +201,149 @@ int main(int argc, char* argv[]) {
         countKnobPoll++;
     } // for;;
 }
+
+/** OSC messages received internally (from PD or other program) **/
+
+void setPatchScreenOledLine1(OSCMessage &msg){
+    setPatchScreenOledLine(1, msg);
+}
+
+void setPatchScreenOledLine2(OSCMessage &msg){
+    setPatchScreenOledLine(2, msg);
+}
+
+void setPatchScreenOledLine3(OSCMessage &msg){
+    setPatchScreenOledLine(3, msg);
+}
+
+void setPatchScreenOledLine4(OSCMessage &msg){
+    setPatchScreenOledLine(4, msg);
+}
+
+void setPatchScreenOledLine5(OSCMessage &msg){
+    setPatchScreenOledLine(5, msg);
+}
+
+void setLED(OSCMessage &msg){
+    msg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+}
+
+void vuMeter(OSCMessage &msg){
+    static int count;
+
+    char line[1024];
+    int len, i, outR, outL, inR, inL;    
+
+    if (msg.isInt(0)) inR = msg.getInt(0);
+    if (msg.isInt(1)) inL = msg.getInt(1);
+    if (msg.isInt(2)) outR = msg.getInt(2);
+    if (msg.isInt(3)) outL = msg.getInt(3);
+
+    ui.patchScreen.drawInfoBar(inR, inL, outR, outL);
+
+}
+
+void setAuxScreen(OSCMessage &msg){
+    ui.currentScreen = AUX;
+    ui.newScreen = 1;
+}
+
+void reload(OSCMessage &msg){
+    ui.getPatchList();
+}
+
+void sendReady(OSCMessage &msg){   
+    printf("sending ready...\n");
+    OSCMessage rdyMsg("/ready");
+    rdyMsg.add(1);
+    rdyMsg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+    rdyMsg.empty();
+}
+
+void sendShutdown(OSCMessage &msg){
+    printf("sending shutdown...\n");
+    OSCMessage rdyMsg("/shutdown");
+    rdyMsg.add(1);
+    rdyMsg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+    rdyMsg.empty();
+}
+/* end internal OSC messages received */
+
+/* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
+void encoderInput(OSCMessage &msg){
+    if (msg.isInt(0)){
+        if (msg.getInt(0) == 1) ui.encoderUp();
+        if (msg.getInt(0) == 0) ui.encoderDown();
+    }
+}
+
+void encoderButton(OSCMessage &msg){
+    if (msg.isInt(0)){
+        if (msg.getInt(0) == 1) ui.encoderPress();
+        if (msg.getInt(0) == 0) ui.encoderRelease();
+    }
+}
+/* end OSC messages received from MCU */
+
+/* helpers */
+void setPatchScreenOledLine(int lineNum, OSCMessage &msg){
+
+    char str[256];
+    char screenLine[256];
+    int i = 0;
+
+    screenLine[0] = 0;
+    
+    // since there are no strings in pd, the line message will be made of different types
+    // cat the line together, then throw it up on the patch screen
+    while (msg.isString(i) || msg.isFloat(i) || msg.isInt(i)){
+        if (msg.isString(i)){
+            msg.getString(i, str, 256);
+            strcat(screenLine, str);
+            strcat(screenLine, " ");
+        }
+        if (msg.isFloat(i)){
+            sprintf(str, "%g ", msg.getFloat(i));
+            strcat(screenLine, str);
+        }
+        if (msg.isInt(i)){
+            sprintf(str, "%d ", msg.getInt(i));
+            strcat(screenLine, str);
+        }
+        i++;
+    }
+    ui.patchScreen.setLine(lineNum, screenLine);
+    //    printf("%s\n", screenLine);
+}
+
+void sendGetKnobs(void){
+    OSCMessage msg("/getknobs");
+    msg.add(1);
+    msg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+}
+
+void updateScreenPage(uint8_t page, OledScreen &screen){
+    
+    uint8_t oledPage[128];
+    uint32_t i, j;
+
+    i = page;
+
+        // copy 128 byte page from the screen buffer
+        for (j=0; j<128; j++){
+            oledPage[j] = screen.pix_buf[j + (i * 128)];
+        }
+        OSCMessage oledMsg("/oled");
+        oledMsg.add(i);
+        oledMsg.add(oledPage, 128);
+        oledMsg.send(dump);
+        slip.sendMessage(dump.buffer, dump.length, serial);
+        oledMsg.empty();
+}
+/* end helpers */
 
 
