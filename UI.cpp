@@ -9,10 +9,9 @@
 #include "UI.h"
 
 UI::UI(){
-
     numPatches = 0;
-    selectedPatch = 0;
-    patchlistOffset = 9;
+    numMenuEntries = 0;
+    menuOffset = 9;
     cursorOffset = 1;
     patchIsRunning = 0;
     menuScreenTimeout = MENU_TIMEOUT;
@@ -35,29 +34,44 @@ int UI::checkFileExists (const char * filename){
 
 void UI::encoderUp(void) {
     if (cursorOffset == 4) {
-        if (!(patchlistOffset >= (numPatches - 1))) patchlistOffset++;
+        if (!(menuOffset >= (numMenuEntries - 1))) menuOffset++;
     }
     if (!(cursorOffset >= 4)) cursorOffset++;
     
+    selectedPatch = menuOffset + cursorOffset;
     drawPatchList();
 }
 
 void UI::encoderDown(void) {
     if (cursorOffset == 0) {
-        if (!(patchlistOffset < 1)) patchlistOffset--;
+        if (!(menuOffset < 1)) menuOffset--;
     }
     if (!(cursorOffset < 1)) cursorOffset--;
     
+    selectedPatch = menuOffset + cursorOffset;
     drawPatchList();
 }
 
 void UI::encoderPress(void){
+    selectedPatch =  menuOffset + cursorOffset;
+    printf("selected patch: %d, %s\n", selectedPatch, menuItems[selectedPatch]);
+    
+    // menu items 0-10 are part of system menu
+    if (selectedPatch < 10) {    
+        runSystemCommand();
+    }
+    else { 
+        runPatch();       
+    }
+}
+
+void UI::encoderRelease(void){
+
+}
+
+void UI::runSystemCommand(void){
     char cmd[256];
-    
-    selectedPatch =  patchlistOffset + cursorOffset;
-    printf("selected patch: %d, %s\n", selectedPatch, patches[selectedPatch]);
-    
-    if (!strcmp(patches[selectedPatch], "Reload")){
+    if (!strcmp(menuItems[selectedPatch], "Reload")){
         printf("Reloading... ");
         sprintf(cmd, "/root/scripts/mount.sh");
         system(cmd);
@@ -65,13 +79,13 @@ void UI::encoderPress(void){
         drawPatchList();
     }
  
-    if (!strcmp(patches[selectedPatch], "Shutdown")){
+    else if (!strcmp(menuItems[selectedPatch], "Shutdown")){
         printf("Shutting down... ");
         sprintf(cmd, "/root/scripts/shutdown.sh &");
         system(cmd);
     }
     
-    if (!strcmp(patches[selectedPatch], "Info")){
+    else if (!strcmp(menuItems[selectedPatch], "Info")){
         printf("Displaying system info... ");
 
         auxScreen.clear();
@@ -86,63 +100,64 @@ void UI::encoderPress(void){
         currentScreen = AUX;
     }
      
-    if (!strcmp(patches[selectedPatch], "Eject")){
+    else if (!strcmp(menuItems[selectedPatch], "Eject")){
         printf("Ejecting USB drive... ");
         sprintf(cmd, "/root/scripts/eject.sh &");
         system(cmd);
     }
-
-    if (selectedPatch >= 10) { 
-        // check for X,
-        // run pd with nogui if no X. also use smaller audio buf with nogui
-        // the rest of the settings are in /root/.pdsettings
-        if(system("/root/scripts/check-for-x.sh")){
-            printf("starting in GUI mode");
-            if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
-            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
-        }
-        else {
-            printf("starting in NON GUI mode");
-            if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
-            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", patches[selectedPatch]);
-        }
-
-        // first kill any other PD
-        system("/root/scripts/killpd.sh");
-        system(cmd);
-        patchIsRunning = 1;
-        patchScreen.clear();
-        currentScreen = PATCH;
-        
-        // put the patch name on the menu screen
-        sprintf(cmd, "> %s", patches[selectedPatch]);
-        menuScreen.drawNotification(cmd);
-
-    }
 }
 
-void UI::encoderRelease(void){
+void UI::runPatch(void){
+    char cmd[256];
+    // check for X,
+    // run pd with nogui if no X. also use smaller audio buf with nogui
+    // the rest of the settings are in /root/.pdsettings
+    if(system("/root/scripts/check-for-x.sh")){
+        printf("starting in GUI mode");
+        if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+        else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+    }
+    else {
+        printf("starting in NON GUI mode");
+        if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+        else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+    }
 
+    // first kill any other PD
+    system("/root/scripts/killpd.sh");
+    system(cmd);
+    patchIsRunning = 1;
+    patchScreen.clear();
+    currentScreen = PATCH;
+    
+    // put the patch name on the menu screen
+    sprintf(cmd, "> %s", menuItems[selectedPatch]);
+    menuScreen.drawNotification(cmd);
 }
 
 void UI::drawPatchList(void){
     char line[256];
     int i;
     for (i=0; i<5; i++) {
-        sprintf(line, "%s", patches[i + patchlistOffset]);
+        sprintf(line, "%s", menuItems[i + menuOffset]);
         menuScreen.setLine(i + 1, line);
     }
-
-    menuScreen.invertLine(cursorOffset);   
+ 
+    // dont invert patch lines if there are no patches
+    if ((selectedPatch >= 10) && !numPatches) {
+    }
+    else {
+        menuScreen.invertLine(cursorOffset);   
+    }
 
     if (!patchIsRunning) {
-        menuScreen.drawNotification("Select a patch cool...");
+        menuScreen.drawNotification("Select a patch...");
     }
 
     newScreen = 1;
     menuScreenTimeout = MENU_TIMEOUT;
     currentScreen = MENU;
-    //printf("c %d, p %d\n", cursorOffset, patchlistOffset);
+    //printf("c %d, p %d\n", cursorOffset, menuOffset);
 }
 
 void UI::loadPatchList(void){
@@ -156,42 +171,42 @@ void UI::loadPatchList(void){
   
     // clear em out
     for (i = 0; i < 127; i++){
-        strcpy(patches[i], "");
+        strcpy(menuItems[i], "");
     }
 
     // inititial patches
-    numPatches = 0;
-    strcpy(patches[0], "");
-    numPatches++;
-    strcpy(patches[1], "");
-    numPatches++;
-    strcpy(patches[2], "------ SYSTEM -------");
-    numPatches++;
+    numMenuEntries = 0;
+    strcpy(menuItems[0], "");
+    numMenuEntries++;
+    strcpy(menuItems[1], "");
+    numMenuEntries++;
+    strcpy(menuItems[2], "------ SYSTEM -------");
+    numMenuEntries++;
 
-    strcpy(patches[3], "Eject");
-    numPatches++;
+    strcpy(menuItems[3], "Eject");
+    numMenuEntries++;
 
-    strcpy(patches[4], "Reload");
-    numPatches++;
+    strcpy(menuItems[4], "Reload");
+    numMenuEntries++;
 
-    strcpy(patches[5], "Info");
-    numPatches++;
+    strcpy(menuItems[5], "Info");
+    numMenuEntries++;
 
-    strcpy(patches[6], "Shutdown");
-    numPatches++;
+    strcpy(menuItems[6], "Shutdown");
+    numMenuEntries++;
 
-    strcpy(patches[7], "");
-    numPatches++;
-    strcpy(patches[8], "");
-    numPatches++;
-    strcpy(patches[9], "------ PATCHES ------");
-    numPatches++;
+    strcpy(menuItems[7], "");
+    numMenuEntries++;
+    strcpy(menuItems[8], "");
+    numMenuEntries++;
+    strcpy(menuItems[9], "------ PATCHES ------");
+    numMenuEntries++;
 
 
     // set locale so sorting happens in right order
     setlocale(LC_ALL, "en_US.UTF-8");
 
-    //n = scandir("/home/debian/Desktop/patches", &namelist, NULL, alphasort);
+    numPatches = 0;
     n = scandir("/usbdrive/patches", &namelist, NULL, alphasort);
     if (n<0)
         perror("scandir");
@@ -199,21 +214,29 @@ void UI::loadPatchList(void){
 
        while (n--) {
             if (namelist[n]->d_type == DT_DIR && strcmp (namelist[n]->d_name, "..") != 0 && strcmp (namelist[n]->d_name, ".") != 0) {
-                strcpy(patches[numPatches], namelist[n]->d_name);
+                strcpy(menuItems[numMenuEntries], namelist[n]->d_name);
+                numMenuEntries++;
                 numPatches++;
-                numPatches &= 0x7f;  // 128 max num patches
+                numMenuEntries &= 0x7f;  // 128 max num patches
             }
-            //printf("%s\n", namelist[n]->d_name);
             free(namelist[n]);
         }
         free(namelist);
     }
-    for (i=0; i<numPatches; i++) {
-        printf("patch[%d]: %s\n", i, patches[i]);
+    for (i=0; i<numMenuEntries; i++) {
+        printf("patch[%d]: %s\n", i, menuItems[i]);
+    }
+
+    // notify if no patches found
+    if (!numPatches){
+        strcpy(menuItems[10], "No patches found!");
+        strcpy(menuItems[11], "Insert USB drive ");
+        strcpy(menuItems[12], "with 'Patches' Folder.");
+        strcpy(menuItems[13], "Then select Reload.");
     }
 
     // set cursor to beg
-    patchlistOffset = 9;
+    menuOffset = 9;
     cursorOffset = 1;
 
     // kill pd 

@@ -1,7 +1,7 @@
 #!/bin/sh
 oscsend localhost 4001 /oled/aux/clear i 1
 oscsend localhost 4001 /oled/aux/line/1 s "USB Devive Removed!"
-oscsend localhost 4001 /oled/aux/line/3 s "Stopping Patch."
+oscsend localhost 4001 /oled/aux/line/3 s "Stopping patch..."
 
 # set to aux screen
 oscsend localhost 4001 /oled/setscreen i 1

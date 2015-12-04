@@ -18,10 +18,11 @@ class UI
 {
     public:
         UI();
+        int numMenuEntries;
         int numPatches;
-        char patches[128][256];     // holds names of patches
+        char menuItems[128][256];     // holds names of patches
         int selectedPatch;          // index in patches
-        int patchlistOffset;        // position of cursor
+        int menuOffset;        // position of cursor
         int cursorOffset;
         char currentPatch[256];
         int patchIsRunning;         // if an actual patch is running
@@ -36,6 +37,8 @@ class UI
         void encoderUp(void);
         void encoderDown(void);
 
+        void runPatch(void);
+        void runSystemCommand(void);
 
         void loadPatchList(void);
         void drawPatchList(void);

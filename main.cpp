@@ -333,8 +333,12 @@ void encoderInput(OSCMessage &msg){
 
 void encoderButton(OSCMessage &msg){
     if (msg.isInt(0)){
-        if (msg.getInt(0) == 1) ui.encoderPress();
-        if (msg.getInt(0) == 0) ui.encoderRelease();
+        if (msg.getInt(0) == 1) {
+            ui.encoderPress();
+        }
+        if (msg.getInt(0) == 0) {
+            ui.encoderRelease();
+        }
     }
 }
 /* end OSC messages received from MCU */
