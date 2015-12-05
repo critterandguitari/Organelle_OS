@@ -3,6 +3,31 @@
 #include "OledScreen.h"
 #include "fonts.h"
 #include <string.h>
+#include "simple_svg_1.0.0.hpp"
+
+void OledScreen::saveSVG(const char * filename) {
+
+    using namespace svg;
+    Dimensions dimensions(256, 128);
+    Document doc(filename, Layout(dimensions, Layout::BottomLeft));
+
+    // bg
+    doc << Rectangle(Point(0, dimensions.height), dimensions.width, dimensions.height, Color::Black);
+
+    int x,y;
+    for(y=0;y<64;y++){
+        for(x=0; x<128; x++){
+            if (get_pixel(x, y)) {
+               // printf("*");
+                doc << Rectangle(Point((x * 2), 128 - (y * 2)), 2, 2, Color::White);
+            }
+            //else printf(" ");
+        }
+        //printf("\n");
+    }
+    //printf("\n");
+    doc.save();
+}
 
 void OledScreen::clear(void){
     int i;

@@ -42,7 +42,7 @@ class OledScreen
 
         void println_8(char * line, int len, int x, int y);
 
-
+        void saveSVG(const char * filename);
 };
 
 

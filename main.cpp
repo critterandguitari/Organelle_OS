@@ -48,6 +48,8 @@ void reload(OSCMessage &msg);
 void sendReady(OSCMessage &msg);
 void sendShutdown(OSCMessage &msg);
 void quitMother(OSCMessage &msg);
+
+void screenShot(OSCMessage &msg);
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
@@ -133,6 +135,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/setscreen", setScreen, 0);
                 msgIn.dispatch("/reload", reload, 0);
                 msgIn.dispatch("/quitmother", quitMother, 0);
+                msgIn.dispatch("/screenshot", screenShot, 0);
             }
             else {
                 printf("bad message\n");
@@ -268,6 +271,16 @@ void setAuxScreenLine5(OSCMessage &msg) {
 }
 void auxScreenClear(OSCMessage &msg) {
     ui.auxScreen.clear();
+}
+
+void screenShot(OSCMessage &msg){
+/*    int screen;
+    if (msg.isInt(0)) {
+        screen = msg.getInt(0);
+        
+    }*/
+    ui.patchScreen.saveSVG("/usbdrive/cool.svg");
+
 }
 
 void quitMother(OSCMessage &msg){
