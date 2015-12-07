@@ -14,6 +14,9 @@
 
 #define MENU_TIMEOUT 2000  // m sec timeout when screen switches back to patch detail
 
+// location of Patches folder 
+#define PATCHES_PATH "/usbdrive/Patches"
+
 class UI
 {
     public:

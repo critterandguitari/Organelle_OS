@@ -274,13 +274,14 @@ void auxScreenClear(OSCMessage &msg) {
 }
 
 void screenShot(OSCMessage &msg){
-/*    int screen;
-    if (msg.isInt(0)) {
-        screen = msg.getInt(0);
-        
-    }*/
-    ui.patchScreen.saveSVG("/usbdrive/cool.svg");
-
+    if (ui.currentScreen == AUX) 
+        ui.auxScreen.saveSVG("/usbdrive/AuxScreen.svg");
+    
+    if (ui.currentScreen == MENU) 
+        ui.menuScreen.saveSVG("/usbdrive/MenuScreen.svg");
+    
+    if (ui.currentScreen == PATCH) 
+        ui.patchScreen.saveSVG("/usbdrive/PatchScreen.svg");
 }
 
 void quitMother(OSCMessage &msg){

@@ -8,24 +8,24 @@
 void OledScreen::saveSVG(const char * filename) {
 
     using namespace svg;
-    Dimensions dimensions(256, 128);
+    // using 16 pixels per oled pixel so we can have 1 px separation to
+    // simulate look of real screen
+    Dimensions dimensions(2048 + (6*16), 1024 + (6*16));
     Document doc(filename, Layout(dimensions, Layout::BottomLeft));
 
     // bg
     doc << Rectangle(Point(0, dimensions.height), dimensions.width, dimensions.height, Color::Black);
-
+    
+    // loop over oled pix buf
     int x,y;
     for(y=0;y<64;y++){
         for(x=0; x<128; x++){
             if (get_pixel(x, y)) {
-               // printf("*");
-                doc << Rectangle(Point((x * 2), 128 - (y * 2)), 2, 2, Color::White);
+                // offset for 3px border,  size is 15 to leave small space between pixels
+                doc << Rectangle(Point(((x+3) * 16), dimensions.height - ((y+3) * 16)), 15, 15, Color::White);
             }
-            //else printf(" ");
         }
-        //printf("\n");
     }
-    //printf("\n");
     doc.save();
 }
 

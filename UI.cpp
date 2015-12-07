@@ -103,8 +103,8 @@ void UI::runSystemCommand(void){
 
 void UI::runPatch(void){
     char cmd[256];
-    sprintf(cmd, "/usbdrive/patches/%s/main.pd", menuItems[selectedPatch]);
-    sprintf(cmd, "/usbdrive/patches/%s/main.pd", menuItems[selectedPatch]);
+    sprintf(cmd, PATCHES_PATH"/%s/main.pd", menuItems[selectedPatch]);
+    sprintf(cmd, PATCHES_PATH"/%s/main.pd", menuItems[selectedPatch]);
     printf("Checking for Patch File: %s\n", cmd);
     if (checkFileExists(cmd)) {
         // check for X,
@@ -112,13 +112,13 @@ void UI::runPatch(void){
         // the rest of the settings are in /root/.pdsettings
         if(system("/root/scripts/check-for-x.sh")){
             printf("starting in GUI mode\n");
-            if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
-            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedPatch]);
+            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedPatch]);
         }
         else {
             printf("starting in NON GUI mode\n");
-            if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
-            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedPatch]);
+            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedPatch]);
         }
 
         // first kill any other PD
@@ -208,7 +208,7 @@ void UI::loadPatchList(void){
     setlocale(LC_ALL, "en_US.UTF-8");
 
     numPatches = 0;
-    n = scandir("/usbdrive/patches", &namelist, NULL, alphasort);
+    n = scandir(PATCHES_PATH, &namelist, NULL, alphasort);
     if (n<0)
         perror("scandir");
     else {
