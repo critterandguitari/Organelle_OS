@@ -1,8 +1,8 @@
 #!/bin/sh
 echo "Stopping pd, unmounting USB drive..."
 oscsend localhost 4001 /oled/aux/clear i 1
-oscsend localhost 4001 /oled/setscreen i 1
 oscsend localhost 4001 /oled/aux/line/1 s "Ejecting USB drive..."
+oscsend localhost 4001 /oled/setscreen i 1
 /root/scripts/killpd.sh
 umount /usbdrive
 echo "done"

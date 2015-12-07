@@ -54,7 +54,7 @@ void UI::encoderDown(void) {
 
 void UI::encoderPress(void){
     selectedPatch =  menuOffset + cursorOffset;
-    printf("selected patch: %d, %s\n", selectedPatch, menuItems[selectedPatch]);
+    printf("Menu Selection: %d, %s\n", selectedPatch, menuItems[selectedPatch]);
     
     // menu items 0-10 are part of system menu
     if (selectedPatch < 10) {    
@@ -72,7 +72,7 @@ void UI::encoderRelease(void){
 void UI::runSystemCommand(void){
     char cmd[256];
     if (!strcmp(menuItems[selectedPatch], "Reload")){
-        printf("Reloading... ");
+        printf("Reloading... \n");
         sprintf(cmd, "/root/scripts/mount.sh");
         system(cmd);
         loadPatchList();
@@ -80,28 +80,22 @@ void UI::runSystemCommand(void){
     }
  
     else if (!strcmp(menuItems[selectedPatch], "Shutdown")){
-        printf("Shutting down... ");
+        printf("Shutting down... \n");
         sprintf(cmd, "/root/scripts/shutdown.sh &");
         system(cmd);
     }
     
     else if (!strcmp(menuItems[selectedPatch], "Info")){
-        printf("Displaying system info... ");
-
+        printf("Displaying system info... \n");
         auxScreen.clear();
         auxScreen.drawNotification("     System Info     ");
+        sprintf(cmd, "/root/scripts/info.sh &");
+        system(cmd);
 
-        auxScreen.setLine(1, "Software Version: 1");
-        auxScreen.setLine(2, "USB: ...");
-        auxScreen.setLine(3, "MIDI: ...");
-        auxScreen.setLine(4, "CPU Load: ...");
-        
-        newScreen = 1;
-        currentScreen = AUX;
     }
      
     else if (!strcmp(menuItems[selectedPatch], "Eject")){
-        printf("Ejecting USB drive... ");
+        printf("Ejecting USB drive... \n");
         sprintf(cmd, "/root/scripts/eject.sh &");
         system(cmd);
     }
@@ -109,30 +103,37 @@ void UI::runSystemCommand(void){
 
 void UI::runPatch(void){
     char cmd[256];
-    // check for X,
-    // run pd with nogui if no X. also use smaller audio buf with nogui
-    // the rest of the settings are in /root/.pdsettings
-    if(system("/root/scripts/check-for-x.sh")){
-        printf("starting in GUI mode");
-        if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
-        else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
-    }
-    else {
-        printf("starting in NON GUI mode");
-        if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
-        else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
-    }
+    sprintf(cmd, "/usbdrive/patches/%s/main.pd", menuItems[selectedPatch]);
+    sprintf(cmd, "/usbdrive/patches/%s/main.pd", menuItems[selectedPatch]);
+    printf("Checking for Patch File: %s\n", cmd);
+    if (checkFileExists(cmd)) {
+        // check for X,
+        // run pd with nogui if no X. also use smaller audio buf with nogui
+        // the rest of the settings are in /root/.pdsettings
+        if(system("/root/scripts/check-for-x.sh")){
+            printf("starting in GUI mode\n");
+            if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+        }
+        else {
+            printf("starting in NON GUI mode\n");
+            if (checkFileExists("/usbdrive/patches/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /usbdrive/patches/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \"/usbdrive/patches/%s/main.pd\" &", menuItems[selectedPatch]);
+        }
 
-    // first kill any other PD
-    system("/root/scripts/killpd.sh");
-    system(cmd);
-    patchIsRunning = 1;
-    patchScreen.clear();
-    currentScreen = PATCH;
-    
-    // put the patch name on the menu screen
-    sprintf(cmd, "> %s", menuItems[selectedPatch]);
-    menuScreen.drawNotification(cmd);
+        // first kill any other PD
+        system("/root/scripts/killpd.sh");
+        system(cmd);
+        patchIsRunning = 1;
+        patchScreen.clear();
+        currentScreen = PATCH;
+        
+        // put the patch name on the menu screen
+        sprintf(cmd, "> %s", menuItems[selectedPatch]);
+        menuScreen.drawNotification(cmd);
+    } else {
+        printf("Patch File Not Found: %s\n", cmd);
+    }
 }
 
 void UI::drawPatchList(void){

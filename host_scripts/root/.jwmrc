@@ -76,7 +76,7 @@
 
         <!--TrayButton label="Menu">root:1</TrayButton-->
         <TrayButton icon="/usr/share/icons/Adwaita/32x32/apps/utilities-terminal.png">exec:lxterminal</TrayButton>
-        <TrayButton icon="/root/pd.png">exec:wish /usr/lib/pd/tcl/pd-gui.tcl</TrayButton>
+        <!--TrayButton icon="/root/pd.png">exec:wish /usr/lib/pd/tcl/pd-gui.tcl</TrayButton-->
         <!--TrayButton label="_">showdesktop</TrayButton-->
 
         <!-- Pager labeled="true"/ -->
