@@ -17,6 +17,9 @@
 // location of Patches folder 
 #define PATCHES_PATH "/usbdrive/Patches"
 
+// first patch in menu
+#define FIRST_PATCH_MENU_INDEX 10
+
 class UI
 {
     public:

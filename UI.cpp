@@ -57,7 +57,7 @@ void UI::encoderPress(void){
     printf("Menu Selection: %d, %s\n", selectedPatch, menuItems[selectedPatch]);
     
     // menu items 0-10 are part of system menu
-    if (selectedPatch < 10) {    
+    if (selectedPatch < FIRST_PATCH_MENU_INDEX) {    
         runSystemCommand();
     }
     else { 
@@ -103,7 +103,12 @@ void UI::runSystemCommand(void){
 
 void UI::runPatch(void){
     char cmd[256];
-    sprintf(cmd, PATCHES_PATH"/%s/main.pd", menuItems[selectedPatch]);
+
+    if (strcmp(menuItems[selectedPatch], "") == 0) {
+        printf("Empty menu entry\n");
+        return;
+    }
+    
     sprintf(cmd, PATCHES_PATH"/%s/main.pd", menuItems[selectedPatch]);
     printf("Checking for Patch File: %s\n", cmd);
     if (checkFileExists(cmd)) {
@@ -145,7 +150,7 @@ void UI::drawPatchList(void){
     }
  
     // dont invert patch lines if there are no patches
-    if ((selectedPatch >= 10) && !numPatches) {
+    if ((selectedPatch >= FIRST_PATCH_MENU_INDEX) && !numPatches) {
     }
     else {
         menuScreen.invertLine(cursorOffset);   
