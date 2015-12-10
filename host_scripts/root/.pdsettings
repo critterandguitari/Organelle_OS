@@ -5,14 +5,16 @@ audioindevname1: On-board Codec (hardware)
 noaudioout: False
 audiooutdev1: 0 2
 audiooutdevname1: On-board Codec (hardware)
-audiobuf: 4
+audiobuf: 10
 rate: 44100
 callback: 0
 blocksize: 64
 nomidiin: False
 midiindev1: 0
-midiindevname1: ?
-nomidiout: True
+midiindevname1: /dev/midi3
+nomidiout: False
+midioutdev1: 0
+midioutdevname1: /dev/midi3
 path1: /root/externals
 path2: /root/externals/rj
 npath: 2
