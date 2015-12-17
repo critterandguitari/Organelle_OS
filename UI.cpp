@@ -141,6 +141,19 @@ void UI::runPatch(void){
     }
 }
 
+void UI::programChange(int pgm){
+
+    if ((pgm > numPatches) || (pgm < 1)) {
+        printf("Program Change out of range\n");
+        return;
+    }
+    else {
+        printf("Program Change: %d, %s\n", pgm, menuItems[selectedPatch]);
+        selectedPatch = pgm + FIRST_PATCH_MENU_INDEX - 1;
+        runPatch();
+    }
+}
+
 void UI::drawPatchList(void){
     char line[256];
     int i;

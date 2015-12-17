@@ -48,8 +48,8 @@ void reload(OSCMessage &msg);
 void sendReady(OSCMessage &msg);
 void sendShutdown(OSCMessage &msg);
 void quitMother(OSCMessage &msg);
-
 void screenShot(OSCMessage &msg);
+void programChange(OSCMessage &msg);
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
@@ -136,6 +136,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/reload", reload, 0);
                 msgIn.dispatch("/quitmother", quitMother, 0);
                 msgIn.dispatch("/screenshot", screenShot, 0);
+                msgIn.dispatch("/pgmchg", programChange, 0);
             }
             else {
                 printf("bad message\n");
@@ -282,6 +283,10 @@ void screenShot(OSCMessage &msg){
     
     if (ui.currentScreen == PATCH) 
         ui.patchScreen.saveSVG("/usbdrive/PatchScreen.svg");
+}
+
+void programChange(OSCMessage &msg){
+    if (msg.isInt(0)) ui.programChange(msg.getInt(0));
 }
 
 void quitMother(OSCMessage &msg){

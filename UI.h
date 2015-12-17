@@ -45,6 +45,7 @@ class UI
 
         void runPatch(void);
         void runSystemCommand(void);
+        void programChange(int pgm);
 
         void loadPatchList(void);
         void drawPatchList(void);
