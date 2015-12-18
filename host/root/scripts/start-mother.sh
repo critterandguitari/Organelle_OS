@@ -1,7 +1,6 @@
 #!/bin/sh
 clear
 #cd /usbdrive
-/root/scripts/killpd.sh
 /root/scripts/killmother.sh
 /root/scripts/setup.sh
 #/root/scripts/check-for-usb-drive.sh
