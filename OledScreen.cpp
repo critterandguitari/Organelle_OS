@@ -95,7 +95,19 @@ void OledScreen::drawNotification( char * line ) {
 
 void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
 
-    int i;    
+    int i, len; 
+
+    // bounds for vu
+    // i guess it goes up to 11 haha
+    if (inR < 0) inR = 0;
+    if (inR > 11) inR = 11;
+    if (inL < 0) inL = 0;
+    if (inL > 11) inL = 11;
+
+    if (outR < 0) outR = 0;
+    if (outR > 11) outR = 11;
+    if (outL < 0) outL = 0;
+    if (outL > 11) outL = 11;
 
     // first clear it out
     for (i = 0; i < 128; i++)
@@ -103,7 +115,7 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
 
     // draw input output
     put_char_small('I', 0, 0, 1);
-    put_char_small('O', 48, 0, 1);
+    put_char_small('O', 64, 0, 1);
 
     
     // VU meter
@@ -113,53 +125,74 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
     draw_box(1, 2, 12, 1); 
     draw_box(1, 2, 17, 1); 
     draw_box(1, 2, 22, 1); 
-    draw_box(1, 2, 28, 1); 
-    draw_box(1, 2, 33, 1); 
-    draw_box(1, 2, 38, 1); 
+    draw_box(1, 2, 27, 1); 
+    draw_box(1, 2, 32, 1); 
+    draw_box(1, 2, 37, 1); 
+    draw_box(1, 2, 42, 1); 
+    draw_box(1, 2, 47, 1); 
+    draw_box(1, 2, 52, 1); 
+    draw_box(1, 2, 57, 1); 
 
     draw_box(1, 2, 7, 5);
     draw_box(1, 2, 12, 5);
     draw_box(1, 2, 17, 5);
     draw_box(1, 2, 22, 5);
-    draw_box(1, 2, 28, 5);
-    draw_box(1, 2, 33, 5);
-    draw_box(1, 2, 38, 5);
+    draw_box(1, 2, 27, 5);
+    draw_box(1, 2, 32, 5);
+    draw_box(1, 2, 37, 5);
+    draw_box(1, 2, 42, 5);
+    draw_box(1, 2, 47, 5);
+    draw_box(1, 2, 52, 5);
+    draw_box(1, 2, 57, 5);
 
     // big guys
-    for (i = 0; i < (inR % 8); i++){
+    for (i = 0; i < (inR); i++){
         draw_box(3, 4, 7 + (5 * i), 0); 
     }
 
-    for (i = 0; i < (inL % 8); i++){
+    for (i = 0; i < (inL); i++){
         draw_box(3, 4, 7 + (5 * i), 4);
     }
 
     // after O
     // small guys
-    draw_box(1, 2, 55, 1); 
-    draw_box(1, 2, 60, 1); 
-    draw_box(1, 2, 65, 1); 
-    draw_box(1, 2, 70, 1); 
-    draw_box(1, 2, 75, 1); 
-    draw_box(1, 2, 80, 1); 
-    draw_box(1, 2, 85, 1); 
+    draw_box(1, 2, 73, 1); 
+    draw_box(1, 2, 78, 1); 
+    draw_box(1, 2, 83, 1); 
+    draw_box(1, 2, 88, 1); 
+    draw_box(1, 2, 93, 1); 
+    draw_box(1, 2, 98, 1); 
+    draw_box(1, 2, 103, 1); 
+    draw_box(1, 2, 108, 1); 
+    draw_box(1, 2, 113, 1); 
+    draw_box(1, 2, 118, 1); 
+    draw_box(1, 2, 123, 1); 
 
-    draw_box(1, 2, 55, 5);
-    draw_box(1, 2, 60, 5);
-    draw_box(1, 2, 65, 5);
-    draw_box(1, 2, 70, 5);
-    draw_box(1, 2, 75, 5);
-    draw_box(1, 2, 80, 5);
-    draw_box(1, 2, 85, 5);
-
+    draw_box(1, 2, 73, 5);
+    draw_box(1, 2, 78, 5);
+    draw_box(1, 2, 83, 5);
+    draw_box(1, 2, 88, 5);
+    draw_box(1, 2, 93, 5);
+    draw_box(1, 2, 98, 5);
+    draw_box(1, 2, 103, 5);
+    draw_box(1, 2, 108, 5);
+    draw_box(1, 2, 113, 5);
+    draw_box(1, 2, 118, 5);
+    draw_box(1, 2, 123, 5);
+    
     // big guys
-    for (i = 0; i < (outR % 8); i++){
-        draw_box(3, 4, 55 + (5 * i), 0); 
+    for (i = 0; i < (outR); i++){
+        draw_box(3, 4, 73 + (5 * i), 0); 
     }
 
-    for (i = 0; i < (outL % 8); i++){
-        draw_box(3, 4, 55 + (5 * i), 4);
+    for (i = 0; i < (outL); i++){
+        draw_box(3, 4, 73 + (5 * i), 4);
     }
+
+ 
+//    println_8("---x", 4,  90, 0);
+
+   
 
     // other info
 /*    put_char_small('M', 95, 0, 1);
