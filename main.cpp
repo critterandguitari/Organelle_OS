@@ -76,6 +76,11 @@ int main(int argc, char* argv[]) {
     int countReadyPing = 0;
     int countKnobPoll = 0;
 
+
+
+    // set locale so sorting happens in right order
+    //std::setlocale(LC_ALL, "en_US.UTF-8");
+
     // for setting real time scheduling
     /*struct sched_param par;
 

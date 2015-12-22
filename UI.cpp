@@ -221,24 +221,23 @@ void UI::loadPatchList(void){
     strcpy(menuItems[9], "------ PATCHES ------");
     numMenuEntries++;
 
-
-    // set locale so sorting happens in right order
-    setlocale(LC_ALL, "en_US.UTF-8");
-
     numPatches = 0;
+    // set locale so sorting happens in right order
+    // not sure this does anything
+    std::setlocale(LC_ALL, "en_US.UTF-8");
     n = scandir(PATCHES_PATH, &namelist, NULL, alphasort);
     if (n<0)
         perror("scandir");
     else {
-
-       while (n--) {
-            if (namelist[n]->d_type == DT_DIR && strcmp (namelist[n]->d_name, "..") != 0 && strcmp (namelist[n]->d_name, ".") != 0) {
-                strcpy(menuItems[numMenuEntries], namelist[n]->d_name);
+       //while(n--) {
+       for(i = 0; i < n; i++) {
+            if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
+                strcpy(menuItems[numMenuEntries], namelist[i]->d_name);
                 numMenuEntries++;
                 numPatches++;
                 numMenuEntries &= 0x7f;  // 128 max num patches
             }
-            free(namelist[n]);
+            free(namelist[i]);
         }
         free(namelist);
     }

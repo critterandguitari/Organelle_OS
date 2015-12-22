@@ -1,11 +1,12 @@
  
 #include <stdint.h>
 #include <stdio.h>
+#include <cfloat>
 
 int main(int argc, char* argv[]) {
   
   uint32_t seconds = 0;
 
-  printf("cool\n");
+  printf("max float: %d \n", DECIMAL_DIG);
 
 }

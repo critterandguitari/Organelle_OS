@@ -1,23 +1,23 @@
-#N canvas 538 304 935 511 10;
+#N canvas 539 301 935 511 10;
 #X msg 88 138 \; pd dsp 1, f 10;
 #X obj 88 70 loadbang;
 #X obj 88 102 delay 100;
 #X obj 355 113 r knob1;
 #X obj 355 147 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 11001 1;
+-1 -1 2753 1;
 #X obj 418 147 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 372 1;
+-1 -1 3857 1;
 #X obj 479 147 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 3497 1;
+-1 -1 8384 1;
 #X obj 541 147 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 12688 1;
+-1 -1 12675 1;
 #X obj 418 113 r knob2;
 #X obj 479 113 r knob3;
 #X obj 541 113 r knob4;
 #X obj 650 148 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 12688 1;
 #X obj 755 148 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 4700 1;
+-1 -1 12688 1;
 #X obj 755 114 r vol;
 #X obj 454 304 r notes;
 #X obj 454 330 unpack;
@@ -30,8 +30,8 @@
 #X obj 652 332 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 650 114 r exp;
-#N canvas 119 272 1425 670 audioIO 0;
-#X obj 525 312 dac~;
+#N canvas 120 269 1425 670 audioIO 0;
+#X obj 510 275 dac~;
 #X obj 600 45 catch~ outR;
 #X obj 443 43 catch~ outL;
 #X obj 159 87 adc~;
@@ -64,15 +64,15 @@
 #X obj 144 305 sqrt;
 #X obj 206 280 pvu~;
 #X obj 206 309 sqrt;
-#X obj 519 269 tb_peakcomp~ -3 8 10 100 0;
+#X obj 450 109 tb_peakcomp~ -3 8 10 100 0;
 #X obj 144 330 * 14;
 #X obj 206 334 * 14;
 #X obj 206 356 - 2;
 #X obj 144 352 - 2;
 #X obj 714 92 sig~;
 #X obj 714 118 lop~ 2;
-#X connect 1 0 10 0;
-#X connect 2 0 9 0;
+#X connect 1 0 33 1;
+#X connect 2 0 33 0;
 #X connect 3 0 6 0;
 #X connect 3 0 29 0;
 #X connect 3 1 5 0;
@@ -80,9 +80,9 @@
 #X connect 4 0 7 0;
 #X connect 7 0 8 0;
 #X connect 9 0 27 0;
-#X connect 9 0 33 0;
-#X connect 10 0 33 1;
+#X connect 9 0 0 0;
 #X connect 10 0 24 0;
+#X connect 10 0 0 1;
 #X connect 11 0 13 0;
 #X connect 12 0 38 0;
 #X connect 13 0 12 0;
@@ -104,8 +104,8 @@
 #X connect 30 0 34 0;
 #X connect 31 0 32 0;
 #X connect 32 0 35 0;
-#X connect 33 0 0 0;
-#X connect 33 1 0 1;
+#X connect 33 0 9 0;
+#X connect 33 1 10 0;
 #X connect 34 0 37 0;
 #X connect 35 0 36 0;
 #X connect 36 0 4 1;
@@ -114,7 +114,7 @@
 #X connect 39 0 10 1;
 #X connect 39 0 9 1;
 #X restore 86 229 pd audioIO;
-#N canvas 176 285 1327 564 messageIO 0;
+#N canvas 177 282 1327 564 messageIO 0;
 #X msg 566 125 port 4000;
 #X obj 242 197 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
@@ -369,7 +369,6 @@
 #X restore 380 502 pd analog;
 #X text 353 279 stuff going out (from patch)...;
 #X text 350 386 stuff coming in (to patch)...;
-#X text 217 61 comment;
 #X connect 0 0 3 0;
 #X connect 2 0 6 0;
 #X connect 3 0 4 0;
