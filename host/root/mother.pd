@@ -1,4 +1,4 @@
-#N canvas 700 345 935 511 10;
+#N canvas 716 341 935 511 10;
 #X msg 88 138 \; pd dsp 1, f 10;
 #X obj 88 70 loadbang;
 #X obj 88 102 delay 100;
@@ -15,7 +15,7 @@
 #X obj 479 113 r knob3;
 #X obj 541 113 r knob4;
 #X obj 650 148 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 12 1;
+-1 -1 0 1;
 #X obj 755 148 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 9785 1;
 #X obj 755 114 r vol;
@@ -114,7 +114,7 @@
 #X connect 39 0 10 1;
 #X connect 39 0 9 1;
 #X restore 86 229 pd audioIO;
-#N canvas 183 264 1327 564 messageIO 1;
+#N canvas 184 261 1327 564 messageIO 0;
 #X msg 566 125 port 4000;
 #X obj 242 197 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
@@ -135,7 +135,7 @@
 #X obj 764 163 s oscOut;
 #X obj 566 201 s oscIn;
 #X text 890 43 screen shot hack -- not for production release;
-#N canvas 9 50 633 581 LED 1;
+#N canvas 10 50 633 581 LED 0;
 #X msg 74 339 send /led \$1;
 #X obj 75 137 % 8;
 #X obj 75 86 r led;
