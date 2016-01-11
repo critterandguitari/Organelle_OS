@@ -5,7 +5,7 @@ audioindevname1: On-board Codec (hardware)
 noaudioout: False
 audiooutdev1: 0 2
 audiooutdevname1: On-board Codec (hardware)
-audiobuf: 10
+audiobuf: 4
 rate: 44100
 callback: 0
 blocksize: 64

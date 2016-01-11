@@ -13,4 +13,3 @@ else
     echo "running mother from /root/"
     /root/mother &
 fi
-
