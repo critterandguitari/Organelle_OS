@@ -12,3 +12,6 @@ sleep .1
 # and kill SIGKILL 
 killall -s 9 pd
 
+# turn off led, just to be sure
+oscsend localhost 4001 /led i 0
+
