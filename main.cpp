@@ -11,7 +11,7 @@
 #include "SLIPEncodedSerial.h"
 #include "OledScreen.h"
 #include "UI.h"
-
+#include "Timer.h"
 
 Serial serial;
 SLIPEncodedSerial slip;
@@ -70,13 +70,16 @@ int main(int argc, char* argv[]) {
     //uint8_t osc_packet_in[256];
     uint8_t i = 0;
     int len = 0;
-    int count = 0;
     int page = 0;
-    int count20fps = 0;
-    int countReadyPing = 0;
-    int countKnobPoll = 0;
 
 
+    Timer screenFpsTimer, screenLineTimer, knobPollTimer, pingTimer, upTime;
+
+    screenFpsTimer.reset();
+    knobPollTimer.reset();
+    screenLineTimer.reset();
+    pingTimer.reset();
+    upTime.reset();
 
     // set locale so sorting happens in right order
     //std::setlocale(LC_ALL, "en_US.UTF-8");
@@ -161,14 +164,13 @@ int main(int argc, char* argv[]) {
             msgIn.empty();
         }
 
-        // sleep for 1ms
-        usleep(1000);
+        // sleep for .5ms
+        usleep(500);
         
-
         if (ui.currentScreen == AUX) {
              // we can do a whole screen,  but not faster than 20fps
-            if (count20fps > 50){
-                count20fps = 0;
+            if (screenFpsTimer.getElapsed() > 50.f){
+                screenFpsTimer.reset();
                 if (ui.newScreen){
                     ui.newScreen = 0;
                     updateScreenPage(0, ui.auxScreen);//menuScreen);
@@ -181,12 +183,11 @@ int main(int argc, char* argv[]) {
                     updateScreenPage(7, ui.auxScreen);
                 }
             }
-            count20fps++;
         }
         else if (ui.currentScreen == MENU) {
              // we can do a whole screen,  but not faster than 20fps
-            if (count20fps > 50){
-                count20fps = 0;
+            if (screenFpsTimer.getElapsed() > 50.f){
+                screenFpsTimer.reset();
                 if (ui.newScreen){
                     ui.newScreen = 0;
                     updateScreenPage(0, ui.menuScreen);//menuScreen);
@@ -199,7 +200,6 @@ int main(int argc, char* argv[]) {
                     updateScreenPage(7, ui.menuScreen);
                 }
             }
-            count20fps++;
 
             // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
             if (ui.menuScreenTimeout) ui.menuScreenTimeout--;
@@ -208,30 +208,28 @@ int main(int argc, char* argv[]) {
         else if (ui.currentScreen == PATCH) {
             if (ui.patchIsRunning) {
                 // every 16 ms send a new screen page
-                if (count > 16){
-                    count = 0;
+                if (screenLineTimer.getElapsed() > 15.f){
+                    screenLineTimer.reset();
                     updateScreenPage(page, ui.patchScreen);
                     page++;
                     page %= 8;
                 }
-                count++;
             }
         }
        
         // every 1 second send a ping in case MCU resets
-        if (countReadyPing >1000){
-            countReadyPing = 0;
+        if (pingTimer.getElapsed() > 1000.f){
+            printf("pinged the MCU at %f ms.\n", upTime.getElapsed());
+            pingTimer.reset();
             rdyMsg.send(dump);
             slip.sendMessage(dump.buffer, dump.length, serial);
         }
-        countReadyPing++;
 
         // poll for knobs
-        if (countKnobPoll > 50){
-            countKnobPoll = 0;
+        if (knobPollTimer.getElapsed() > 40.f){
+            knobPollTimer.reset();
             sendGetKnobs();
         }
-        countKnobPoll++;
         
         // check exit flag
         if (quit) {

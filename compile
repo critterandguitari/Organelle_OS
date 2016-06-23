@@ -1,1 +1,1 @@
-g++ main.cpp UI.cpp OledScreen.cpp SLIPEncodedSerial.cpp Serial.cpp Socket.cpp UdpSocket.cpp OSC/OSCData.cpp OSC/OSCMatch.c OSC/OSCMessage.cpp OSC/OSCTiming.cpp OSC/SimpleWriter.cpp -o main
+g++ main.cpp Timer.cpp UI.cpp OledScreen.cpp SLIPEncodedSerial.cpp Serial.cpp Socket.cpp UdpSocket.cpp OSC/OSCData.cpp OSC/OSCMatch.c OSC/OSCMessage.cpp OSC/OSCTiming.cpp OSC/SimpleWriter.cpp -o main
