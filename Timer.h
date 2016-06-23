@@ -14,7 +14,7 @@ Timer
 class Timer
 {
  public:
-  // Default constructor takes serial port as argument
+  
   Timer ();
 
   // destructor
