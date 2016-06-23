@@ -55,7 +55,7 @@ UdpSocket :: UdpSocket(int port )
   address.sin_port = htons( port );
 
   int flags = fcntl(soket_, F_GETFL);
-  flags |= O_NONBLOCK;
+//  flags |= O_NONBLOCK;
   fcntl(soket_, F_SETFL, flags);
 
   // Bind socket to the appropriate port and interface (INADDR_ANY)
