@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
         }
 
         // sleep for .5ms
-        usleep(500);
+        usleep(750);
         
         if (ui.currentScreen == AUX) {
              // we can do a whole screen,  but not faster than 20fps
@@ -199,11 +199,10 @@ int main(int argc, char* argv[]) {
                     updateScreenPage(6, ui.menuScreen);
                     updateScreenPage(7, ui.menuScreen);
                 }
+                // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
+                if (ui.menuScreenTimeout > 0) ui.menuScreenTimeout -= 50;
+                else ui.currentScreen = PATCH;
             }
-
-            // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
-            if (ui.menuScreenTimeout) ui.menuScreenTimeout--;
-            else ui.currentScreen = PATCH;
         }
         else if (ui.currentScreen == PATCH) {
             if (ui.patchIsRunning) {
@@ -219,7 +218,7 @@ int main(int argc, char* argv[]) {
        
         // every 1 second send a ping in case MCU resets
         if (pingTimer.getElapsed() > 1000.f){
-            printf("pinged the MCU at %f ms.\n", upTime.getElapsed());
+          //  printf("pinged the MCU at %f ms.\n", upTime.getElapsed());
             pingTimer.reset();
             rdyMsg.send(dump);
             slip.sendMessage(dump.buffer, dump.length, serial);
