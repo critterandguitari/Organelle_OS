@@ -17,17 +17,13 @@
 // location of Patches folder 
 #define PATCHES_PATH "/usbdrive/Patches"
 
-// first patch in menu
-#define FIRST_PATCH_MENU_INDEX 10
-
 class UI
 {
     public:
         UI();
         int numMenuEntries;
-        int numPatches;
         char menuItems[128][256];     // holds names of patches
-        int selectedPatch;          // index in patches
+        int selectedEntry;          // index in patches
         int menuOffset;        // position of cursor
         int cursorOffset;
         char currentPatch[256];
@@ -36,6 +32,13 @@ class UI
         int currentScreen;          // the current screen (AUX, MENU or PATCH)
         int encoderEnabled;         // when 1, encoder input is ignored
         int menuScreenTimeout;
+
+        int systemMenuOffset;
+        int patchMenuOffset;
+        int presetMenuOffset;
+        int numSystemItems;
+        int numPatches;
+        int numPresets; 
 
         // encoder events
         void encoderPress(void);
@@ -47,7 +50,7 @@ class UI
         void runSystemCommand(void);
         void programChange(int pgm);
 
-        void loadPatchList(void);
+        void buildMenu(void);
         void drawPatchList(void);
 
         OledScreen menuScreen;

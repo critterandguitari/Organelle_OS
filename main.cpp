@@ -50,6 +50,7 @@ void sendShutdown(OSCMessage &msg);
 void quitMother(OSCMessage &msg);
 void screenShot(OSCMessage &msg);
 void programChange(OSCMessage &msg);
+void getPatchName(OSCMessage &msg);
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
@@ -96,7 +97,7 @@ int main(int argc, char* argv[]) {
     udpSock.setDestination(4000, "localhost");
     OSCMessage msgIn;
 
-    ui.loadPatchList();
+    ui.buildMenu();
     ui.drawPatchList();
 
     // send ready to wake up MCU
@@ -145,6 +146,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/quitmother", quitMother, 0);
                 msgIn.dispatch("/screenshot", screenShot, 0);
                 msgIn.dispatch("/pgmchg", programChange, 0);
+                msgIn.dispatch("/getPatchName", getPatchName, 0);
             }
             else {
                 printf("bad message\n");
@@ -322,7 +324,7 @@ void setScreen(OSCMessage &msg){
 
 void reload(OSCMessage &msg){
     printf("received reload msg\n");
-    ui.loadPatchList();
+    ui.buildMenu();
 }
 
 void sendReady(OSCMessage &msg){   

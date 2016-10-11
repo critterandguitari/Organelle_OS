@@ -38,7 +38,7 @@ void UI::encoderUp(void) {
     }
     if (!(cursorOffset >= 4)) cursorOffset++;
     
-    selectedPatch = menuOffset + cursorOffset;
+    selectedEntry = menuOffset + cursorOffset;
     drawPatchList();
 }
 
@@ -48,16 +48,16 @@ void UI::encoderDown(void) {
     }
     if (!(cursorOffset < 1)) cursorOffset--;
     
-    selectedPatch = menuOffset + cursorOffset;
+    selectedEntry = menuOffset + cursorOffset;
     drawPatchList();
 }
 
 void UI::encoderPress(void){
-    selectedPatch =  menuOffset + cursorOffset;
-    printf("Menu Selection: %d, %s\n", selectedPatch, menuItems[selectedPatch]);
+    selectedEntry =  menuOffset + cursorOffset;
+    printf("Menu Selection: %d, %s\n", selectedEntry, menuItems[selectedEntry]);
     
     // menu items 0-10 are part of system menu
-    if (selectedPatch < FIRST_PATCH_MENU_INDEX) {    
+    if (selectedEntry < patchMenuOffset) {    
         runSystemCommand();
     }
     else { 
@@ -71,21 +71,21 @@ void UI::encoderRelease(void){
 
 void UI::runSystemCommand(void){
     char cmd[256];
-    if (!strcmp(menuItems[selectedPatch], "Reload")){
+    if (!strcmp(menuItems[selectedEntry], "Reload")){
         printf("Reloading... \n");
         sprintf(cmd, "/root/scripts/mount.sh");
         system(cmd);
-        loadPatchList();
+        buildMenu();
         drawPatchList();
     }
  
-    else if (!strcmp(menuItems[selectedPatch], "Shutdown")){
+    else if (!strcmp(menuItems[selectedEntry], "Shutdown")){
         printf("Shutting down... \n");
         sprintf(cmd, "/root/scripts/shutdown.sh &");
         system(cmd);
     }
     
-    else if (!strcmp(menuItems[selectedPatch], "Info")){
+    else if (!strcmp(menuItems[selectedEntry], "Info")){
         printf("Displaying system info... \n");
         auxScreen.clear();
         auxScreen.drawNotification("     System Info     ");
@@ -94,22 +94,30 @@ void UI::runSystemCommand(void){
 
     }
      
-    else if (!strcmp(menuItems[selectedPatch], "Eject")){
+    else if (!strcmp(menuItems[selectedEntry], "Eject")){
         printf("Ejecting USB drive... \n");
         sprintf(cmd, "/root/scripts/eject.sh &");
         system(cmd);
     }
+     
+    else if (!strcmp(menuItems[selectedEntry], "Save Preset")){
+        printf("Saving Prest... \n");
+        sprintf(cmd, "/root/scripts/savepre.sh \"%s\" &", currentPatch);
+        system(cmd);
+        printf("%s \n", cmd);
+    }
+
 }
 
 void UI::runPatch(void){
     char cmd[256];
 
-    if (strcmp(menuItems[selectedPatch], "") == 0) {
+    if (strcmp(menuItems[selectedEntry], "") == 0) {
         printf("Empty menu entry\n");
         return;
     }
     
-    sprintf(cmd, PATCHES_PATH"/%s/main.pd", menuItems[selectedPatch]);
+    sprintf(cmd, PATCHES_PATH"/%s/main.pd", menuItems[selectedEntry]);
     printf("Checking for Patch File: %s\n", cmd);
     if (checkFileExists(cmd)) {
         // check for X,
@@ -117,13 +125,13 @@ void UI::runPatch(void){
         // the rest of the settings are in /root/.pdsettings
         if(system("/root/scripts/check-for-x.sh")){
             printf("starting in GUI mode\n");
-            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedPatch]);
-            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedPatch]);
+            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
+            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" /root/presetter.pd &", menuItems[selectedEntry]);
         }
         else {
             printf("starting in NON GUI mode\n");
-            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedPatch]);
-            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedPatch]);
+            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
+            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
         }
 
         // first kill any other PD
@@ -132,9 +140,9 @@ void UI::runPatch(void){
         patchIsRunning = 1;
         patchScreen.clear();
         currentScreen = PATCH;
-        
+        strcpy(currentPatch, menuItems[selectedEntry]);
         // put the patch name on the menu screen
-        sprintf(cmd, "> %s", menuItems[selectedPatch]);
+        sprintf(cmd, "> %s", menuItems[selectedEntry]);
         menuScreen.drawNotification(cmd);
     } else {
         printf("Patch File Not Found: %s\n", cmd);
@@ -148,8 +156,8 @@ void UI::programChange(int pgm){
         return;
     }
     else {
-        printf("Program Change: %d, %s\n", pgm, menuItems[selectedPatch]);
-        selectedPatch = pgm + FIRST_PATCH_MENU_INDEX - 1;
+        printf("Program Change: %d, %s\n", pgm, menuItems[selectedEntry]);
+        selectedEntry = pgm + patchMenuOffset - 1;
         runPatch();
     }
 }
@@ -163,7 +171,7 @@ void UI::drawPatchList(void){
     }
  
     // dont invert patch lines if there are no patches
-    if ((selectedPatch >= FIRST_PATCH_MENU_INDEX) && !numPatches) {
+    if ((selectedEntry >= patchMenuOffset) && !numPatches) {
     }
     else {
         menuScreen.invertLine(cursorOffset);   
@@ -179,7 +187,7 @@ void UI::drawPatchList(void){
     //printf("c %d, p %d\n", cursorOffset, menuOffset);
 }
 
-void UI::loadPatchList(void){
+void UI::buildMenu(void){
 
     char cmd[256];
 
@@ -187,41 +195,51 @@ void UI::loadPatchList(void){
     struct dirent **namelist;
     int n;
     int i;
+    int mindex;
   
     // clear em out
     for (i = 0; i < 127; i++){
         strcpy(menuItems[i], "");
     }
-
-    // inititial patches
-    numMenuEntries = 0;
-    strcpy(menuItems[0], "");
-    numMenuEntries++;
-    strcpy(menuItems[1], "");
-    numMenuEntries++;
-    strcpy(menuItems[2], "------ SYSTEM -------");
-    numMenuEntries++;
-
-    strcpy(menuItems[3], "Eject");
-    numMenuEntries++;
-
-    strcpy(menuItems[4], "Reload");
-    numMenuEntries++;
-
-    strcpy(menuItems[5], "Info");
-    numMenuEntries++;
-
-    strcpy(menuItems[6], "Shutdown");
-    numMenuEntries++;
-
-    strcpy(menuItems[7], "");
-    numMenuEntries++;
-    strcpy(menuItems[8], "");
-    numMenuEntries++;
-    strcpy(menuItems[9], "------ PATCHES ------");
-    numMenuEntries++;
-
+    
+    // OK  got three sections here
+    //  System menu offset = index of 1st item
+    //  Patch menu offset = same
+    //  Preset menu offset = same 
+    
+    systemMenuOffset = 0;
+    patchMenuOffset = 0;
+    presetMenuOffset = 0;
+    numSystemItems = 0;
     numPatches = 0;
+    numPresets = 0; 
+    numMenuEntries = 0; // total things 
+
+    // System menu
+    // padding
+    strcpy(menuItems[numMenuEntries++], "");
+    strcpy(menuItems[numMenuEntries++], "");
+    strcpy(menuItems[numMenuEntries++], "------ SYSTEM -------");
+    systemMenuOffset = numMenuEntries;
+    strcpy(menuItems[numMenuEntries++], "Eject");
+    strcpy(menuItems[numMenuEntries++], "Reload");
+    strcpy(menuItems[numMenuEntries++], "Info");
+    strcpy(menuItems[numMenuEntries++], "Shutdown");
+    strcpy(menuItems[numMenuEntries++], "  - - - - - - - - -  ");
+    
+    // system scripts from USB
+    strcpy(menuItems[numMenuEntries++], "Save Pre");
+    strcpy(menuItems[numMenuEntries++], "Record");
+
+    // padding
+    strcpy(menuItems[numMenuEntries++], "");
+    strcpy(menuItems[numMenuEntries++], "");
+    
+
+    //
+    strcpy(menuItems[numMenuEntries++], "------ PATCHES ------");
+    patchMenuOffset = numMenuEntries;
+
     // set locale so sorting happens in right order
     // not sure this does anything
     std::setlocale(LC_ALL, "en_US.UTF-8");
@@ -241,20 +259,32 @@ void UI::loadPatchList(void){
         }
         free(namelist);
     }
+
+    // end patches
+
+
+    // Preset
+    strcpy(menuItems[numMenuEntries++], "");
+    strcpy(menuItems[numMenuEntries++], "");
+    strcpy(menuItems[numMenuEntries++], "------ PRESETS ------");
+    presetMenuOffset = numMenuEntries;
+    strcpy(menuItems[numMenuEntries++], "1 cool");
+    strcpy(menuItems[numMenuEntries++], "2 cool");
+
     for (i=0; i<numMenuEntries; i++) {
         printf("patch[%d]: %s\n", i, menuItems[i]);
     }
 
     // notify if no patches found
-    if (!numPatches){
-        strcpy(menuItems[10], "No patches found!");
-        strcpy(menuItems[11], "Insert USB drive ");
-        strcpy(menuItems[12], "with 'Patches' Folder.");
-        strcpy(menuItems[13], "Then select Reload.");
-    }
+    //if (!numPatches){
+    //    strcpy(menuItems[10], "No patches found!");
+    //    strcpy(menuItems[11], "Insert USB drive ");
+    //    strcpy(menuItems[12], "with 'Patches' Folder.");
+    //    strcpy(menuItems[13], "Then select Reload.");
+   // }
 
     // set cursor to beg
-    menuOffset = 9;
+    menuOffset = patchMenuOffset - 1;
     cursorOffset = 1;
 
     // kill pd 
