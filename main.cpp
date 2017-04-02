@@ -204,9 +204,12 @@ int main(int argc, char* argv[]) {
                     updateScreenPage(7, ui.menuScreen);
                 }
                 // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
-                if (ui.currentScreen != PATCH) {
+                if (ui.patchIsRunning){
                     if (ui.menuScreenTimeout > 0) ui.menuScreenTimeout -= 50;
-                    else ui.currentScreen = PATCH;
+                    else {
+                        ui.currentScreen = PATCH;
+                        ui.newScreen = 1;
+                    }
                 }
             }
         }
@@ -381,6 +384,8 @@ void invertScreenLine(OSCMessage &msg){
 void goHome(OSCMessage &msg ) {
     printf("returning to main menu");
     ui.currentScreen = MENU;
+    ui.newScreen = 1;
+    ui.menuScreenTimeout = MENU_TIMEOUT;
 
 }
 /* end internal OSC messages received */
@@ -388,6 +393,7 @@ void goHome(OSCMessage &msg ) {
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
 void encoderInput(OSCMessage &msg){
     if (ui.currentScreen == MENU){
+        ui.menuScreenTimeout = MENU_TIMEOUT;
         if (msg.isInt(0)){
             if (msg.getInt(0) == 1) ui.encoderUp();
             if (msg.getInt(0) == 0) ui.encoderDown();
@@ -414,6 +420,16 @@ void encoderButton(OSCMessage &msg){
                 ui.encoderRelease();
             }
         }   
+    }
+
+    // if in patch mode, send encoder 
+    if (ui.currentScreen == PATCH){
+        if (msg.isInt(0)){
+            OSCMessage msgOut("/encoder/button");
+            msgOut.add(msg.getInt(0));
+            msgOut.send(dump);
+            udpSock.writeBuffer(dump.buffer, dump.length);
+        }
     }
 }
 /* end OSC messages received from MCU */

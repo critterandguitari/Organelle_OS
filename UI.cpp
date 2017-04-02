@@ -53,17 +53,15 @@ void UI::encoderDown(void) {
 }
 
 void UI::encoderPress(void){
-    if (currentScreen == MENU) {
-        selectedEntry =  menuOffset + cursorOffset;
-        printf("Menu Selection: %d, %s\n", selectedEntry, menuItems[selectedEntry]);
-        
-        // menu items 0-10 are part of system menu
-        if (selectedEntry < patchMenuOffset) {    
-            runSystemCommand();
-        }
-        else { 
-            runPatch();       
-        }
+    selectedEntry =  menuOffset + cursorOffset;
+    printf("Menu Selection: %d, %s\n", selectedEntry, menuItems[selectedEntry]);
+    
+    // menu items 0-10 are part of system menu
+    if (selectedEntry < patchMenuOffset) {    
+        runSystemCommand();
+    }
+    else { 
+        runPatch();       
     }
 }
 
