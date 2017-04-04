@@ -10,7 +10,7 @@
 #include "UdpSocket.h"
 #include "SLIPEncodedSerial.h"
 #include "OledScreen.h"
-#include "UI.h"
+#include "MainMenu.h"
 #include "Timer.h"
 #include "AppData.h"
 
@@ -26,7 +26,7 @@ UdpSocket udpSockAux(4003); // sends to aux program reciever
 AppData app;
 
 // main menu
-UI ui(&app);
+MainMenu menu(&app);
 
 // exit flag
 int quit = 0;
@@ -105,8 +105,8 @@ int main(int argc, char* argv[]) {
     udpSockAux.setDestination(4002, "localhost"); // for sending encoder to aux program
     OSCMessage msgIn;
 
-    ui.buildMenu();
-    ui.drawPatchList();
+    menu.buildMenu();
+    menu.drawPatchList();
 
     // send ready to wake up MCU
     // MCU is ignoring stuff over serial port until this message comes through
@@ -316,7 +316,7 @@ void screenShot(OSCMessage &msg){
 }
 
 void programChange(OSCMessage &msg){
-    if (msg.isInt(0)) ui.programChange(msg.getInt(0));
+    if (msg.isInt(0)) menu.programChange(msg.getInt(0));
 }
 
 void quitMother(OSCMessage &msg){
@@ -350,7 +350,7 @@ void setScreen(OSCMessage &msg){
 
 void reload(OSCMessage &msg){
     printf("received reload msg\n");
-    ui.buildMenu();
+    menu.buildMenu();
 }
 
 void sendReady(OSCMessage &msg){   
@@ -411,8 +411,8 @@ void encoderInput(OSCMessage &msg){
     if (app.currentScreen == MENU){
         if (msg.isInt(0)){
             app.menuScreenTimeout = MENU_TIMEOUT;
-            if (msg.getInt(0) == 1) ui.encoderUp();
-            if (msg.getInt(0) == 0) ui.encoderDown();
+            if (msg.getInt(0) == 1) menu.encoderUp();
+            if (msg.getInt(0) == 0) menu.encoderDown();
         }
     }
     // if in patch mode, send encoder, but only if the patch said it wants encoder access
@@ -457,10 +457,10 @@ void encoderButton(OSCMessage &msg){
     if (app.currentScreen == MENU){
         if (msg.isInt(0)){
             if (msg.getInt(0) == 1) {
-                ui.encoderPress();
+                menu.encoderPress();
             }
             if (msg.getInt(0) == 0) {
-                ui.encoderRelease();
+                menu.encoderRelease();
             }
         }   
     }

@@ -1,5 +1,5 @@
-#ifndef UI_H
-#define UI_H
+#ifndef MainMenu_H
+#define MainMenu_H
 
 
 #include "AppData.h"
@@ -7,10 +7,10 @@
 #include <stdint.h> 
 #include <string>
 
-class UI
+class MainMenu
 {
     public:
-        UI(AppData * appGlobal);
+        MainMenu(AppData * appGlobal);
         int numMenuEntries;
         char menuItems[128][256];     // holds names of patches
         int selectedEntry;          // index in patches

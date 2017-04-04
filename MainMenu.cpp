@@ -6,9 +6,9 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "UI.h"
+#include "MainMenu.h"
 
-UI::UI(AppData * appGlobal){
+MainMenu::MainMenu(AppData * appGlobal){
     numPatches = 0;
     numMenuEntries = 0;
     menuOffset = 9;
@@ -16,13 +16,13 @@ UI::UI(AppData * appGlobal){
     app = appGlobal;
 }
 
-int UI::checkFileExists (const char * filename){
+int MainMenu::checkFileExists (const char * filename){
     struct stat st;
     int result = stat(filename, &st);
     return result == 0;
 }
 
-void UI::encoderUp(void) {
+void MainMenu::encoderUp(void) {
     if (cursorOffset == 4) {
         if (!(menuOffset >= (numMenuEntries - 1))) menuOffset++;
     }
@@ -32,7 +32,7 @@ void UI::encoderUp(void) {
     drawPatchList();
 }
 
-void UI::encoderDown(void) {
+void MainMenu::encoderDown(void) {
     if (cursorOffset == 0) {
         if (!(menuOffset < 1)) menuOffset--;
     }
@@ -42,7 +42,7 @@ void UI::encoderDown(void) {
     drawPatchList();
 }
 
-void UI::encoderPress(void){
+void MainMenu::encoderPress(void){
     selectedEntry =  menuOffset + cursorOffset;
     printf("Menu Selection: %d, %s\n", selectedEntry, menuItems[selectedEntry]);
     
@@ -55,11 +55,11 @@ void UI::encoderPress(void){
     }
 }
 
-void UI::encoderRelease(void){
+void MainMenu::encoderRelease(void){
 
 }
 
-void UI::runSystemCommand(void){
+void MainMenu::runSystemCommand(void){
     char cmd[256];
     app->auxScreenEncoderOverride = 0;
     if (!strcmp(menuItems[selectedEntry], "Reload")){
@@ -100,7 +100,7 @@ void UI::runSystemCommand(void){
 
 }
 
-void UI::runPatch(void){
+void MainMenu::runPatch(void){
     char cmd[256];
 
     if (strcmp(menuItems[selectedEntry], "") == 0) {
@@ -115,12 +115,12 @@ void UI::runPatch(void){
         // run pd with nogui if no X. also use smaller audio buf with nogui
         // the rest of the settings are in /root/.pdsettings
         if(system("/root/scripts/check-for-x.sh")){
-            printf("starting in GUI mode\n");
+            printf("starting in GMainMenu mode\n");
             if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
             else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" /root/presetter.pd &", menuItems[selectedEntry]);
         }
         else {
-            printf("starting in NON GUI mode\n");
+            printf("starting in NON GMainMenu mode\n");
             if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
             else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
         }
@@ -149,7 +149,7 @@ void UI::runPatch(void){
     }
 }
 
-void UI::programChange(int pgm){
+void MainMenu::programChange(int pgm){
 
     if ((pgm > numPatches) || (pgm < 1)) {
         printf("Program Change out of range\n");
@@ -162,7 +162,7 @@ void UI::programChange(int pgm){
     }
 }
 
-void UI::drawPatchList(void){
+void MainMenu::drawPatchList(void){
     char line[256];
     int i;
     for (i=0; i<5; i++) {
@@ -185,7 +185,7 @@ void UI::drawPatchList(void){
 //    printf("c %d, p %d\n", cursorOffset, menuOffset);
 }
 
-void UI::buildMenu(void){
+void MainMenu::buildMenu(void){
 
     char cmd[256];
 
