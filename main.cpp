@@ -12,6 +12,7 @@
 #include "OledScreen.h"
 #include "UI.h"
 #include "Timer.h"
+#include "AppData.h"
 
 Serial serial;
 SLIPEncodedSerial slip;
@@ -21,8 +22,11 @@ SimpleWriter dump;
 UdpSocket udpSock(4001);
 UdpSocket udpSockAux(4003); // sends to aux program reciever
 
-// the main data structure.  handles main menu, defines 3 screens, and system state
-UI ui;
+// global app data, state, flags, screens
+AppData app;
+
+// main menu
+UI ui(&app);
 
 // exit flag
 int quit = 0;
@@ -76,7 +80,6 @@ int main(int argc, char* argv[]) {
     uint8_t i = 0;
     int len = 0;
     int page = 0;
-
 
     Timer screenFpsTimer, screenLineTimer, knobPollTimer, pingTimer, upTime;
 
@@ -177,61 +180,61 @@ int main(int argc, char* argv[]) {
         // sleep for .5ms
         usleep(750);
         
-        if (ui.currentScreen == AUX) {
+        if (app.currentScreen == AUX) {
              // we can do a whole screen,  but not faster than 20fps
             if (screenFpsTimer.getElapsed() > 50.f){
                 screenFpsTimer.reset();
-                if (ui.newScreen){
-                    ui.newScreen = 0;
-                    updateScreenPage(0, ui.auxScreen);//menuScreen);
-                    updateScreenPage(1, ui.auxScreen);
-                    updateScreenPage(2, ui.auxScreen);
-                    updateScreenPage(3, ui.auxScreen);
-                    updateScreenPage(4, ui.auxScreen);
-                    updateScreenPage(5, ui.auxScreen);
-                    updateScreenPage(6, ui.auxScreen);
-                    updateScreenPage(7, ui.auxScreen);
+                if (app.newScreen){
+                    app.newScreen = 0;
+                    updateScreenPage(0, app.auxScreen);//menuScreen);
+                    updateScreenPage(1, app.auxScreen);
+                    updateScreenPage(2, app.auxScreen);
+                    updateScreenPage(3, app.auxScreen);
+                    updateScreenPage(4, app.auxScreen);
+                    updateScreenPage(5, app.auxScreen);
+                    updateScreenPage(6, app.auxScreen);
+                    updateScreenPage(7, app.auxScreen);
                 }
             }
         }
-        else if (ui.currentScreen == MENU) {
+        else if (app.currentScreen == MENU) {
              // we can do a whole screen,  but not faster than 20fps
             if (screenFpsTimer.getElapsed() > 50.f){
                 screenFpsTimer.reset();
-                if (ui.newScreen){
-                    ui.newScreen = 0;
-                    updateScreenPage(0, ui.menuScreen);//menuScreen);
-                    updateScreenPage(1, ui.menuScreen);
-                    updateScreenPage(2, ui.menuScreen);
-                    updateScreenPage(3, ui.menuScreen);
-                    updateScreenPage(4, ui.menuScreen);
-                    updateScreenPage(5, ui.menuScreen);
-                    updateScreenPage(6, ui.menuScreen);
-                    updateScreenPage(7, ui.menuScreen);
+                if (app.newScreen){
+                    app.newScreen = 0;
+                    updateScreenPage(0, app.menuScreen);//menuScreen);
+                    updateScreenPage(1, app.menuScreen);
+                    updateScreenPage(2, app.menuScreen);
+                    updateScreenPage(3, app.menuScreen);
+                    updateScreenPage(4, app.menuScreen);
+                    updateScreenPage(5, app.menuScreen);
+                    updateScreenPage(6, app.menuScreen);
+                    updateScreenPage(7, app.menuScreen);
                 }
                 // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
-                if (ui.patchIsRunning){
-                    if (ui.menuScreenTimeout > 0) ui.menuScreenTimeout -= 50;
+                if (app.patchIsRunning){
+                    if (app.menuScreenTimeout > 0) app.menuScreenTimeout -= 50;
                     else {
-                        ui.currentScreen = PATCH;
-                        ui.newScreen = 1;
+                        app.currentScreen = PATCH;
+                        app.newScreen = 1;
                     }
                 }
             }
         }
-        else if (ui.currentScreen == PATCH) {
+        else if (app.currentScreen == PATCH) {
             if (screenFpsTimer.getElapsed() > 50.f){
                 screenFpsTimer.reset();
-                if (ui.newScreen){
-                    ui.newScreen = 0;
-                    updateScreenPage(0, ui.patchScreen);//menuScreen);
-                    updateScreenPage(1, ui.patchScreen);
-                    updateScreenPage(2, ui.patchScreen);
-                    updateScreenPage(3, ui.patchScreen);
-                    updateScreenPage(4, ui.patchScreen);
-                    updateScreenPage(5, ui.patchScreen);
-                    updateScreenPage(6, ui.patchScreen);
-                    updateScreenPage(7, ui.patchScreen);
+                if (app.newScreen){
+                    app.newScreen = 0;
+                    updateScreenPage(0, app.patchScreen);//menuScreen);
+                    updateScreenPage(1, app.patchScreen);
+                    updateScreenPage(2, app.patchScreen);
+                    updateScreenPage(3, app.patchScreen);
+                    updateScreenPage(4, app.patchScreen);
+                    updateScreenPage(5, app.patchScreen);
+                    updateScreenPage(6, app.patchScreen);
+                    updateScreenPage(7, app.patchScreen);
                 }
             }
         }
@@ -261,55 +264,55 @@ int main(int argc, char* argv[]) {
 /** OSC messages received internally (from PD or other program) **/
 // settin patch screen
 void setPatchScreenLine1(OSCMessage &msg){
-    setScreenLine(ui.patchScreen, 1, msg);
-    ui.newScreen = 1;
+    setScreenLine(app.patchScreen, 1, msg);
+    app.newScreen = 1;
 }
 void setPatchScreenLine2(OSCMessage &msg){
-    setScreenLine(ui.patchScreen, 2, msg);
-    ui.newScreen = 1;
+    setScreenLine(app.patchScreen, 2, msg);
+    app.newScreen = 1;
 }
 void setPatchScreenLine3(OSCMessage &msg){
-    setScreenLine(ui.patchScreen, 3, msg);
-    ui.newScreen = 1;
+    setScreenLine(app.patchScreen, 3, msg);
+    app.newScreen = 1;
 }
 void setPatchScreenLine4(OSCMessage &msg){
-    setScreenLine(ui.patchScreen, 4, msg);
-    ui.newScreen = 1;
+    setScreenLine(app.patchScreen, 4, msg);
+    app.newScreen = 1;
 }
 void setPatchScreenLine5(OSCMessage &msg){
-    setScreenLine(ui.patchScreen, 5, msg);
-    ui.newScreen = 1;
+    setScreenLine(app.patchScreen, 5, msg);
+    app.newScreen = 1;
 }
 
 // setting aux screen
 void setAuxScreenLine1(OSCMessage &msg) {
-    setScreenLine(ui.auxScreen, 1, msg);
+    setScreenLine(app.auxScreen, 1, msg);
 }
 void setAuxScreenLine2(OSCMessage &msg) {
-    setScreenLine(ui.auxScreen, 2, msg);
+    setScreenLine(app.auxScreen, 2, msg);
 }
 void setAuxScreenLine3(OSCMessage &msg) {
-    setScreenLine(ui.auxScreen, 3, msg);
+    setScreenLine(app.auxScreen, 3, msg);
 }
 void setAuxScreenLine4(OSCMessage &msg) {
-    setScreenLine(ui.auxScreen, 4, msg);
+    setScreenLine(app.auxScreen, 4, msg);
 }
 void setAuxScreenLine5(OSCMessage &msg) {
-    setScreenLine(ui.auxScreen, 5, msg);
+    setScreenLine(app.auxScreen, 5, msg);
 }
 void auxScreenClear(OSCMessage &msg) {
-    ui.auxScreen.clear();
+    app.auxScreen.clear();
 }
 
 void screenShot(OSCMessage &msg){
-    if (ui.currentScreen == AUX) 
-        ui.auxScreen.saveSVG("/usbdrive/AuxScreen.svg");
+    if (app.currentScreen == AUX) 
+        app.auxScreen.saveSVG("/usbdrive/AuxScreen.svg");
     
-    if (ui.currentScreen == MENU) 
-        ui.menuScreen.saveSVG("/usbdrive/MenuScreen.svg");
+    if (app.currentScreen == MENU) 
+        app.menuScreen.saveSVG("/usbdrive/MenuScreen.svg");
     
-    if (ui.currentScreen == PATCH) 
-        ui.patchScreen.saveSVG("/usbdrive/PatchScreen.svg");
+    if (app.currentScreen == PATCH) 
+        app.patchScreen.saveSVG("/usbdrive/PatchScreen.svg");
 }
 
 void programChange(OSCMessage &msg){
@@ -336,13 +339,13 @@ void vuMeter(OSCMessage &msg){
     if (msg.isInt(2)) outR = msg.getInt(2);
     if (msg.isInt(3)) outL = msg.getInt(3);
 
-    ui.patchScreen.drawInfoBar(inR, inL, outR, outL);
-    ui.newScreen = 1;
+    app.patchScreen.drawInfoBar(inR, inL, outR, outL);
+    app.newScreen = 1;
 }
 
 void setScreen(OSCMessage &msg){
-    if (msg.isInt(0)) ui.currentScreen = msg.getInt(0);
-    ui.newScreen = 1;
+    if (msg.isInt(0)) app.currentScreen = msg.getInt(0);
+    app.newScreen = 1;
 }
 
 void reload(OSCMessage &msg){
@@ -373,27 +376,27 @@ void invertScreenLine(OSCMessage &msg){
     if (msg.isInt(0)){
         int line = msg.getInt(0);
         //printf("inverting %d\n", line);
-        ui.patchScreen.invertLine(line % 5);
-        ui.newScreen = 1;
+        app.patchScreen.invertLine(line % 5);
+        app.newScreen = 1;
     }
 }
 
 void goHome(OSCMessage &msg ) {
     printf("returning to main menu\n");
-    ui.currentScreen = MENU;
-    ui.newScreen = 1;
-    ui.menuScreenTimeout = MENU_TIMEOUT;
+    app.currentScreen = MENU;
+    app.newScreen = 1;
+    app.menuScreenTimeout = MENU_TIMEOUT;
 
 }
 
 void enablePatchSubMenu(OSCMessage &msg ) {
     printf("enabling patch sub menu\n");
-    ui.patchScreenEncoderOverride = 1;
+    app.patchScreenEncoderOverride = 1;
 }
 
 void enableAuxSubMenu(OSCMessage &msg ) {
     printf("enabling aux sub menu\n");
-    ui.auxScreenEncoderOverride = 1;
+    app.auxScreenEncoderOverride = 1;
 }
 
 /* end internal OSC messages received */
@@ -405,42 +408,42 @@ void enableAuxSubMenu(OSCMessage &msg ) {
 // in patch screen, bounce back to menu, unless override is on 
 // in aux screen, same
 void encoderInput(OSCMessage &msg){
-    if (ui.currentScreen == MENU){
+    if (app.currentScreen == MENU){
         if (msg.isInt(0)){
-            ui.menuScreenTimeout = MENU_TIMEOUT;
+            app.menuScreenTimeout = MENU_TIMEOUT;
             if (msg.getInt(0) == 1) ui.encoderUp();
             if (msg.getInt(0) == 0) ui.encoderDown();
         }
     }
     // if in patch mode, send encoder, but only if the patch said it wants encoder access
-    if (ui.currentScreen == PATCH){
+    if (app.currentScreen == PATCH){
         if (msg.isInt(0)){
-            if (ui.patchScreenEncoderOverride){
+            if (app.patchScreenEncoderOverride){
                 OSCMessage msgOut("/encoder/turn");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);
                 udpSock.writeBuffer(dump.buffer, dump.length);
             }
             else {
-                ui.currentScreen = MENU;
-                ui.menuScreenTimeout = MENU_TIMEOUT;
-                ui.newScreen = 1;
+                app.currentScreen = MENU;
+                app.menuScreenTimeout = MENU_TIMEOUT;
+                app.newScreen = 1;
             }
         }
     }
     // same for aux screen
-    if (ui.currentScreen == AUX){
+    if (app.currentScreen == AUX){
         if (msg.isInt(0)){
-            if (ui.auxScreenEncoderOverride){
+            if (app.auxScreenEncoderOverride){
                 OSCMessage msgOut("/encoder/turn");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);
                 udpSockAux.writeBuffer(dump.buffer, dump.length);
             }
             else {
-                ui.currentScreen = MENU;
-                ui.menuScreenTimeout = MENU_TIMEOUT;
-                ui.newScreen = 1;
+                app.currentScreen = MENU;
+                app.menuScreenTimeout = MENU_TIMEOUT;
+                app.newScreen = 1;
             }
         }
     }
@@ -451,7 +454,7 @@ void encoderInput(OSCMessage &msg){
 // in patch screen, bounce back to menu, unless override is on 
 // in aux screen, same
 void encoderButton(OSCMessage &msg){
-    if (ui.currentScreen == MENU){
+    if (app.currentScreen == MENU){
         if (msg.isInt(0)){
             if (msg.getInt(0) == 1) {
                 ui.encoderPress();
@@ -463,9 +466,9 @@ void encoderButton(OSCMessage &msg){
     }
 
     // if in patch mode, send encoder, but only if the patch said it wants encoder access
-    if (ui.currentScreen == PATCH){
+    if (app.currentScreen == PATCH){
         if (msg.isInt(0)){
-            if (ui.patchScreenEncoderOverride){
+            if (app.patchScreenEncoderOverride){
                 OSCMessage msgOut("/encoder/button");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);
@@ -474,9 +477,9 @@ void encoderButton(OSCMessage &msg){
         }
     }
     // same for the aux screen 
-    if (ui.currentScreen == AUX){
+    if (app.currentScreen == AUX){
          if (msg.isInt(0)){
-            if (ui.auxScreenEncoderOverride){
+            if (app.auxScreenEncoderOverride){
                 OSCMessage msgOut("/encoder/button");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);

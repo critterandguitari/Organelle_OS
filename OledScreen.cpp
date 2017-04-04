@@ -5,6 +5,11 @@
 #include <string.h>
 #include "simple_svg_1.0.0.hpp"
 
+OledScreen::OledScreen(){
+    clear();
+    printf("init oled screen, clearing oled screen\n");
+}
+
 void OledScreen::saveSVG(const char * filename) {
 
     using namespace svg;
