@@ -19,8 +19,9 @@ SimpleWriter dump;
 
 // for communicating with Pd or other program
 UdpSocket udpSock(4001);
+UdpSocket udpSockAux(4003); // sends to aux program reciever
 
-// main menu interface program
+// the main data structure.  handles main menu, defines 3 screens, and system state
 UI ui;
 
 // exit flag
@@ -51,6 +52,8 @@ void quitMother(OSCMessage &msg);
 void screenShot(OSCMessage &msg);
 void programChange(OSCMessage &msg);
 void goHome(OSCMessage &msg);
+void enablePatchSubMenu(OSCMessage &msg);
+void enableAuxSubMenu(OSCMessage &msg);
 void invertScreenLine(OSCMessage &msg);
 /* end internal OSC messages received */
 
@@ -96,6 +99,7 @@ int main(int argc, char* argv[]) {
     }*/
 
     udpSock.setDestination(4000, "localhost");
+    udpSockAux.setDestination(4002, "localhost"); // for sending encoder to aux program
     OSCMessage msgIn;
 
     ui.buildMenu();
@@ -148,6 +152,8 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/screenshot", screenShot, 0);
                 msgIn.dispatch("/pgmchg", programChange, 0);
                 msgIn.dispatch("/gohome", goHome, 0);
+                msgIn.dispatch("/enablepatchsub", enablePatchSubMenu, 0);
+                msgIn.dispatch("/enableauxsub", enableAuxSubMenu, 0);
                 msgIn.dispatch("/oled/invertline", invertScreenLine, 0);
             }
             else {
@@ -214,15 +220,6 @@ int main(int argc, char* argv[]) {
             }
         }
         else if (ui.currentScreen == PATCH) {
-/*            if (ui.patchIsRunning) {
-                // every 16 ms send a new screen page
-                if (screenLineTimer.getElapsed() > 15.f){
-                    screenLineTimer.reset();
-                    updateScreenPage(page, ui.patchScreen);
-                    page++;
-                    page %= 8;
-                }
-            }*/
             if (screenFpsTimer.getElapsed() > 50.f){
                 screenFpsTimer.reset();
                 if (ui.newScreen){
@@ -340,7 +337,7 @@ void vuMeter(OSCMessage &msg){
     if (msg.isInt(3)) outL = msg.getInt(3);
 
     ui.patchScreen.drawInfoBar(inR, inL, outR, outL);
-
+    ui.newScreen = 1;
 }
 
 void setScreen(OSCMessage &msg){
@@ -382,34 +379,77 @@ void invertScreenLine(OSCMessage &msg){
 }
 
 void goHome(OSCMessage &msg ) {
-    printf("returning to main menu");
+    printf("returning to main menu\n");
     ui.currentScreen = MENU;
     ui.newScreen = 1;
     ui.menuScreenTimeout = MENU_TIMEOUT;
 
 }
+
+void enablePatchSubMenu(OSCMessage &msg ) {
+    printf("enabling patch sub menu\n");
+    ui.patchScreenEncoderOverride = 1;
+}
+
+void enableAuxSubMenu(OSCMessage &msg ) {
+    printf("enabling aux sub menu\n");
+    ui.auxScreenEncoderOverride = 1;
+}
+
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
+
+// this is when the encoder gets turned 
+// in menu screen, just navigate the menu
+// in patch screen, bounce back to menu, unless override is on 
+// in aux screen, same
 void encoderInput(OSCMessage &msg){
     if (ui.currentScreen == MENU){
-        ui.menuScreenTimeout = MENU_TIMEOUT;
         if (msg.isInt(0)){
+            ui.menuScreenTimeout = MENU_TIMEOUT;
             if (msg.getInt(0) == 1) ui.encoderUp();
             if (msg.getInt(0) == 0) ui.encoderDown();
         }
     }
-    // if in patch mode, send encoder 
+    // if in patch mode, send encoder, but only if the patch said it wants encoder access
     if (ui.currentScreen == PATCH){
         if (msg.isInt(0)){
-            OSCMessage msgOut("/encoder/turn");
-            msgOut.add(msg.getInt(0));
-            msgOut.send(dump);
-            udpSock.writeBuffer(dump.buffer, dump.length);
+            if (ui.patchScreenEncoderOverride){
+                OSCMessage msgOut("/encoder/turn");
+                msgOut.add(msg.getInt(0));
+                msgOut.send(dump);
+                udpSock.writeBuffer(dump.buffer, dump.length);
+            }
+            else {
+                ui.currentScreen = MENU;
+                ui.menuScreenTimeout = MENU_TIMEOUT;
+                ui.newScreen = 1;
+            }
+        }
+    }
+    // same for aux screen
+    if (ui.currentScreen == AUX){
+        if (msg.isInt(0)){
+            if (ui.auxScreenEncoderOverride){
+                OSCMessage msgOut("/encoder/turn");
+                msgOut.add(msg.getInt(0));
+                msgOut.send(dump);
+                udpSockAux.writeBuffer(dump.buffer, dump.length);
+            }
+            else {
+                ui.currentScreen = MENU;
+                ui.menuScreenTimeout = MENU_TIMEOUT;
+                ui.newScreen = 1;
+            }
         }
     }
 }
 
+// this is when the encoder gets pressed 
+// in menu screen, execute the menu entry
+// in patch screen, bounce back to menu, unless override is on 
+// in aux screen, same
 void encoderButton(OSCMessage &msg){
     if (ui.currentScreen == MENU){
         if (msg.isInt(0)){
@@ -422,13 +462,26 @@ void encoderButton(OSCMessage &msg){
         }   
     }
 
-    // if in patch mode, send encoder 
+    // if in patch mode, send encoder, but only if the patch said it wants encoder access
     if (ui.currentScreen == PATCH){
         if (msg.isInt(0)){
-            OSCMessage msgOut("/encoder/button");
-            msgOut.add(msg.getInt(0));
-            msgOut.send(dump);
-            udpSock.writeBuffer(dump.buffer, dump.length);
+            if (ui.patchScreenEncoderOverride){
+                OSCMessage msgOut("/encoder/button");
+                msgOut.add(msg.getInt(0));
+                msgOut.send(dump);
+                udpSock.writeBuffer(dump.buffer, dump.length);
+            }
+        }
+    }
+    // same for the aux screen 
+    if (ui.currentScreen == AUX){
+         if (msg.isInt(0)){
+            if (ui.auxScreenEncoderOverride){
+                OSCMessage msgOut("/encoder/button");
+                msgOut.add(msg.getInt(0));
+                msgOut.send(dump);
+                udpSockAux.writeBuffer(dump.buffer, dump.length);
+            }
         }
     }
 }

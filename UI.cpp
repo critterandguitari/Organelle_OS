@@ -20,6 +20,9 @@ UI::UI(){
 
     newScreen = 0;
     currentScreen = MENU;
+    
+    patchScreenEncoderOverride = 0;
+    auxScreenEncoderOverride = 0;
 
     menuScreen.clear();
     patchScreen.clear();
@@ -71,6 +74,7 @@ void UI::encoderRelease(void){
 
 void UI::runSystemCommand(void){
     char cmd[256];
+    auxScreenEncoderOverride = 0;
     if (!strcmp(menuItems[selectedEntry], "Reload")){
         printf("Reloading... \n");
         sprintf(cmd, "/root/scripts/mount.sh");
@@ -136,11 +140,20 @@ void UI::runPatch(void){
 
         // first kill any other PD
         system("/root/scripts/killpd.sh");
+
+        // disable encoder override
+        patchScreenEncoderOverride = 0;
+        
+        // start patch
         system(cmd);
+
+        // update stuff
         patchIsRunning = 1;
         patchScreen.clear();
         currentScreen = PATCH;
+        newScreen = 1;
         strcpy(currentPatch, menuItems[selectedEntry]);
+
         // put the patch name on the menu screen
         sprintf(cmd, "> %s", menuItems[selectedEntry]);
         menuScreen.drawNotification(cmd);
@@ -183,7 +196,6 @@ void UI::drawPatchList(void){
 
     newScreen = 1;
     //menuScreenTimeout = MENU_TIMEOUT;
-    //currentScreen = MENU;
     //printf("c %d, p %d\n", cursorOffset, menuOffset);
 }
 
@@ -208,6 +220,7 @@ void UI::buildMenu(void){
     //  Preset menu offset = same 
     
     systemMenuOffset = 0;
+    systemUserMenuOffset = 0;
     patchMenuOffset = 0;
     presetMenuOffset = 0;
     numSystemItems = 0;
@@ -225,18 +238,33 @@ void UI::buildMenu(void){
     strcpy(menuItems[numMenuEntries++], "Reload");
     strcpy(menuItems[numMenuEntries++], "Info");
     strcpy(menuItems[numMenuEntries++], "Shutdown");
-    strcpy(menuItems[numMenuEntries++], "  - - - - - - - - -  ");
-    
+    strcpy(menuItems[numMenuEntries++], "Save Preset");
+ 
     // system scripts from USB
-    strcpy(menuItems[numMenuEntries++], "Save Pre");
-    strcpy(menuItems[numMenuEntries++], "Record");
+    // set locale so sorting happens in right order
+    // not sure this does anything
+    systemUserMenuOffset = numMenuEntries; // the starting point of user system entries
+    std::setlocale(LC_ALL, "en_US.UTF-8");
+    n = scandir(SYSTEMS_PATH, &namelist, NULL, alphasort);
+    if (n<0)
+        perror("scandir");
+    else {
+       for(i = 0; i < n; i++) {
+            if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
+                strcpy(menuItems[numMenuEntries], namelist[i]->d_name);
+                numMenuEntries++;
+                numPatches++;
+                numMenuEntries &= 0x7f;  // TODO break if max reached, don't do this...
+            }
+            free(namelist[i]);
+        }
+        free(namelist);
+    }
 
     // padding
     strcpy(menuItems[numMenuEntries++], "");
     strcpy(menuItems[numMenuEntries++], "");
-    
 
-    //
     strcpy(menuItems[numMenuEntries++], "------ PATCHES ------");
     patchMenuOffset = numMenuEntries;
 
@@ -247,7 +275,6 @@ void UI::buildMenu(void){
     if (n<0)
         perror("scandir");
     else {
-       //while(n--) {
        for(i = 0; i < n; i++) {
             if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
                 strcpy(menuItems[numMenuEntries], namelist[i]->d_name);

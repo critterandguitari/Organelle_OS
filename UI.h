@@ -16,6 +16,7 @@
 
 // location of Patches folder 
 #define PATCHES_PATH "/usbdrive/Patches"
+#define SYSTEMS_PATH "/usbdrive/System"
 
 class UI
 {
@@ -31,9 +32,12 @@ class UI
         int newScreen;              // flag indicating screen changed and needs to be sent to oled
         int currentScreen;          // the current screen (AUX, MENU or PATCH)
         int encoderEnabled;         // when 1, encoder input is ignored
+        int patchScreenEncoderOverride;  // when 1, encoder input is ignored in menu scree, routed to patch
+        int auxScreenEncoderOverride; // when 1, encoder input is routed to aux
         int menuScreenTimeout;
 
         int systemMenuOffset;
+        int systemUserMenuOffset;
         int patchMenuOffset;
         int presetMenuOffset;
         int numSystemItems;
