@@ -1,1 +1,2 @@
 g++ main.cpp AppData.cpp Timer.cpp MainMenu.cpp OledScreen.cpp SLIPEncodedSerial.cpp Serial.cpp Socket.cpp UdpSocket.cpp OSC/OSCData.cpp OSC/OSCMatch.c OSC/OSCMessage.cpp OSC/OSCTiming.cpp OSC/SimpleWriter.cpp -o main
+cp main host/root/mother

@@ -8,7 +8,7 @@ USBDRIVE="$(grep usbdrive /proc/mounts | awk '{print $1}' | sed -e 's/\/dev\///'
 # second column on second line of output from aplaymidi -l is the name of the first attached MIDI device
 MIDIDEV="$(aplaymidi -l | awk '{if (NR==2) print $2}')"
 
-oscsend localhost 4001 /oled/aux/line/1 s "Version: 1.1"
+oscsend localhost 4001 /oled/aux/line/1 s "Version: 1.2"
 oscsend localhost 4001 /oled/aux/line/2 s "MIDI: $MIDIDEV"
 oscsend localhost 4001 /oled/aux/line/3 s "USB drive: $USBDRIVE"
 oscsend localhost 4001 /oled/aux/line/4 s "CPU: ..."
