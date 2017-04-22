@@ -61,84 +61,90 @@ void MainMenu::encoderRelease(void){
 }
 
 void MainMenu::runSystemCommand(void){
-    char cmd[256];
+    char buf[256];
     app.auxScreenEncoderOverride = 0;
     if (!strcmp(menuItems[selectedEntry], "Reload")){
         printf("Reloading... \n");
-        sprintf(cmd, "/root/scripts/mount.sh");
-        system(cmd);
+        sprintf(buf, "/root/scripts/mount.sh");
+        system(buf);
         buildMenu();
         drawPatchList();
     }
  
     else if (!strcmp(menuItems[selectedEntry], "Shutdown")){
         printf("Shutting down... \n");
-        sprintf(cmd, "/root/scripts/shutdown.sh &");
-        system(cmd);
+        sprintf(buf, "/root/scripts/shutdown.sh &");
+        system(buf);
     }
     
     else if (!strcmp(menuItems[selectedEntry], "Info")){
         printf("Displaying system info... \n");
         app.auxScreen.clear();
         app.auxScreen.drawNotification("     System Info     ");
-        sprintf(cmd, "/root/scripts/info.sh &");
-        system(cmd);
+        sprintf(buf, "/root/scripts/info.sh &");
+        system(buf);
 
     }
      
     else if (!strcmp(menuItems[selectedEntry], "Eject")){
         printf("Ejecting USB drive... \n");
-        sprintf(cmd, "/root/scripts/eject.sh &");
-        system(cmd);
+        sprintf(buf, "/root/scripts/eject.sh &");
+        system(buf);
     }
      
 /*    else if (!strcmp(menuItems[selectedEntry], "Save Preset")){
         printf("Saving Prest... \n");
-        sprintf(cmd, "/root/scripts/savepre.sh \"%s\" &", app.currentPatch);
-        system(cmd);
-        printf("%s \n", cmd);
-    }
+        sprintf(buf, "/root/scripts/savepre.sh \"%s\" &", app.currentPatch);
+        system(buf);
+        printf("%s \n", buf);
+    }*/
     else {
-        sprintf(cmd, "\""SYSTEMS_PATH"/%s/run.sh\" &", menuItems[selectedEntry]);
-        system(cmd);
-        printf("%s \n", cmd);
-   }*/
-
+        sprintf(buf, "\""SYSTEMS_PATH"/%s/run.sh\" &", menuItems[selectedEntry]);
+        system(buf);
+        printf("%s \n", buf);
+   }
 }
 
 void MainMenu::runPatch(void){
-    char cmd[256];
+    char buf[256];
+    char buf2[256];
 
     if (strcmp(menuItems[selectedEntry], "") == 0) {
         printf("Empty menu entry\n");
         return;
     }
     
-    sprintf(cmd, PATCHES_PATH"/%s/main.pd", menuItems[selectedEntry]);
-    printf("Checking for Patch File: %s\n", cmd);
-    if (checkFileExists(cmd)) {
+    sprintf(buf, PATCHES_PATH"/%s/main.pd", menuItems[selectedEntry]);
+    printf("Checking for Patch File: %s\n", buf);
+    if (checkFileExists(buf)) {
         // check for X,
         // run pd with nogui if no X. also use smaller audio buf with nogui
         // the rest of the settings are in /root/.pdsettings
         if(system("/root/scripts/check-for-x.sh")){
             printf("starting in GMainMenu mode\n");
-            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
-            else sprintf(cmd, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" /root/presetter.pd &", menuItems[selectedEntry]);
+            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
+            else sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" /root/presetter.pd &", menuItems[selectedEntry]);
         }
         else {
             printf("starting in NON GMainMenu mode\n");
-            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
-            else sprintf(cmd, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
+            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
+            else sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
         }
 
         // first kill any other PD
         system("/root/scripts/killpd.sh");
 
+        // remove previous symlink, make new one
+        system("rm /tmp/patch");   
+        sprintf(buf2, "ln -s \""PATCHES_PATH"/%s\" /tmp/patch", menuItems[selectedEntry]);
+        system(buf2);
+        printf("%s \n", buf2);
+    
         // disable encoder override
         app.patchScreenEncoderOverride = 0;
         
         // start patch
-        system(cmd);
+        system(buf);
 
         // update stuff
         app.patchIsRunning = 1;
@@ -148,10 +154,10 @@ void MainMenu::runPatch(void){
         strcpy(app.currentPatch, menuItems[selectedEntry]);
 
         // put the patch name on the menu screen
-        sprintf(cmd, "> %s", menuItems[selectedEntry]);
-        app.menuScreen.drawNotification(cmd);
+        sprintf(buf, "> %s", menuItems[selectedEntry]);
+        app.menuScreen.drawNotification(buf);
     } else {
-        printf("Patch File Not Found: %s\n", cmd);
+        printf("Patch File Not Found: %s\n", buf);
     }
 }
 
@@ -193,7 +199,7 @@ void MainMenu::drawPatchList(void){
 
 void MainMenu::buildMenu(void){
 
-    char cmd[256];
+    char buf[256];
 
     // find patches
     struct dirent **namelist;
@@ -231,7 +237,7 @@ void MainMenu::buildMenu(void){
     strcpy(menuItems[numMenuEntries++], "Info");
     strcpy(menuItems[numMenuEntries++], "Shutdown");
  //   strcpy(menuItems[numMenuEntries++], "Save Preset");
- /*
+ 
     // system scripts from USB
     // set locale so sorting happ.ns in right order
     // not sure this does anything
@@ -251,7 +257,7 @@ void MainMenu::buildMenu(void){
             free(namelist[i]);
         }
         free(namelist);
-    }*/
+    }
 
     // padding
     strcpy(menuItems[numMenuEntries++], "");
@@ -308,8 +314,8 @@ void MainMenu::buildMenu(void){
 
     // kill pd 
     printf("stopping pd... \n");
-    sprintf(cmd, "/root/scripts/killpd.sh ");
-    system(cmd);
+    sprintf(buf, "/root/scripts/killpd.sh ");
+    system(buf);
     app.patchIsRunning = 0;
 
 }
