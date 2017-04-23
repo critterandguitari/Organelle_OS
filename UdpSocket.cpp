@@ -43,7 +43,8 @@ UdpSocket :: UdpSocket(int port )
 #endif
 
   // Create the UDP socket
-  soket_ = ::socket( AF_INET, SOCK_DGRAM, IPPROTO_UDP );
+  // sock_cloexec so any child processes don't retain the address
+  soket_ = ::socket( AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP );
   if ( soket_ < 0 ) {
     std::cout << "UdpSocket: Couldn't create UDP socket!";
     //handleError( StkError::PROCESS_SOCKET );
