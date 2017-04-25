@@ -7,6 +7,8 @@
 #include <stdint.h> 
 #include <string>
 
+#define MAX_MENU_ENTRIES 128
+
 class MainMenu
 {
     public:

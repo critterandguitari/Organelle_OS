@@ -49,7 +49,7 @@ void MainMenu::encoderPress(void){
     
     // menu items 0-10 are part of system menu
     if (selectedEntry < patchMenuOffset) {    
-        runSystemCommand();
+       runSystemCommand();
     }
     else { 
         runPatch();       
@@ -142,7 +142,13 @@ void MainMenu::runPatch(void){
         system("rm /tmp/patch");   
         sprintf(buf2, "ln -s \""PATCHES_PATH"/%s\" /tmp/patch", menuItems[selectedEntry]);
         system(buf2);
-        printf("%s \n", buf2);
+
+        // save the name 
+        system("rm -fr /tmp/curpatchname");
+        sprintf(buf2, "mkdir -p /tmp/curpatchname/\"%s\"", menuItems[selectedEntry]);
+        system(buf2);
+
+        //printf("%s \n", buf2);
     
         // disable encoder override
         app.patchScreenEncoderOverride = 0;
@@ -305,6 +311,9 @@ void MainMenu::buildMenu(void){
     for (i=0; i<numMenuEntries; i++) {
         printf("patch[%d]: %s\n", i, menuItems[i]);
     }
+
+    printf("num patches %d\n", numPatches);
+    printf("patch menu offset %d\n", patchMenuOffset);
 
     // notify if no patches found
     //if (!numPatches){

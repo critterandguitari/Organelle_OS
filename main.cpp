@@ -66,6 +66,7 @@ void goHome(OSCMessage &msg);
 void enablePatchSubMenu(OSCMessage &msg);
 void enableAuxSubMenu(OSCMessage &msg);
 void invertScreenLine(OSCMessage &msg);
+void loadPatch(OSCMessage &msg);
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
@@ -165,6 +166,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/enablepatchsub", enablePatchSubMenu, 0);
                 msgIn.dispatch("/enableauxsub", enableAuxSubMenu, 0);
                 msgIn.dispatch("/oled/invertline", invertScreenLine, 0);
+                msgIn.dispatch("/loadPatch", loadPatch, 0);
             }
             else {
                 printf("bad message\n");
@@ -376,6 +378,31 @@ void sendShutdown(OSCMessage &msg){
     rdyMsg.send(dump);
     slip.sendMessage(dump.buffer, dump.length, serial);
     rdyMsg.empty();
+}
+
+void loadPatch(OSCMessage &msg){
+    char patchName[256];
+    int i = 0;
+    
+    // loop over the patches and jump to the correct one
+    if (msg.isString(0)){
+        msg.getString(0, patchName, 256);
+        for (i = menu.patchMenuOffset; i < MAX_MENU_ENTRIES; i++) {
+            if (!strcmp(menu.menuItems[i], patchName)){
+                printf("loading patch %s\n", patchName);
+                menu.menuOffset = i;
+                menu.cursorOffset = 0;
+                menu.selectedEntry =  i;
+                menu.drawPatchList();        
+                menu.runPatch();       
+                break;
+            }
+        }
+    
+
+    }
+
+
 }
 
 void invertScreenLine(OSCMessage &msg){
