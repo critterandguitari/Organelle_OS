@@ -15,3 +15,9 @@ killall -s 9 pd
 # turn off led, just to be sure
 oscsend localhost 4001 /led i 0
 
+# clean up
+# remove old state directory
+rm -fr /tmp/state
+mkdir /tmp/state
+
+

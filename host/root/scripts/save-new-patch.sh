@@ -2,10 +2,10 @@
 
 echo "about to save new patch..."
 
-# remove old state directory
-rm -fr /tmp/state
-mkdir /tmp/state
+# encoder wheel is ignored (until /gohome is called at end of script)
+oscsend localhost 4001 /enableauxsub i 1
 
+# clear aux screen
 oscsend localhost 4001 /oled/aux/clear i 1
 oscsend localhost 4001 /oled/aux/line/1 s "Saving New..."
 oscsend localhost 4000 /saveStateNew i 1
@@ -23,7 +23,8 @@ OLDNAME=$( ls /tmp/curpatchname )
 # remove a space followed by more numbers then start incrementing
 BASENAME=$( echo "${OLDNAME}" | sed 's/ [0-9]\+$//' )
 
-N=1
+# start at 2 cause this will always be at least a sequel
+N=2
 NEWNAME="${BASENAME} ${N}"
 while [[ -d "/usbdrive/Patches/${NEWNAME}" ]] ; do
     N=$(($N+1))
@@ -35,11 +36,8 @@ echo $NEWNAME
 # copy current patch to a new one
 cp -Hr /tmp/patch/ "/usbdrive/Patches/${NEWNAME}"
 
-# remove previous state
-rm -fr "/usbdrive/Patches/${NEWNAME}/state"
-
-# copy knobs.txt and any other states saved by the patch
-cp -Hr /tmp/state/ "/usbdrive/Patches/${NEWNAME}/state"
+# copy knobstate.txt and any other files saved by the patch
+cp -r /tmp/state/* "/usbdrive/Patches/${NEWNAME}"
 
 # reload
 oscsend localhost 4001 /reload i 1
