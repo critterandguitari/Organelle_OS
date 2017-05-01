@@ -1,11 +1,11 @@
-#N canvas 302 56 857 563 10;
+#N canvas 303 53 857 563 10;
 #X msg 86 184 \; pd dsp 1, f 10;
 #X obj 86 116 loadbang;
 #X obj 358 162 r knob1;
 #X obj 358 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 8359 1;
 #X obj 421 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 6375 1;
+-1 -1 6362 1;
 #X obj 482 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 8892 1;
 #X obj 544 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
@@ -64,7 +64,7 @@
 run through a compressor to provide some headroom if things get too
 loud. Also sends values to the Organelle's OLED VU meter.;
 #X obj 742 360 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 6933 1;
+-1 -1 12688 1;
 #X obj 742 326 r vol;
 #X connect 1 0 24 1;
 #X connect 2 0 24 0;
@@ -806,7 +806,7 @@ need to be edited under most circumstances.;
 #X connect 11 0 8 0;
 #X connect 11 1 10 0;
 #X restore 83 357 pd menuControl;
-#N canvas 225 50 952 660 knobState 1;
+#N canvas 226 50 952 660 knobState 0;
 #X obj 402 27 r oscIn;
 #X obj 137 454 textfile;
 #X obj 402 85 sel 1;
