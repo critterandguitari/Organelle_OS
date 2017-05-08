@@ -91,7 +91,13 @@ void MainMenu::runSystemCommand(void){
         sprintf(buf, "/root/scripts/eject.sh &");
         system(buf);
     }
-     
+      
+    else if (!strcmp(menuItems[selectedEntry], "MIDI Channel")){
+        printf("Selecting MIDI ch... \n");
+        sprintf(buf, "/root/scripts/midi-config.sh &");
+        system(buf);
+    }
+
     else if (!strcmp(menuItems[selectedEntry], "Save")){
         printf("Saving... \n");
         sprintf(buf, "/root/scripts/save-patch.sh &");
@@ -100,8 +106,14 @@ void MainMenu::runSystemCommand(void){
     else if (!strcmp(menuItems[selectedEntry], "Save New")){
         printf("Saving new... \n");
         sprintf(buf, "/root/scripts/save-new-patch.sh &");
-        system(buf);
+     
+     
+     
+     system(buf);
     }
+    
+    
+    
     else {
         sprintf(buf, "\""SYSTEMS_PATH"/%s/run.sh\" &", menuItems[selectedEntry]);
         system(buf);
@@ -271,6 +283,7 @@ void MainMenu::buildMenu(void){
     strcpy(menuItems[numMenuEntries++], "Reload");
     strcpy(menuItems[numMenuEntries++], "Info");
     strcpy(menuItems[numMenuEntries++], "Shutdown");
+    strcpy(menuItems[numMenuEntries++], "MIDI Channel");
     strcpy(menuItems[numMenuEntries++], "Save");
     strcpy(menuItems[numMenuEntries++], "Save New");
  //   strcpy(menuItems[numMenuEntries++], "Save Preset");

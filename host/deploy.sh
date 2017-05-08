@@ -12,6 +12,8 @@ cp root/.bash_profile /root
 cp root/.jwmrc /root
 cp root/.pdsettings /root
 cp root/scripts/* /root/scripts
+cp root/Desktop/* /root/Desktop
+cp root/version /root/version
 
 # sync
 sync 
