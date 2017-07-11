@@ -1,6 +1,13 @@
 #!/bin/sh
+
+# USER_DIR=${USER_DIR:="/usbdrive"}
+# PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
+export FW_DIR=${FW_DIR:="/root"}
+SCRIPTS_DIR=$FW_DIR/scripts
+
+
 # quit Pd 
-/root/scripts/killpd.sh
+$SCRIPTS_DIR/killpd.sh
 # then mother
 # give a chance to shut itself off
 oscsend localhost 4001 /quitmother i 1

@@ -25,6 +25,9 @@
 #include <cstring>
 #include <sstream>
 
+#ifdef __APPLE__
+const int SOCK_CLOEXEC=0;
+#endif
 //namespace stk {
 
 UdpSocket :: UdpSocket(int port )

@@ -1,4 +1,12 @@
 #!/bin/sh
+
+# USER_DIR=${USER_DIR:="/usbdrive"}
+# PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
+# FW_DIR=${FW_DIR:="/root"}
+# SCRIPTS_DIR=$FW_DIR/scripts
+
+# quit Pd 
+
 # quit Pd in 3 steps
 
 # give pd a chance to shut itself off
