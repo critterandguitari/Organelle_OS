@@ -18,7 +18,9 @@
 #include <err.h>
 //#include <linux/serial.h>
 
-
+#ifdef __APPLE__
+const int B500000=500000;
+#endif
 
 static int set_interface_attribs (int fd, int speed)
 {

@@ -81,7 +81,7 @@ void OledScreen::draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y){
 
 
 
-void OledScreen::drawNotification( char * line ) {
+void OledScreen::drawNotification(const char * line) {
 
     int i, len;
 
@@ -215,7 +215,7 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
 
 }
 
-void OledScreen::println_16(char * line, int len, int x, int y){
+void OledScreen::println_16(const char * line, int len, int x, int y){
     int i, deltax;
     deltax = x;
     for (i = 0; i < len; i++) {
@@ -224,7 +224,7 @@ void OledScreen::println_16(char * line, int len, int x, int y){
     }
 }
 
-void OledScreen::println_8(char * line, int len, int x, int y){
+void OledScreen::println_8(const char * line, int len, int x, int y){
     int i, deltax;
     deltax = x;
     for (i = 0; i < len; i++) {

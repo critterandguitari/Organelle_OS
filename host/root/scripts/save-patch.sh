@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# USER_DIR=${USER_DIR:="/usbdrive"}
+# PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
+# FW_DIR=${FW_DIR:="/root"}
+# SCRIPTS_DIR=$FW_DIR/scripts
+
 echo "about to save patch..."
 
 # encoder wheel is ignored (until /gohome is called at end of script)
@@ -22,5 +27,6 @@ sleep .5
 cp -r /tmp/state/* "/tmp/patch"
 
 # retrun to patch
+oscsend localhost 4001 /enableauxsub i 0
 oscsend localhost 4001 /oled/setscreen i 3
 

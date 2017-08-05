@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# USER_DIR=${USER_DIR:="/usbdrive"}
+PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
+# FW_DIR=${FW_DIR:="/root"}
+# SCRIPTS_DIR=$FW_DIR/scripts
+
+
 echo "about to save new patch..."
 
 # encoder wheel is ignored (until /gohome is called at end of script)
@@ -28,7 +34,7 @@ BASENAME=$( echo "${OLDNAME}" | sed 's/ [0-9]\+$//' )
 # start at 2 cause this will always be at least a sequel
 N=2
 NEWNAME="${BASENAME} ${N}"
-while [[ -d "/usbdrive/Patches/${NEWNAME}" ]] ; do
+while [[ -d "${PATCH_DIR}/${NEWNAME}" ]] ; do
     N=$(($N+1))
     NEWNAME="${BASENAME} ${N}"
 done
@@ -36,10 +42,10 @@ done
 echo $NEWNAME
 
 # copy current patch to a new one
-cp -Hr /tmp/patch/ "/usbdrive/Patches/${NEWNAME}"
+cp -Hr /tmp/patch/ "${PATCH_DIR}/${NEWNAME}"
 
 # copy knobstate.txt and any other files saved by the patch
-cp -r /tmp/state/* "/usbdrive/Patches/${NEWNAME}"
+cp -r /tmp/state/* "${PATCH_DIR}/${NEWNAME}"
 
 # reload
 oscsend localhost 4001 /reload i 1

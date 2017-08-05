@@ -2,19 +2,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
-#include <locale.h>
 #include <string.h>
 #include <sys/stat.h>
 
+#include <clocale>
+#include <fstream>
+#include <string>
+#include <cstdio>
+
 #include "MainMenu.h"
 
+
+
+
 extern AppData app; 
+
 
 MainMenu::MainMenu(){
     numPatches = 0;
     numMenuEntries = 0;
     menuOffset = 9;
     cursorOffset = 1;
+    favouriteMenu = false;
+    actionTrigger = false;
 }
 
 int MainMenu::checkFileExists (const char * filename){
@@ -31,6 +41,7 @@ void MainMenu::encoderUp(void) {
     
     selectedEntry = menuOffset + cursorOffset;
     drawPatchList();
+
 }
 
 void MainMenu::encoderDown(void) {
@@ -43,121 +54,115 @@ void MainMenu::encoderDown(void) {
     drawPatchList();
 }
 
+void MainMenu::executeAction(void (MainMenu::* func)(const char*, const char*),const char* name,const char* arg)  {
+    (this->*func)(name, arg);
+}
+
 void MainMenu::encoderPress(void){
-    selectedEntry =  menuOffset + cursorOffset;
-    printf("Menu Selection: %d, %s\n", selectedEntry, menuItems[selectedEntry]);
-    
-    // menu items 0-10 are part of system menu
-    if (selectedEntry < patchMenuOffset) {    
-       runSystemCommand();
-    }
-    else { 
-        runPatch();       
-    }
+    actionTrigger = true;
 }
 
 void MainMenu::encoderRelease(void){
-
+    if(actionTrigger) {
+        selectedEntry = menuOffset + cursorOffset;
+        printf("Menu Selection: %d, %s\n", selectedEntry, menuItems[selectedEntry].name);
+        executeAction(menuItems[selectedEntry].func,menuItems[selectedEntry].name,menuItems[selectedEntry].arg);
+    }
+    actionTrigger = false;
 }
 
-void MainMenu::runSystemCommand(void){
+void MainMenu::runDoNothing(const char* name,const char* ){
+}
+
+void MainMenu::runReload(const char* name,const char* arg) {
+    printf("Reloading... \n");
+    execScript("mount.sh");
+    buildMenu();
+}
+void MainMenu::runShutdown(const char* name,const char* arg) {
+    printf("Shutting down... \n");
+    execScript("shutdown.sh &");
+}
+
+void MainMenu::runInfo(const char* name,const char* arg) {
+    printf("Displaying system info... \n");
+    app.auxScreen.clear();
+    app.auxScreen.drawNotification("     System Info     ");
+    execScript("info.sh &");
+}
+
+void MainMenu::runEject(const char* name,const char* arg) {
+    printf("Ejecting USB drive... \n");
+    execScript("eject.sh &");
+}
+
+void MainMenu::runMidiChannel(const char* name,const char* arg) {
+    printf("Selecting MIDI ch... \n");
+    execScript("midi-config.sh &");
+}
+void MainMenu::runSave(const char* name,const char* arg) {
+    printf("Saving... \n");
+    execScript("save-patch.sh &");
+}
+
+void MainMenu::runSaveNew(const char* name,const char* arg) {
+    printf("Saving new... \n");
+    execScript("save-new-patch.sh &");
+}
+
+
+void MainMenu::runSystemCommand(const char* name,const char* arg){
     char buf[256];
-    app.auxScreenEncoderOverride = 0;
-    if (!strcmp(menuItems[selectedEntry], "Reload")){
-        printf("Reloading... \n");
-        sprintf(buf, "/root/scripts/mount.sh");
-        system(buf);
-        buildMenu();
-        drawPatchList();
-    }
- 
-    else if (!strcmp(menuItems[selectedEntry], "Shutdown")){
-        printf("Shutting down... \n");
-        sprintf(buf, "/root/scripts/shutdown.sh &");
-        system(buf);
-    }
-    
-    else if (!strcmp(menuItems[selectedEntry], "Info")){
-        printf("Displaying system info... \n");
-        app.auxScreen.clear();
-        app.auxScreen.drawNotification("     System Info     ");
-        sprintf(buf, "/root/scripts/info.sh &");
-        system(buf);
-
-    }
-     
-    else if (!strcmp(menuItems[selectedEntry], "Eject")){
-        printf("Ejecting USB drive... \n");
-        sprintf(buf, "/root/scripts/eject.sh &");
-        system(buf);
-    }
-      
-    else if (!strcmp(menuItems[selectedEntry], "MIDI Channel")){
-        printf("Selecting MIDI ch... \n");
-        sprintf(buf, "/root/scripts/midi-config.sh &");
-        system(buf);
-    }
-
-    else if (!strcmp(menuItems[selectedEntry], "Save")){
-        printf("Saving... \n");
-        sprintf(buf, "/root/scripts/save-patch.sh &");
-        system(buf);
-    }
-    else if (!strcmp(menuItems[selectedEntry], "Save New")){
-        printf("Saving new... \n");
-        sprintf(buf, "/root/scripts/save-new-patch.sh &");
-     
-     
-     
-     system(buf);
-    }
-    
-    
-    
-    else {
-        sprintf(buf, "\""SYSTEMS_PATH"/%s/run.sh\" &", menuItems[selectedEntry]);
-        system(buf);
-        printf("%s \n", buf);
-   }
+    printf("%s \n", buf);
+    sprintf(buf, "\"%s/%s/run.sh\" &", app.getSystemDir(),arg);
+    system(buf);
 }
 
-void MainMenu::runPatch(void){
+void MainMenu::runPatch(const char* name,const char* arg){
     char buf[256];
     char buf2[256];
 
-    if (strcmp(menuItems[selectedEntry], "") == 0) {
+    if (strcmp(arg, "") == 0) {
         printf("Empty menu entry\n");
         return;
     }
     
-    sprintf(buf, PATCHES_PATH"/%s/main.pd", menuItems[selectedEntry]);
+    sprintf(buf, "%s/%s/main.pd", app.getPatchDir(), arg);
     printf("Checking for Patch File: %s\n", buf);
     if (checkFileExists(buf)) {
+        setEnv();
+    
         // check for X,
         // run pd with nogui if no X. also use smaller audio buf with nogui
         // the rest of the settings are in /root/.pdsettings
-        if(system("/root/scripts/check-for-x.sh")){
+        char motherpd[128];
+        sprintf(motherpd, "%s/mother.pd", app.getPatchDir());
+        if(!checkFileExists(motherpd)) {
+            sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
+            if(!checkFileExists(motherpd)) {
+                sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
+            }
+        }
+        if(execScript("check-for-x.sh")){
             printf("starting in GMainMenu mode\n");
-            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
-            else sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
+            sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 %s \"%s/%s/main.pd\" &", motherpd, app.getPatchDir(), arg);
         }
         else {
             printf("starting in NON GMainMenu mode\n");
-            if (checkFileExists(PATCHES_PATH"/mother.pd")) sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 "PATCHES_PATH"/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
-            else sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 /root/mother.pd \""PATCHES_PATH"/%s/main.pd\" &", menuItems[selectedEntry]);
+            sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 %s \"%s/%s/main.pd\" &", motherpd, app.getPatchDir(), arg);
         }
 
         // first kill any other PD
-        system("/root/scripts/killpd.sh");
+        execScript("killpd.sh");
 
         // remove previous symlink, make new one
         system("rm /tmp/patch");   
-        sprintf(buf2, "ln -s \""PATCHES_PATH"/%s\" /tmp/patch", menuItems[selectedEntry]);
+        sprintf(buf2, "ln -s \"%s/%s\" /tmp/patch", app.getPatchDir(), arg);
         system(buf2);
 
         // save the name 
         system("rm -fr /tmp/curpatchname");
-        sprintf(buf2, "mkdir -p /tmp/curpatchname/\"%s\"", menuItems[selectedEntry]);
+        sprintf(buf2, "mkdir -p /tmp/curpatchname/\"%s\"", arg);
         system(buf2);
 
         //printf("%s \n", buf2);
@@ -173,21 +178,22 @@ void MainMenu::runPatch(void){
         app.patchScreen.clear();
         app.currentScreen = PATCH;
         app.newScreen = 1;
-        strcpy(app.currentPatch, menuItems[selectedEntry]);
+        strcpy(app.currentPatch, arg);
+        strcpy(app.currentPatchPath, app.getPatchDir());
         
         // put the patch name on top of screen
         // truncate long file names
-        int len = strlen(menuItems[selectedEntry]);
+        int len = strlen(arg);
         if (len > 20) {
-           sprintf(buf, "> %s", menuItems[selectedEntry]);
+           sprintf(buf, "> %s", arg);
            buf[11] = '.';
            buf[12] = '.';
            buf[13] = '.';
-           strcpy(&buf[14], &menuItems[selectedEntry][len-7]);
+           strcpy(&buf[14], &arg[len-7]);
            
         }
         else {
-            sprintf(buf, "> %s", menuItems[selectedEntry]);
+            sprintf(buf, "> %s", arg);
         }
         app.menuScreen.drawNotification(buf);
     } else {
@@ -195,17 +201,108 @@ void MainMenu::runPatch(void){
     }
 }
 
-void MainMenu::programChange(int pgm){
+void MainMenu::runFavourite(const char* name, const char* arg) {
+    app.setPatchDir(arg);
+    runPatch(name, name);
+}
+void MainMenu::runToggleFavourites(const char* name,const char*) {
+    favouriteMenu = ! favouriteMenu;
+    app.setPatchDir(NULL);
+    buildMenu();
+}
 
-    if ((pgm > numPatches) || (pgm < 1)) {
-        printf("Program Change out of range\n");
-        return;
+void MainMenu::runAddToFavourite(const char*, const char*) {
+    bool exists = false;
+    // check to see if exists
+    char favfile[256];
+
+    sprintf(favfile, "%s/Favourites.txt", app.getUserDir());
+    printf("adding to favs %s\n",favfile);
+    std::ifstream infile(favfile);
+    std::string line;
+    while (std::getline(infile, line) && !exists)
+    {
+        if(line.length()>0 ) {
+            int sep = line.find(":");
+            if(sep!=std::string::npos && sep > 0 && line.length() - sep > 2) {
+                std::string path= line.substr(0,sep);
+                std::string patch = line.substr(sep+1,line.length());
+                if(path.compare(app.getCurrentPatchPath())==0 && patch.compare(app.getCurrentPatch())==0 ) {
+                    exists = true;
+                }
+            }
+        }
     }
-    else {
-        printf("Program Change: %d, %s\n", pgm, menuItems[selectedEntry]);
-        selectedEntry = pgm + patchMenuOffset - 1;
-        runPatch();
+    infile.close();
+    if(!exists) {
+        std::ofstream outfile(favfile, std::ios_base::app);
+        outfile << app.getCurrentPatchPath() << ":" << app.getCurrentPatch() << std::endl;
+        outfile.close();
     }
+    buildMenu();
+}
+
+void MainMenu::runDelFromFavourite(const char*, const char*) {
+    bool exists = false;
+    char favfile[256];
+    char tmpfile[256];
+    // check to see if exists
+    sprintf(favfile, "%s/Favourites.txt", app.getUserDir());
+    sprintf(tmpfile, "%s/Favourites.tmp", app.getUserDir());
+    std::ofstream outfile(tmpfile);
+    std::ifstream infile(favfile);
+    std::string line;
+    while (std::getline(infile, line) && !exists)
+    {
+        if(line.length()>0 ) {
+            int sep = line.find(":");
+            if(sep!=std::string::npos && sep > 0 && line.length() - sep > 2) {
+                std::string path= line.substr(0,sep);
+                std::string patch = line.substr(sep+1,line.length());
+                if( !(path.compare(app.getCurrentPatchPath())==0 && patch.compare(app.getCurrentPatch())==0) ) {
+                    outfile << line << std::endl;
+                }
+            }
+        }
+    }
+    infile.close();
+    outfile.close();
+    std::remove(favfile);
+    std::rename(tmpfile,favfile);
+    buildMenu();
+}
+
+
+
+void MainMenu::programChange(int pgm){
+    if(pgm<0) { return;}
+    printf("recieved pgmchange %d\n",pgm);
+    bool exists = false;
+    char favfile[256];
+    sprintf(favfile, "%s/Favourites.txt", app.getUserDir());
+    std::ifstream infile(favfile);
+    std::string line;
+    int idx = 0;
+    exists = std::getline(infile, line);
+    for(idx = 0;idx<(pgm-1); idx++) {
+      exists = std::getline(infile, line);
+    }
+
+    if(exists) {
+        if(line.length()>0 ) {
+            int sep = line.find(":");
+            if(sep!=std::string::npos && sep > 0 && line.length() - sep > 2) {
+                std::string path= line.substr(0,sep);
+                std::string patch = line.substr(sep+1,line.length());
+                printf("Program Change: %d, %s %s\n", pgm, path.c_str(), patch.c_str());
+                favouriteMenu = true;
+                app.setPatchDir(path.c_str());
+                buildMenu();
+                runFavourite(patch.c_str(),path.c_str());                    
+            }
+        }
+    }
+    infile.close();
 }
 
 void MainMenu::drawPatchList(void){
@@ -214,17 +311,17 @@ void MainMenu::drawPatchList(void){
     int len;
     for (i=0; i<5; i++) {
         // truncate long file names
-        len = strlen(menuItems[i + menuOffset]);
+        len = strlen(menuItems[i + menuOffset].name);
         if (len > 21) {
-           strcpy(line, menuItems[i + menuOffset]);
+           strcpy(line, menuItems[i + menuOffset].name);
            line[9] = '.';
            line[10] = '.';
            line[11] = '.';
-           strcpy(&line[12], &menuItems[i + menuOffset][len-9]);
+           strcpy(&line[12], &menuItems[i + menuOffset].name[len-9]);
            
         }
         else {
-            sprintf(line, "%s", menuItems[i + menuOffset]);
+            sprintf(line, "%s", menuItems[i + menuOffset].name);
         }
         app.menuScreen.setLine(i + 1, line);
     }
@@ -244,6 +341,15 @@ void MainMenu::drawPatchList(void){
 //    printf("c %d, p %d\n", cursorOffset, menuOffset);
 }
 
+
+void MainMenu::addMenuItem(int i, const char* name, const char* arg, void (MainMenu::* func) (const char*, const char*)) {
+    strncpy(menuItems[i].name, name,22);
+    menuItems[i].name[21]=0;
+    strncpy(menuItems[i].arg, arg,256);
+    menuItems[i].arg[255]=0;
+    menuItems[i].func = func;
+}
+
 void MainMenu::buildMenu(void){
 
     char buf[256];
@@ -255,10 +361,13 @@ void MainMenu::buildMenu(void){
     int mindex;
   
     // clear em out
-    for (i = 0; i < 127; i++){
-        strcpy(menuItems[i], "");
+    for (i = 0; i < MAX_MENU_ENTRIES; i++){
+        menuItems[i].name[0] = 0;
+        menuItems[i].arg[0] = 0;
+        menuItems[i].func = &MainMenu::runDoNothing;
     }
-    
+
+   
     // OK  got three sections here
     //  System menu offset = index of 1st item
     //  Patch menu offset = same
@@ -274,100 +383,195 @@ void MainMenu::buildMenu(void){
     numMenuEntries = 0; // total things 
 
     // System menu
-    // padding
-    strcpy(menuItems[numMenuEntries++], "");
-    strcpy(menuItems[numMenuEntries++], "");
-    strcpy(menuItems[numMenuEntries++], "------ SYSTEM -------");
+    addMenuItem(numMenuEntries++, "------ SYSTEM -------", "", &MainMenu::runDoNothing);
     systemMenuOffset = numMenuEntries;
-    strcpy(menuItems[numMenuEntries++], "Eject");
-    strcpy(menuItems[numMenuEntries++], "Reload");
-    strcpy(menuItems[numMenuEntries++], "Info");
-    strcpy(menuItems[numMenuEntries++], "Shutdown");
-    strcpy(menuItems[numMenuEntries++], "MIDI Channel");
-    strcpy(menuItems[numMenuEntries++], "Save");
-    strcpy(menuItems[numMenuEntries++], "Save New");
- //   strcpy(menuItems[numMenuEntries++], "Save Preset");
+
+    addMenuItem(numMenuEntries++, "Shutdown","Shutdown", &MainMenu::runShutdown);
+    addMenuItem(numMenuEntries++, "Eject","Eject", &MainMenu::runEject);
+    addMenuItem(numMenuEntries++, "Reload","Reload", &MainMenu::runReload);
+    addMenuItem(numMenuEntries++, "Info","Info", &MainMenu::runInfo);
+    addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
+    addMenuItem(numMenuEntries++, "Save","Save", &MainMenu::runSave);
+    addMenuItem(numMenuEntries++, "Save New", "Save New", &MainMenu::runSaveNew);
+    // addMenuItem(numMenuEntries++, "Save Preset", "Save Preset", &MainMenu::runSystemCommand);
+
+    if(favouriteMenu) {
+        addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
+    } else {
+        addMenuItem(numMenuEntries++, "Show Favourites", "Show Favourites", &MainMenu::runToggleFavourites);
+    }
  
-    // system scripts from USB
-    // set locale so sorting happ.ns in right order
+    // system scripts from usb/sdcard
+    // set locale so sorting happens in right order
     // not sure this does anything
     systemUserMenuOffset = numMenuEntries; // the starting point of user system entries
     std::setlocale(LC_ALL, "en_US.UTF-8");
-    n = scandir(SYSTEMS_PATH, &namelist, NULL, alphasort);
-    if (n<0)
-        perror("scandir");
-    else {
-       for(i = 0; i < n; i++) {
-            if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
-                strcpy(menuItems[numMenuEntries], namelist[i]->d_name);
-                numMenuEntries++;
-                // for the uncommon situation of having many system scripts
-                if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
-                    numMenuEntries = MAX_MENU_ENTRIES - 100;
+    if(checkFileExists(app.getSystemDir())) {
+            n = scandir(app.getSystemDir(), &namelist, NULL, alphasort);
+            if (n < 0)
+                perror("scandir usercmds");
+            else {
+                for (i = 0; i < n; i++) {
+                    if (namelist[i]->d_type == DT_DIR &&
+                    strcmp (namelist[i]->d_name, "..") != 0
+                    && strcmp (namelist[i]->d_name, ".") != 0) {
+
+                        char runsh[256];
+                        sprintf(runsh, "%s/%s/run.sh", app.getSystemDir(), namelist[i]->d_name);
+                        if (checkFileExists(runsh)) {
+                            addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runSystemCommand);
+                            // for the uncommon situation of having many system scripts
+                            if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
+                                numMenuEntries = MAX_MENU_ENTRIES - 100;
+                            }
+                        }
+                    }
+                    free(namelist[i]);
+                }
+                free(namelist);
+            }
+    }
+
+    if(favouriteMenu) {
+        addMenuItem(numMenuEntries++, "---- FAVOURITES -----", "", &MainMenu::runDoNothing);
+        if(app.patchIsRunning) {
+            addMenuItem(numMenuEntries++, "Add Current", "", &MainMenu::runAddToFavourite);
+            addMenuItem(numMenuEntries++, "Remove Current", "", &MainMenu::runDelFromFavourite);
+        }
+
+        patchMenuOffset = numMenuEntries;
+
+        char favfile[256];
+        sprintf(favfile, "%s/Favourites.txt", app.getUserDir());
+        std::ifstream infile(favfile);
+        std::string line;
+        while (std::getline(infile, line))
+        {
+            if(line.length()>0 ) {
+                int sep = line.find(":");
+                if(sep!=std::string::npos && sep > 0 && line.length() - sep > 2) {
+                    std::string path= line.substr(0,sep);
+                    std::string patch = line.substr(sep+1,line.length());
+                    addMenuItem(numMenuEntries++, patch.c_str(), path.c_str(), &MainMenu::runFavourite);
+                    numPatches++;
+                    // for the uncommon situation of having many system scripts
+                    if (numMenuEntries > MAX_MENU_ENTRIES - 10) {
+                        numMenuEntries = MAX_MENU_ENTRIES - 10;
+                    }
+
+                } else {
+                    printf("invalid line in favourites %s\n", line.c_str());
                 }
             }
-            free(namelist[i]);
         }
-        free(namelist);
-    }
+    } else {
+        addMenuItem(numMenuEntries++, "------ PATCHES ------", "", &MainMenu::runDoNothing);
+        if(!app.isPatchHome()) { 
+            addMenuItem(numMenuEntries++, "<-- HOME", "", &MainMenu::runCdPatchHome);
+        }
 
-    // padding
-    strcpy(menuItems[numMenuEntries++], "");
-    strcpy(menuItems[numMenuEntries++], "");
+        patchMenuOffset = numMenuEntries;
 
-    strcpy(menuItems[numMenuEntries++], "------ PATCHES ------");
-    patchMenuOffset = numMenuEntries;
-
-    // set locale so sorting happ.ns in right order
-    // not sure this does anything
-    std::setlocale(LC_ALL, "en_US.UTF-8");
-    n = scandir(PATCHES_PATH, &namelist, NULL, alphasort);
-    if (n<0)
-        perror("scandir");
-    else {
-       for(i = 0; i < n; i++) {
-            if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
-                strcpy(menuItems[numMenuEntries], namelist[i]->d_name);
-                numMenuEntries++;
-                numPatches++;
-                // for the uncommon situation of having many system scripts
-                if (numMenuEntries > MAX_MENU_ENTRIES - 10) {
-                    numMenuEntries = MAX_MENU_ENTRIES - 10;
+        // set locale so sorting happ.ns in right order
+        // not sure this does anything
+        std::setlocale(LC_ALL, "en_US.UTF-8");
+        n = scandir(app.getPatchDir(), &namelist, NULL, alphasort);
+        if (n<0)
+            perror("scandir patchlist");
+        else {
+           for(i = 0; i < n; i++) {
+                if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
+                    char mainpd[256];
+                    sprintf(mainpd, "%s/%s/main.pd", app.getPatchDir(), namelist[i]->d_name);
+                    if(checkFileExists(mainpd)) {
+                        addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runPatch);
+                    } else {
+                        char dirpath[255];
+                        char name[22];
+                        int len = strlen(namelist[i]->d_name);
+                        strncpy(name,namelist[i]->d_name,22);
+                        if(len<22) memset(name+len,' ',22-len);
+                        name[20] = '>';
+                        name[21] = 0;
+                        
+                        sprintf(dirpath,"%s/%s",app.getPatchDir(),namelist[i]->d_name);
+                        addMenuItem(numMenuEntries++, name , dirpath, &MainMenu::runCdPatchDirectory);
+                    }
+                    numPatches++;
+                    // for the uncommon situation of having many system scripts
+                    if (numMenuEntries > MAX_MENU_ENTRIES - 10) {
+                        numMenuEntries = MAX_MENU_ENTRIES - 10;
+                    }
                 }
+                free(namelist[i]);
             }
-            free(namelist[i]);
+            free(namelist);
         }
-        free(namelist);
+
+        // end patches
+
+        for (i=0; i<numMenuEntries; i++) {
+            printf("patch[%d]: %s\n", i, menuItems[i].arg);
+        }
+
+        printf("num patches %d\n", numPatches);
+        printf("patch menu offset %d\n", patchMenuOffset);
+
+        // notify if no patches found
+        if (!numPatches){
+            addMenuItem(numMenuEntries++, "No patches found!", "", &MainMenu::runDoNothing);
+            addMenuItem(numMenuEntries++, "Insert USB drive ", "", &MainMenu::runDoNothing);
+            addMenuItem(numMenuEntries++, "with Patches folder.", "", &MainMenu::runDoNothing);
+            addMenuItem(numMenuEntries++, "Then select Reload.", "", &MainMenu::runDoNothing);
+        }
+
+        // set cursor to beg
+
+        //TODO - check, why? seems unnecesary;
+        // kill pd 
+        // printf("stopping pd... \n");
+        // sprintf(buf, "/root/scripts/killpd.sh ");
+        // system(buf);
+        // app.patchIsRunning = 0;
     }
 
-    // end patches
-
-    for (i=0; i<numMenuEntries; i++) {
-        printf("patch[%d]: %s\n", i, menuItems[i]);
-    }
-
-    printf("num patches %d\n", numPatches);
-    printf("patch menu offset %d\n", patchMenuOffset);
-
-    // notify if no patches found
-    if (!numPatches){
-        strcpy(menuItems[numMenuEntries++], "No patches found!");
-        strcpy(menuItems[numMenuEntries++], "Insert USB drive ");
-        strcpy(menuItems[numMenuEntries++], "with Patches folder.");
-        strcpy(menuItems[numMenuEntries++], "Then select Reload.");
-    }
-
-    // set cursor to beg
     menuOffset = patchMenuOffset - 1;
     cursorOffset = 1;
-
-    // kill pd 
-    printf("stopping pd... \n");
-    sprintf(buf, "/root/scripts/killpd.sh ");
-    system(buf);
-    app.patchIsRunning = 0;
-
+    drawPatchList();
 }
+
+void MainMenu::runCdPatchDirectory(const char* name,const char* arg) {
+    printf("Changing Patch directory... %s\n",arg);
+    app.setPatchDir(arg);
+    buildMenu();
+}
+
+void MainMenu::runCdPatchHome(const char* name,const char*) {
+    printf("Resetting to patch home\n");
+    app.setPatchDir(NULL);
+    buildMenu();
+}
+
+
+bool MainMenu::loadPatch(const char* patchName) {
+    runPatch(patchName, patchName);       
+    return true;
+}
+
+void MainMenu::setEnv() {
+    setenv("PATCH_DIR",app.getPatchDir(),1);
+    setenv("FW_DIR",app.getFirmwareDir(),1);
+    setenv("USER_DIR",app.getUserDir(),1);
+}
+
+
+int MainMenu::execScript(const char* cmd) {
+    char buf[128];
+    sprintf(buf,"%s/scripts/%s",app.getFirmwareDir(),cmd);
+    setEnv();
+    return system(buf);
+}
+
 
 
 

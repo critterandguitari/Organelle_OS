@@ -14,6 +14,9 @@
 #include "Timer.h"
 #include "AppData.h"
 
+int       encoderDownTime = 0;
+const int SHUTDOWN_TIME=4;
+
 // for communicating with OSC over serial with MCU
 Serial serial;
 SLIPEncodedSerial slip;
@@ -82,7 +85,7 @@ void sendGetKnobs(void);
 /* end helpers */
 
 int main(int argc, char* argv[]) {
-      
+    printf("build date " __DATE__ "   " __TIME__ "/n");
     uint32_t seconds = 0;
     char udpPacketIn[256];
     //uint8_t osc_packet_in[256];
@@ -115,7 +118,6 @@ int main(int argc, char* argv[]) {
     OSCMessage msgIn;
 
     menu.buildMenu();
-    menu.drawPatchList();
 
     // send ready to wake up MCU
     // MCU is ignoring stuff over serial port until this message comes through
@@ -256,6 +258,14 @@ int main(int argc, char* argv[]) {
             pingTimer.reset();
             rdyMsg.send(dump);
             slip.sendMessage(dump.buffer, dump.length, serial);
+
+            if(encoderDownTime!=-1) {
+                encoderDownTime--;
+                if(encoderDownTime==0) {
+                    fprintf(stderr, "shutting down.....");
+                    menu.runShutdown(0,0);
+                }
+            }
         }
 
         // poll for knobs
@@ -395,17 +405,7 @@ void loadPatch(OSCMessage &msg){
     // loop over the patches and jump to the correct one
     if (msg.isString(0)){
         msg.getString(0, patchName, 256);
-        for (i = menu.patchMenuOffset; i < MAX_MENU_ENTRIES; i++) {
-            if (!strcmp(menu.menuItems[i], patchName)){
-                printf("loading patch %s\n", patchName);
-                menu.menuOffset = i;
-                menu.cursorOffset = 0;
-                menu.selectedEntry =  i;
-                menu.drawPatchList();        
-                menu.runPatch();       
-                break;
-            }
-        }
+        menu.loadPatch(patchName);
     }
 }
 
@@ -436,13 +436,17 @@ void goHome(OSCMessage &msg ) {
 }
 
 void enablePatchSubMenu(OSCMessage &msg ) {
-    printf("enabling patch sub menu\n");
-    app.patchScreenEncoderOverride = 1;
+    int v = 1;
+    if (msg.isInt(0)) { v = msg.getInt(0);}
+    printf("enabling patch sub menu %d\n", v);
+    app.patchScreenEncoderOverride = v;
 }
 
 void enableAuxSubMenu(OSCMessage &msg ) {
-    printf("enabling aux sub menu\n");
-    app.auxScreenEncoderOverride = 1;
+    int v = 1;
+    if (msg.isInt(0)) { v = msg.getInt(0);}
+    printf("enabling aux sub menu %d\n", v);
+    app.auxScreenEncoderOverride = v;
 }
 
 /* end internal OSC messages received */
@@ -495,11 +499,31 @@ void encoderInput(OSCMessage &msg){
     }
 }
 
+
+
+
+
 // this is when the encoder gets pressed 
 // in menu screen, execute the menu entry
 // in patch screen, bounce back to menu, unless override is on 
 // in aux screen, same
 void encoderButton(OSCMessage &msg){
+     if( !  ( (app.currentScreen == PATCH && app.patchScreenEncoderOverride) 
+            || (app.currentScreen == AUX && app.auxScreenEncoderOverride))) {
+
+        if(msg.isInt(0)) { 
+            if(msg.getInt(0)) {
+                if(encoderDownTime == -1) {
+                    encoderDownTime = SHUTDOWN_TIME;
+                }
+            }
+            else {
+               encoderDownTime = -1;
+            }
+        }
+    }
+
+
     if (app.currentScreen == MENU){
         if (msg.isInt(0)){
             if (msg.getInt(0) == 1) {
