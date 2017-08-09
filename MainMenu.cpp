@@ -121,7 +121,7 @@ void MainMenu::runSystemCommand(const char* name,const char* arg){
 void MainMenu::runPatch(const char* name,const char* arg){
     char buf[256];
     char buf2[256];
-
+ 
     if (strcmp(arg, "") == 0) {
         printf("Empty menu entry\n");
         return;
@@ -143,13 +143,24 @@ void MainMenu::runPatch(const char* name,const char* arg){
                 sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
             }
         }
+
+        std::string adv_args;
+        if(app.isAlsa()) adv_args = adv_args + "-alsamidi ";
         if(execScript("check-for-x.sh")){
             printf("starting in GMainMenu mode\n");
-            sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 %s \"%s/%s/main.pd\" &", motherpd, app.getPatchDir(), arg);
+            sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 %s %s \"%s/%s/main.pd\" &", 
+                adv_args.c_str(), 
+                motherpd, 
+                app.getPatchDir(), 
+                arg);
         }
         else {
             printf("starting in NON GMainMenu mode\n");
-            sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 %s \"%s/%s/main.pd\" &", motherpd, app.getPatchDir(), arg);
+            sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 %s %s \"%s/%s/main.pd\" &", 
+                adv_args.c_str(), 
+                motherpd, 
+                app.getPatchDir(), 
+                arg);
         }
 
         // first kill any other PD
@@ -172,6 +183,18 @@ void MainMenu::runPatch(const char* name,const char* arg){
         
         // start patch
         system(buf);
+
+        //send PD midi channel 
+        sprintf(buf2, "(sleep 2; oscsend localhost 4000 /midich i %d ) &", app.getMidiChannel());
+        system(buf2);
+
+        if(app.isAlsa()) {
+            std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
+            execScript(cmd.c_str());
+        }
+
+
+
 
         // update stuff
         app.patchIsRunning = 1;

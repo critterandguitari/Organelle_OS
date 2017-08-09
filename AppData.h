@@ -38,6 +38,12 @@ class AppData
         const char* getCurrentPatch() { return currentPatch;}
         const char* getCurrentPatchPath() { return currentPatchPath;}
 
+        void readMidiConfig();
+        
+        int getMidiChannel() { return midiChannel;}
+        bool isAlsa() { return useAlsa;}
+        std::string getAlsaConfig() { return alsaConfig;}
+
         char currentPatch[256];
         char currentPatchPath[256];
        
@@ -58,7 +64,9 @@ class AppData
         std::string user_path;
         std::string system_path;
         std::string firmware_path;
-
+        int midiChannel;
+        bool useAlsa;
+        std::string alsaConfig;
 };
 
 

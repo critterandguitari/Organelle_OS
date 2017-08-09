@@ -71,6 +71,7 @@ void goHome(OSCMessage &msg);
 void enablePatchSubMenu(OSCMessage &msg);
 void enableAuxSubMenu(OSCMessage &msg);
 void loadPatch(OSCMessage &msg);
+void midiConfig(OSCMessage &msg);
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
@@ -171,6 +172,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/enableauxsub", enableAuxSubMenu, 0);
                 msgIn.dispatch("/oled/invertline", invertScreenLine, 0);
                 msgIn.dispatch("/loadPatch", loadPatch, 0);
+                msgIn.dispatch("/midiConfig", midiConfig, 0);
             }
             else {
                 printf("bad message\n");
@@ -408,6 +410,15 @@ void loadPatch(OSCMessage &msg){
         menu.loadPatch(patchName);
     }
 }
+
+void midiConfig(OSCMessage &msg){
+    app.readMidiConfig();
+    OSCMessage msgOut("/midich");
+    msgOut.add(app.getMidiChannel());
+    msgOut.send(dump);
+    udpSock.writeBuffer(dump.buffer, dump.length);
+}
+
 
 void invertScreenLine(OSCMessage &msg){
     if (msg.isInt(0)){
