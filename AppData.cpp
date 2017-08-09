@@ -100,7 +100,7 @@ void AppData::setFirmwareDir(const char* path) {
 }
 
 void AppData::readMidiConfig() {
-    std::ifstream infile(user_path+"/MIDI-Config.txt");
+    std::ifstream infile(std::string(user_path+"/MIDI-Config.txt").c_str());
     std::string line;
     while (std::getline(infile, line))
     {
@@ -108,7 +108,7 @@ void AppData::readMidiConfig() {
             int sep = line.find(" ");
             if(sep!=std::string::npos && sep > 0 && line.length() - sep > 2) {
                 std::string param = line.substr(0,sep);
-                std::string arg = line.substr(sep + 1, line.length() - 1); // ignore semi colon
+                std::string arg = line.substr(sep + 1, line.length() - sep - 2); // ignore semi colon
                 if(param == "channel") {
                     midiChannel = atoi(arg.c_str());
                     printf("using midi channel %d \n", midiChannel);

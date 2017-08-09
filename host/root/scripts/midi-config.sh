@@ -55,8 +55,9 @@ while read line; do
 
     if [ "$line" == "/encoder/button i 1" ]
     then 
-        grep -v "channel" $MIDIFILE > $MIDIFILE
-        echo "channel $CH;" >> $MIDIFILE
+        grep -v "channel" $MIDIFILE > $MIDIFILE.tmp
+        echo "channel $CH;" >> $MIDIFILE.tmp
+        mv $MIDIFILE.tmp $MIDIFILE
         oscsend localhost 4000 /midich i $CH
         
         oscsend localhost 4001 /oled/aux/clear i 1
