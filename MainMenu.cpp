@@ -184,20 +184,8 @@ void MainMenu::runPatch(const char* name,const char* arg){
         // start patch
         system(buf);
 
-        //send PD midi channel 
-        sprintf(buf2, "(sleep 2; oscsend localhost 4000 /midich i %d ) &", app.getMidiChannel());
-        system(buf2);
-
-        if(app.isAlsa()) {
-            std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
-            execScript(cmd.c_str());
-        }
-
-
-
-
-        // update stuff
-        app.patchIsRunning = 1;
+            // update stuff
+        app.setPatchLoading(true);
         app.patchScreen.clear();
         app.currentScreen = PATCH;
         app.newScreen = 1;
@@ -356,7 +344,7 @@ void MainMenu::drawPatchList(void){
         app.menuScreen.invertLine(cursorOffset);   
     }
 
-    if (!app.patchIsRunning) {
+    if (! (app.isPatchRunning() || app.isPatchLoading()) ) {
         app.menuScreen.drawNotification("Select a patch...");
     }
 
@@ -457,7 +445,7 @@ void MainMenu::buildMenu(void){
 
     if(favouriteMenu) {
         addMenuItem(numMenuEntries++, "---- FAVOURITES -----", "", &MainMenu::runDoNothing);
-        if(app.patchIsRunning) {
+        if(app.isPatchRunning() || app.isPatchLoading()) {
             addMenuItem(numMenuEntries++, "Add Current", "", &MainMenu::runAddToFavourite);
             addMenuItem(numMenuEntries++, "Remove Current", "", &MainMenu::runDelFromFavourite);
         }
@@ -547,15 +535,6 @@ void MainMenu::buildMenu(void){
             addMenuItem(numMenuEntries++, "with Patches folder.", "", &MainMenu::runDoNothing);
             addMenuItem(numMenuEntries++, "Then select Reload.", "", &MainMenu::runDoNothing);
         }
-
-        // set cursor to beg
-
-        //TODO - check, why? seems unnecesary;
-        // kill pd 
-        // printf("stopping pd... \n");
-        // sprintf(buf, "/root/scripts/killpd.sh ");
-        // system(buf);
-        // app.patchIsRunning = 0;
     }
 
     menuOffset = patchMenuOffset - 1;

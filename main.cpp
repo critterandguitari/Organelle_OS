@@ -72,6 +72,7 @@ void enablePatchSubMenu(OSCMessage &msg);
 void enableAuxSubMenu(OSCMessage &msg);
 void loadPatch(OSCMessage &msg);
 void midiConfig(OSCMessage &msg);
+void patchLoaded(OSCMessage &msg);
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
@@ -83,6 +84,7 @@ void encoderButton(OSCMessage &msg);
 void updateScreenPage(uint8_t page, OledScreen &screen);
 void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg);
 void sendGetKnobs(void);
+void patchLoaded(bool);
 /* end helpers */
 
 int main(int argc, char* argv[]) {
@@ -173,6 +175,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/invertline", invertScreenLine, 0);
                 msgIn.dispatch("/loadPatch", loadPatch, 0);
                 msgIn.dispatch("/midiConfig", midiConfig, 0);
+                msgIn.dispatch("/patchLoaded", patchLoaded, 0);
             }
             else {
                 printf("bad message\n");
@@ -228,7 +231,7 @@ int main(int argc, char* argv[]) {
                     updateScreenPage(7, app.menuScreen);
                 }
                 // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
-                if (app.patchIsRunning){
+                if (app.isPatchRunning() || app.isPatchLoading()){
                     if (app.menuScreenTimeout > 0) app.menuScreenTimeout -= 50;
                     else {
                         app.currentScreen = PATCH;
@@ -254,13 +257,15 @@ int main(int argc, char* argv[]) {
             }
         }
        
-        // every 1 second send a ping in case MCU resets
+        // every 1 second do (slwo) periodic tasks
         if (pingTimer.getElapsed() > 1000.f){
-          //  printf("pinged the MCU at %f ms.\n", upTime.getElapsed());
+            // printf("pinged the MCU at %f ms.\n", upTime.getElapsed());
+            // send a ping in case MCU resets
             pingTimer.reset();
             rdyMsg.send(dump);
             slip.sendMessage(dump.buffer, dump.length, serial);
 
+            // check for shutdown shortcut
             if(encoderDownTime!=-1) {
                 encoderDownTime--;
                 if(encoderDownTime==0) {
@@ -268,6 +273,13 @@ int main(int argc, char* argv[]) {
                     menu.runShutdown(0,0);
                 }
             }
+
+            // check for patch loading timeout
+            if(app.hasPatchLoadingTimedOut(1000)) {
+                fprintf(stderr, "timeout: Patch did not return patchLoaded , will assume its loaded");
+                patchLoaded(true);
+            }
+
         }
 
         // poll for knobs
@@ -417,6 +429,29 @@ void midiConfig(OSCMessage &msg){
     msgOut.add(app.getMidiChannel());
     msgOut.send(dump);
     udpSock.writeBuffer(dump.buffer, dump.length);
+}
+
+void patchLoaded(bool b){
+    //patch is loaded, tell patch some config details
+    app.setPatchLoading(false);
+    app.setPatchRunning(true);
+    printf("patch loaded, send config");
+
+    // send patch midi channel to use
+    OSCMessage msgOut("/midich");
+    msgOut.add(app.getMidiChannel());
+    msgOut.send(dump);
+    udpSock.writeBuffer(dump.buffer, dump.length);
+
+    // if using alsa, connect alsa device to PD virtual device
+    if(app.isAlsa()) {
+        std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
+        system(cmd.c_str());
+    }
+}
+
+void patchLoaded(OSCMessage &msg){
+    patchLoaded(true);
 }
 
 

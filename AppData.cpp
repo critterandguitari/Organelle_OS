@@ -18,6 +18,8 @@ const char* USB_FW="/usbdrive/Firmware";
 const char* SD_FW="/sdcard/Firmware";
 const char* DEFAULT_FW="/root";
 
+const char* DEFAULT_ALSA_CONFIG="28:0 128:0 128:1 28:0";
+
 const char* getDefaultPatchDir() {
     struct stat st;
     if(stat(USB_PATCHES, &st)==0) {
@@ -54,7 +56,8 @@ const char* getDefaultFirwareDir() {
 
 
 AppData::AppData(){
-    patchIsRunning = 0;
+    patchIsRunning =false;
+    patchIsLoading =false;
     menuScreenTimeout = MENU_TIMEOUT;
     newScreen = 0;
     currentScreen = MENU;
@@ -62,6 +65,7 @@ AppData::AppData(){
     auxScreenEncoderOverride = 0;
     midiChannel = 1;
     useAlsa = false;
+    alsaConfig = DEFAULT_ALSA_CONFIG;
     setPatchDir(NULL);
     setFirmwareDir(NULL);
     setUserDir(NULL);
