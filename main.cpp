@@ -41,6 +41,23 @@ MainMenu menu;
 // exit flag
 int quit = 0;
 
+void setEnv() {
+    setenv("PATCH_DIR",app.getPatchDir(),1);
+    setenv("FW_DIR",app.getFirmwareDir(),1);
+    setenv("USER_DIR",app.getUserDir(),1);
+}
+
+
+int execScript(const char* cmd) {
+    char buf[128];
+    sprintf(buf,"%s/scripts/%s",app.getFirmwareDir(),cmd);
+    setEnv();
+    return system(buf);
+}
+
+
+
+
 /** OSC messages received internally (from PD or other program) **/
 void setPatchScreenLine1(OSCMessage &msg);
 void setPatchScreenLine2(OSCMessage &msg);
@@ -269,14 +286,14 @@ int main(int argc, char* argv[]) {
             if(encoderDownTime!=-1) {
                 encoderDownTime--;
                 if(encoderDownTime==0) {
-                    fprintf(stderr, "shutting down.....");
+                    fprintf(stderr, "shutting down.....\n");
                     menu.runShutdown(0,0);
                 }
             }
 
             // check for patch loading timeout
             if(app.hasPatchLoadingTimedOut(1000)) {
-                fprintf(stderr, "timeout: Patch did not return patchLoaded , will assume its loaded");
+                fprintf(stderr, "timeout: Patch did not return patchLoaded , will assume its loaded\n");
                 patchLoaded(true);
             }
 
@@ -446,7 +463,7 @@ void patchLoaded(bool b){
     // if using alsa, connect alsa device to PD virtual device
     if(app.isAlsa()) {
         std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
-        system(cmd.c_str());
+        execScript(cmd.c_str());
     }
 }
 

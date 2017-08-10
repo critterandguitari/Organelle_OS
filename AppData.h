@@ -63,7 +63,7 @@ class AppData
         inline bool hasPatchLoadingTimedOut(int msec) {
             if(patchIsLoading) {
                 patchLoadingTimeout -= msec;
-                return msec < 0;
+                return patchLoadingTimeout < 0;
             }
             return false;
         }
