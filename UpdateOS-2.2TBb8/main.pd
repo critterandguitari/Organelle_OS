@@ -1,0 +1,31 @@
+#N canvas 919 330 1265 639 10;
+#X obj 515 282 shell;
+#X obj 135 58 loadbang;
+#X msg 129 91 \; screenLine1 Press Aux to begin. \; screenLine2 When
+the update is \; screenLine3 complete the \; screenLine4 Organelle
+will \; screenLine5 shutdown. \;;
+#X obj 494 139 sel 1;
+#X obj 494 62 r aux;
+#X obj 494 161 t b b;
+#X obj 539 189 s clear-oled;
+#X msg 292 303 \; screenLine2 Updating... \;;
+#X obj 515 220 delay 1000;
+#N canvas 7 50 450 300 clear-oled 0;
+#X msg 91 123 \; oscOut send /oled/line/1 \; oscOut send /oled/line/2
+\; oscOut send /oled/line/3 \; oscOut send /oled/line/4 \; oscOut send
+/oled/line/5 \;;
+#X obj 91 47 r clear-oled;
+#X obj 91 83 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X restore 139 206 pd clear-oled;
+#X msg 515 250 /usbdrive/Patches/UpdateOS-2.2TBb8/deploy.sh;
+#X connect 1 0 2 0;
+#X connect 3 0 5 0;
+#X connect 4 0 3 0;
+#X connect 5 0 7 0;
+#X connect 5 0 8 0;
+#X connect 5 1 6 0;
+#X connect 8 0 10 0;
+#X connect 10 0 0 0;

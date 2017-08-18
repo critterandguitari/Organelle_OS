@@ -12,11 +12,7 @@
 
 #include "MainMenu.h"
 
-
-
-
 extern AppData app; 
-
 
 MainMenu::MainMenu(){
     numPatches = 0;
@@ -77,6 +73,9 @@ void MainMenu::runDoNothing(const char* name,const char* ){
 void MainMenu::runReload(const char* name,const char* arg) {
     printf("Reloading... \n");
     execScript("mount.sh");
+    // set patch and user dir to defaults
+    app.setPatchDir(NULL);
+    app.setUserDir(NULL);
     buildMenu();
 }
 void MainMenu::runShutdown(const char* name,const char* arg) {
