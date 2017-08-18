@@ -502,14 +502,14 @@ void enablePatchSubMenu(OSCMessage &msg ) {
     int v = 1;
     if (msg.isInt(0)) { v = msg.getInt(0);}
     printf("enabling patch sub menu %d\n", v);
-    app.patchScreenEncoderOverride = v;
+    app.setPatchScreenEncoderOverride(v);
 }
 
 void enableAuxSubMenu(OSCMessage &msg ) {
     int v = 1;
     if (msg.isInt(0)) { v = msg.getInt(0);}
     printf("enabling aux sub menu %d\n", v);
-    app.auxScreenEncoderOverride = v;
+    app.setAuxScreenEncoderOverride(v);
 }
 
 /* end internal OSC messages received */
@@ -531,7 +531,7 @@ void encoderInput(OSCMessage &msg){
     // if in patch mode, send encoder, but only if the patch said it wants encoder access
     if (app.currentScreen == PATCH){
         if (msg.isInt(0)){
-            if (app.patchScreenEncoderOverride){
+            if (app.isPatchScreenEncoderOverride()){
                 OSCMessage msgOut("/encoder/turn");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);
@@ -547,7 +547,7 @@ void encoderInput(OSCMessage &msg){
     // same for aux screen
     if (app.currentScreen == AUX){
         if (msg.isInt(0)){
-            if (app.auxScreenEncoderOverride){
+            if (app.isAuxScreenEncoderOverride()){
                 OSCMessage msgOut("/encoder/turn");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);
@@ -571,8 +571,8 @@ void encoderInput(OSCMessage &msg){
 // in patch screen, bounce back to menu, unless override is on 
 // in aux screen, same
 void encoderButton(OSCMessage &msg){
-     if( !  ( (app.currentScreen == PATCH && app.patchScreenEncoderOverride) 
-            || (app.currentScreen == AUX && app.auxScreenEncoderOverride))) {
+     if( !  ( (app.currentScreen == PATCH && app.isPatchScreenEncoderOverride()) 
+            || (app.currentScreen == AUX && app.isAuxScreenEncoderOverride()))) {
 
         if(msg.isInt(0)) { 
             if(msg.getInt(0)) {
@@ -601,7 +601,7 @@ void encoderButton(OSCMessage &msg){
     // if in patch mode, send encoder, but only if the patch said it wants encoder access
     if (app.currentScreen == PATCH){
         if (msg.isInt(0)){
-            if (app.patchScreenEncoderOverride){
+            if (app.isPatchScreenEncoderOverride()){
                 OSCMessage msgOut("/encoder/button");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);
@@ -612,7 +612,7 @@ void encoderButton(OSCMessage &msg){
     // same for the aux screen 
     if (app.currentScreen == AUX){
          if (msg.isInt(0)){
-            if (app.auxScreenEncoderOverride){
+            if (app.isAuxScreenEncoderOverride()){
                 OSCMessage msgOut("/encoder/button");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);

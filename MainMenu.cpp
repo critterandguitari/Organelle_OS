@@ -94,6 +94,8 @@ void MainMenu::runInfo(const char* name,const char* arg) {
 void MainMenu::runEject(const char* name,const char* arg) {
     printf("Ejecting USB drive... \n");
     execScript("eject.sh &");
+    app.setPatchRunning(false);
+    app.setPatchScreenEncoderOverride(false);
 }
 
 void MainMenu::runMidiChannel(const char* name,const char* arg) {
@@ -179,7 +181,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
         //printf("%s \n", buf2);
     
         // disable encoder override
-        app.patchScreenEncoderOverride = 0;
+        app.setPatchScreenEncoderOverride(false);
         
         // start patch
         system(buf);
