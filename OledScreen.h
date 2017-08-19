@@ -12,7 +12,7 @@ class OledScreen
         OledScreen();
         uint8_t pix_buf[1024];
 
-        void setLine(int lineNumber, char * line);
+        void setLine(int lineNumber, const char * line);
         void clearLine(int lineNum);
         void invertLine(int lineNum);
 

@@ -14,6 +14,7 @@
 #include "Timer.h"
 #include "AppData.h"
 
+int       previousScreen = -1;
 int       encoderDownTime = 0;
 const int SHUTDOWN_TIME=4;
 
@@ -40,6 +41,23 @@ MainMenu menu;
 
 // exit flag
 int quit = 0;
+
+void setEnv() {
+    setenv("PATCH_DIR",app.getPatchDir(),1);
+    setenv("FW_DIR",app.getFirmwareDir(),1);
+    setenv("USER_DIR",app.getUserDir(),1);
+}
+
+
+int execScript(const char* cmd) {
+    char buf[128];
+    sprintf(buf,"%s/scripts/%s",app.getFirmwareDir(),cmd);
+    setEnv();
+    return system(buf);
+}
+
+
+
 
 /** OSC messages received internally (from PD or other program) **/
 void setPatchScreenLine1(OSCMessage &msg);
@@ -71,6 +89,8 @@ void goHome(OSCMessage &msg);
 void enablePatchSubMenu(OSCMessage &msg);
 void enableAuxSubMenu(OSCMessage &msg);
 void loadPatch(OSCMessage &msg);
+void midiConfig(OSCMessage &msg);
+void patchLoaded(OSCMessage &msg);
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
@@ -82,6 +102,7 @@ void encoderButton(OSCMessage &msg);
 void updateScreenPage(uint8_t page, OledScreen &screen);
 void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg);
 void sendGetKnobs(void);
+void patchLoaded(bool);
 /* end helpers */
 
 int main(int argc, char* argv[]) {
@@ -171,6 +192,8 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/enableauxsub", enableAuxSubMenu, 0);
                 msgIn.dispatch("/oled/invertline", invertScreenLine, 0);
                 msgIn.dispatch("/loadPatch", loadPatch, 0);
+                msgIn.dispatch("/midiConfig", midiConfig, 0);
+                msgIn.dispatch("/patchLoaded", patchLoaded, 0);
             }
             else {
                 printf("bad message\n");
@@ -226,7 +249,7 @@ int main(int argc, char* argv[]) {
                     updateScreenPage(7, app.menuScreen);
                 }
                 // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
-                if (app.patchIsRunning){
+                if (app.isPatchRunning() || app.isPatchLoading()){
                     if (app.menuScreenTimeout > 0) app.menuScreenTimeout -= 50;
                     else {
                         app.currentScreen = PATCH;
@@ -252,20 +275,40 @@ int main(int argc, char* argv[]) {
             }
         }
        
-        // every 1 second send a ping in case MCU resets
+        // every 1 second do (slwo) periodic tasks
         if (pingTimer.getElapsed() > 1000.f){
-          //  printf("pinged the MCU at %f ms.\n", upTime.getElapsed());
+            // printf("pinged the MCU at %f ms.\n", upTime.getElapsed());
+            // send a ping in case MCU resets
             pingTimer.reset();
             rdyMsg.send(dump);
             slip.sendMessage(dump.buffer, dump.length, serial);
 
+            // check for shutdown shortcut
             if(encoderDownTime!=-1) {
                 encoderDownTime--;
-                if(encoderDownTime==0) {
-                    fprintf(stderr, "shutting down.....");
+                if(encoderDownTime==1) {
+                    app.auxScreen.clear();
+                    app.auxScreen.setLine(2,"HOLD to shutdown");
+                    app.auxScreen.setLine(4,"release to abort");
+                    app.newScreen=1;
+                    previousScreen = app.currentScreen;
+                    app.currentScreen = AUX;
+                }
+                else if(encoderDownTime==0) {
+                    fprintf(stderr, "shutting down.....\n");
+                    app.auxScreen.clear();
+                    app.auxScreen.setLine(3,"Shutting down");
+                    app.newScreen=1;
                     menu.runShutdown(0,0);
                 }
             }
+
+            // check for patch loading timeout
+            if(app.hasPatchLoadingTimedOut(1000)) {
+                fprintf(stderr, "timeout: Patch did not return patchLoaded , will assume its loaded\n");
+                patchLoaded(true);
+            }
+
         }
 
         // poll for knobs
@@ -409,6 +452,38 @@ void loadPatch(OSCMessage &msg){
     }
 }
 
+void midiConfig(OSCMessage &msg){
+    app.readMidiConfig();
+    OSCMessage msgOut("/midich");
+    msgOut.add(app.getMidiChannel());
+    msgOut.send(dump);
+    udpSock.writeBuffer(dump.buffer, dump.length);
+}
+
+void patchLoaded(bool b){
+    //patch is loaded, tell patch some config details
+    app.setPatchLoading(false);
+    app.setPatchRunning(true);
+    printf("patch loaded, send config");
+
+    // send patch midi channel to use
+    OSCMessage msgOut("/midich");
+    msgOut.add(app.getMidiChannel());
+    msgOut.send(dump);
+    udpSock.writeBuffer(dump.buffer, dump.length);
+
+    // if using alsa, connect alsa device to PD virtual device
+    if(app.isAlsa()) {
+        std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
+        execScript(cmd.c_str());
+    }
+}
+
+void patchLoaded(OSCMessage &msg){
+    patchLoaded(true);
+}
+
+
 void invertScreenLine(OSCMessage &msg){
     if (msg.isInt(0)){
         int line = msg.getInt(0);
@@ -439,14 +514,14 @@ void enablePatchSubMenu(OSCMessage &msg ) {
     int v = 1;
     if (msg.isInt(0)) { v = msg.getInt(0);}
     printf("enabling patch sub menu %d\n", v);
-    app.patchScreenEncoderOverride = v;
+    app.setPatchScreenEncoderOverride(v);
 }
 
 void enableAuxSubMenu(OSCMessage &msg ) {
     int v = 1;
     if (msg.isInt(0)) { v = msg.getInt(0);}
     printf("enabling aux sub menu %d\n", v);
-    app.auxScreenEncoderOverride = v;
+    app.setAuxScreenEncoderOverride(v);
 }
 
 /* end internal OSC messages received */
@@ -458,6 +533,14 @@ void enableAuxSubMenu(OSCMessage &msg ) {
 // in patch screen, bounce back to menu, unless override is on 
 // in aux screen, same
 void encoderInput(OSCMessage &msg){
+    // if encoder is turned, abort shutdown timer
+    encoderDownTime = -1;
+    if(previousScreen>=0) {
+       app.currentScreen = previousScreen;
+       previousScreen = -1;
+       app.newScreen = 1;
+    }
+
     if (app.currentScreen == MENU){
         if (msg.isInt(0)){
             app.menuScreenTimeout = MENU_TIMEOUT;
@@ -468,7 +551,7 @@ void encoderInput(OSCMessage &msg){
     // if in patch mode, send encoder, but only if the patch said it wants encoder access
     if (app.currentScreen == PATCH){
         if (msg.isInt(0)){
-            if (app.patchScreenEncoderOverride){
+            if (app.isPatchScreenEncoderOverride()){
                 OSCMessage msgOut("/encoder/turn");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);
@@ -484,7 +567,7 @@ void encoderInput(OSCMessage &msg){
     // same for aux screen
     if (app.currentScreen == AUX){
         if (msg.isInt(0)){
-            if (app.auxScreenEncoderOverride){
+            if (app.isAuxScreenEncoderOverride()){
                 OSCMessage msgOut("/encoder/turn");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);
@@ -508,8 +591,8 @@ void encoderInput(OSCMessage &msg){
 // in patch screen, bounce back to menu, unless override is on 
 // in aux screen, same
 void encoderButton(OSCMessage &msg){
-     if( !  ( (app.currentScreen == PATCH && app.patchScreenEncoderOverride) 
-            || (app.currentScreen == AUX && app.auxScreenEncoderOverride))) {
+     if( !  ( (app.currentScreen == PATCH && app.isPatchScreenEncoderOverride()) 
+            || (app.currentScreen == AUX && app.isAuxScreenEncoderOverride()))) {
 
         if(msg.isInt(0)) { 
             if(msg.getInt(0)) {
@@ -519,7 +602,20 @@ void encoderButton(OSCMessage &msg){
             }
             else {
                encoderDownTime = -1;
+               if(previousScreen>=0) {
+                   app.currentScreen = previousScreen;
+                   previousScreen = -1;
+                   app.newScreen = 1;
+               }
             }
+
+        } else {
+           encoderDownTime = -1;
+           if(previousScreen>=0) {
+               app.currentScreen = previousScreen;
+               previousScreen = -1;
+               app.newScreen = 1;
+           }
         }
     }
 
@@ -538,7 +634,7 @@ void encoderButton(OSCMessage &msg){
     // if in patch mode, send encoder, but only if the patch said it wants encoder access
     if (app.currentScreen == PATCH){
         if (msg.isInt(0)){
-            if (app.patchScreenEncoderOverride){
+            if (app.isPatchScreenEncoderOverride()){
                 OSCMessage msgOut("/encoder/button");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);
@@ -549,7 +645,7 @@ void encoderButton(OSCMessage &msg){
     // same for the aux screen 
     if (app.currentScreen == AUX){
          if (msg.isInt(0)){
-            if (app.auxScreenEncoderOverride){
+            if (app.isAuxScreenEncoderOverride()){
                 OSCMessage msgOut("/encoder/button");
                 msgOut.add(msg.getInt(0));
                 msgOut.send(dump);

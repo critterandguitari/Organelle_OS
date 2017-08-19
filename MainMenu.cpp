@@ -12,11 +12,7 @@
 
 #include "MainMenu.h"
 
-
-
-
 extern AppData app; 
-
 
 MainMenu::MainMenu(){
     numPatches = 0;
@@ -77,6 +73,9 @@ void MainMenu::runDoNothing(const char* name,const char* ){
 void MainMenu::runReload(const char* name,const char* arg) {
     printf("Reloading... \n");
     execScript("mount.sh");
+    // set patch and user dir to defaults
+    app.setPatchDir(NULL);
+    app.setUserDir(NULL);
     buildMenu();
 }
 void MainMenu::runShutdown(const char* name,const char* arg) {
@@ -94,6 +93,8 @@ void MainMenu::runInfo(const char* name,const char* arg) {
 void MainMenu::runEject(const char* name,const char* arg) {
     printf("Ejecting USB drive... \n");
     execScript("eject.sh &");
+    app.setPatchRunning(false);
+    app.setPatchScreenEncoderOverride(false);
 }
 
 void MainMenu::runMidiChannel(const char* name,const char* arg) {
@@ -121,7 +122,7 @@ void MainMenu::runSystemCommand(const char* name,const char* arg){
 void MainMenu::runPatch(const char* name,const char* arg){
     char buf[256];
     char buf2[256];
-
+ 
     if (strcmp(arg, "") == 0) {
         printf("Empty menu entry\n");
         return;
@@ -143,13 +144,24 @@ void MainMenu::runPatch(const char* name,const char* arg){
                 sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
             }
         }
+
+        std::string adv_args;
+        if(app.isAlsa()) adv_args = adv_args + "-alsamidi ";
         if(execScript("check-for-x.sh")){
             printf("starting in GMainMenu mode\n");
-            sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 %s \"%s/%s/main.pd\" &", motherpd, app.getPatchDir(), arg);
+            sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 %s %s \"%s/%s/main.pd\" &", 
+                adv_args.c_str(), 
+                motherpd, 
+                app.getPatchDir(), 
+                arg);
         }
         else {
             printf("starting in NON GMainMenu mode\n");
-            sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 %s \"%s/%s/main.pd\" &", motherpd, app.getPatchDir(), arg);
+            sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 %s %s \"%s/%s/main.pd\" &", 
+                adv_args.c_str(), 
+                motherpd, 
+                app.getPatchDir(), 
+                arg);
         }
 
         // first kill any other PD
@@ -168,13 +180,13 @@ void MainMenu::runPatch(const char* name,const char* arg){
         //printf("%s \n", buf2);
     
         // disable encoder override
-        app.patchScreenEncoderOverride = 0;
+        app.setPatchScreenEncoderOverride(false);
         
         // start patch
         system(buf);
 
-        // update stuff
-        app.patchIsRunning = 1;
+            // update stuff
+        app.setPatchLoading(true);
         app.patchScreen.clear();
         app.currentScreen = PATCH;
         app.newScreen = 1;
@@ -333,7 +345,7 @@ void MainMenu::drawPatchList(void){
         app.menuScreen.invertLine(cursorOffset);   
     }
 
-    if (!app.patchIsRunning) {
+    if (! (app.isPatchRunning() || app.isPatchLoading()) ) {
         app.menuScreen.drawNotification("Select a patch...");
     }
 
@@ -434,7 +446,7 @@ void MainMenu::buildMenu(void){
 
     if(favouriteMenu) {
         addMenuItem(numMenuEntries++, "---- FAVOURITES -----", "", &MainMenu::runDoNothing);
-        if(app.patchIsRunning) {
+        if(app.isPatchRunning() || app.isPatchLoading()) {
             addMenuItem(numMenuEntries++, "Add Current", "", &MainMenu::runAddToFavourite);
             addMenuItem(numMenuEntries++, "Remove Current", "", &MainMenu::runDelFromFavourite);
         }
@@ -524,15 +536,6 @@ void MainMenu::buildMenu(void){
             addMenuItem(numMenuEntries++, "with Patches folder.", "", &MainMenu::runDoNothing);
             addMenuItem(numMenuEntries++, "Then select Reload.", "", &MainMenu::runDoNothing);
         }
-
-        // set cursor to beg
-
-        //TODO - check, why? seems unnecesary;
-        // kill pd 
-        // printf("stopping pd... \n");
-        // sprintf(buf, "/root/scripts/killpd.sh ");
-        // system(buf);
-        // app.patchIsRunning = 0;
     }
 
     menuOffset = patchMenuOffset - 1;

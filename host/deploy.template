@@ -2,14 +2,16 @@
 
 
 # USER_DIR=${USER_DIR:="/usbdrive"}
-# PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
+PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
 FW_DIR=${FW_DIR:="/root"}
 SCRIPTS_DIR=$FW_DIR/scripts
 
+IMAGE_DIR=${PATCH_DIR}/UpdateOS-XXXXXXXXXX
+cd ${IMAGE_DIR}
 
-echo "Updating OS to " `cat /usbdrive/Patches/UpdateOS-XXXXXXXXXX/version` `cat /usbdrive/Patches/UpdateOS-XXXXXXXXXX/buildtag`
 
-cd /usbdrive/Patches/UpdateOS-XXXXXXXXXX
+echo "Updating OS to " `cat ${IMAGE_DIR}/version` `cat ${IMAGE_DIR}/buildtag`
+
 mv files.sha1 /tmp
 openssl sha1 `cat manifest` > /tmp/files.tmp
 
@@ -28,15 +30,28 @@ mv /tmp/files.sha1 .
 # remount root read write
 /root/scripts/remount-rw.sh
 
+
+#remove the default critter git user
+if grep critter  /root/.gitconfig ; then rm /root/.gitconfig; fi
+
 # copy files
-cp -f /usbdrive/Patches/UpdateOS-XXXXXXXXXX/mother.pd /root
-cp -f /usbdrive/Patches/UpdateOS-XXXXXXXXXX/mother /root
-cp -f /usbdrive/Patches/UpdateOS-XXXXXXXXXX/.bash_profile /root
-cp -f /usbdrive/Patches/UpdateOS-XXXXXXXXXX/.jwmrc /root
-cp -f /usbdrive/Patches/UpdateOS-XXXXXXXXXX/.pdsettings /root
-cp -f /usbdrive/Patches/UpdateOS-XXXXXXXXXX/version /root
-cp -f /usbdrive/Patches/UpdateOS-XXXXXXXXXX/buildtag /root
-cp -f /usbdrive/Patches/UpdateOS-XXXXXXXXXX/scripts/* /root/scripts
+cp -f ${IMAGE_DIR}/mother.pd /root
+cp -f ${IMAGE_DIR}/mother /root
+cp -f ${IMAGE_DIR}/version /root
+cp -f ${IMAGE_DIR}/buildtag /root
+cp -f ${IMAGE_DIR}/scripts/* /root/scripts
+
+# system config
+cp -f ${IMAGE_DIR}/.bash_profile /root
+cp -f ${IMAGE_DIR}/.jwmrc /root
+cp -f ${IMAGE_DIR}/.pdsettings /root
+
+mkdir -p /root/.ssh
+cp -f ${IMAGE_DIR}/.ssh/environment /root/.ssh/environment
+cp -f ${IMAGE_DIR}/system/etc/ssh/sshd_config /etc/ssh/sshd_config
+
+
+echo "root:organelle" | chpasswd
 
 # sync
 sync 

@@ -55,13 +55,16 @@ while read line; do
 
     if [ "$line" == "/encoder/button i 1" ]
     then 
-        echo "channel $CH;" > $MIDIFILE
+        grep -v "channel" $MIDIFILE > $MIDIFILE.tmp
+        echo "channel $CH;" >> $MIDIFILE.tmp
+        mv $MIDIFILE.tmp $MIDIFILE
         oscsend localhost 4000 /midich i $CH
         
         oscsend localhost 4001 /oled/aux/clear i 1
         oscsend localhost 4001 /oled/aux/line/2 s "MIDI Channel"
         oscsend localhost 4001 /oled/aux/line/3 s "set to ${CH}."
         oscsend localhost 4001 /enableauxsub i 0
+        oscsend localhost 4001 /midiConfig i 1
         break 2
     fi
 done < <($SCRIPTS_DIR/oscdump2 4002)

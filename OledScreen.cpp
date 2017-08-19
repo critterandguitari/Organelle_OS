@@ -39,7 +39,7 @@ void OledScreen::clear(void){
     for (i = 0; i < 1024; i++) pix_buf[i] = 0;
 }
 
-void OledScreen::setLine(int lineNum, char * line) {
+void OledScreen::setLine(int lineNum, const char * line) {
 
     int i, len;
 

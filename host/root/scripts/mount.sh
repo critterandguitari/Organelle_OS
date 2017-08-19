@@ -53,6 +53,10 @@ case "$ID_FS_TYPE" in
    vfat)  mount -t vfat -o async,noatime,uid=1000 ${DEVICE} "/usbdrive"
           ;;
 
+   exfat)  mount -t exfat -o async,noatime,uid=1000 ${DEVICE} "/usbdrive"
+          ;;
+
+
           # I like the locale setting for ntfs
    ntfs)  mount -t auto -o async,noatime,uid=1000,locale=en_US.UTF-8 ${DEVICE} "/usbdrive"
           ;;
