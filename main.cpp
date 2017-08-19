@@ -14,6 +14,7 @@
 #include "Timer.h"
 #include "AppData.h"
 
+int       previousScreen = -1;
 int       encoderDownTime = 0;
 const int SHUTDOWN_TIME=4;
 
@@ -285,8 +286,19 @@ int main(int argc, char* argv[]) {
             // check for shutdown shortcut
             if(encoderDownTime!=-1) {
                 encoderDownTime--;
-                if(encoderDownTime==0) {
+                if(encoderDownTime==1) {
+                    app.auxScreen.clear();
+                    app.auxScreen.setLine(2,"HOLD to shutdown");
+                    app.auxScreen.setLine(4,"release to abort");
+                    app.newScreen=1;
+                    previousScreen = app.currentScreen;
+                    app.currentScreen = AUX;
+                }
+                else if(encoderDownTime==0) {
                     fprintf(stderr, "shutting down.....\n");
+                    app.auxScreen.clear();
+                    app.auxScreen.setLine(3,"Shutting down");
+                    app.newScreen=1;
                     menu.runShutdown(0,0);
                 }
             }
@@ -521,6 +533,14 @@ void enableAuxSubMenu(OSCMessage &msg ) {
 // in patch screen, bounce back to menu, unless override is on 
 // in aux screen, same
 void encoderInput(OSCMessage &msg){
+    // if encoder is turned, abort shutdown timer
+    encoderDownTime = -1;
+    if(previousScreen>=0) {
+       app.currentScreen = previousScreen;
+       previousScreen = -1;
+       app.newScreen = 1;
+    }
+
     if (app.currentScreen == MENU){
         if (msg.isInt(0)){
             app.menuScreenTimeout = MENU_TIMEOUT;
@@ -582,7 +602,20 @@ void encoderButton(OSCMessage &msg){
             }
             else {
                encoderDownTime = -1;
+               if(previousScreen>=0) {
+                   app.currentScreen = previousScreen;
+                   previousScreen = -1;
+                   app.newScreen = 1;
+               }
             }
+
+        } else {
+           encoderDownTime = -1;
+           if(previousScreen>=0) {
+               app.currentScreen = previousScreen;
+               previousScreen = -1;
+               app.newScreen = 1;
+           }
         }
     }
 
