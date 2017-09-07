@@ -67,6 +67,18 @@ void setPatchScreenLine4(OSCMessage &msg);
 void setPatchScreenLine5(OSCMessage &msg);
 void invertScreenLine(OSCMessage &msg);
 
+// graphics messages for the patch screen
+void gShowInfoBar(OSCMessage &msg);
+void gClear(OSCMessage &msg);
+void gSetPixel(OSCMessage &msg);
+void gRect(OSCMessage &msg);
+void gCircle(OSCMessage &msg);
+void gLine(OSCMessage &msg);
+void gCharSmall(OSCMessage &msg);
+void gChar16(OSCMessage &msg);
+void gChar24(OSCMessage &msg);
+void gChar32(OSCMessage &msg);
+
 void setAuxScreenLine0(OSCMessage &msg);
 void setAuxScreenLine1(OSCMessage &msg);
 void setAuxScreenLine2(OSCMessage &msg);
@@ -171,6 +183,19 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/line/3", setPatchScreenLine3, 0);
                 msgIn.dispatch("/oled/line/4", setPatchScreenLine4, 0);
                 msgIn.dispatch("/oled/line/5", setPatchScreenLine5, 0);
+                msgIn.dispatch("/oled/invertline", invertScreenLine, 0);
+                msgIn.dispatch("/oled/showInfoBar", gShowInfoBar, 0);
+                msgIn.dispatch("/oled/clear", gClear, 0);
+                msgIn.dispatch("/oled/setPixel", gSetPixel, 0);
+                msgIn.dispatch("/oled/rect", gRect, 0);
+                msgIn.dispatch("/oled/circle", gCircle, 0);
+                msgIn.dispatch("/oled/line", gLine, 0);
+                msgIn.dispatch("/oled/smallChar", gCharSmall, 0);
+                msgIn.dispatch("/oled/char16", gChar16, 0);
+                msgIn.dispatch("/oled/char24", gChar24, 0);
+                msgIn.dispatch("/oled/char32", gChar32, 0);
+
+                
                 msgIn.dispatch("/oled/aux/line/1", setAuxScreenLine1, 0);
                 msgIn.dispatch("/oled/aux/line/2", setAuxScreenLine2, 0);
                 msgIn.dispatch("/oled/aux/line/3", setAuxScreenLine3, 0);
@@ -179,6 +204,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/aux/invertline", invertAuxScreenLine, 0);
                 msgIn.dispatch("/oled/aux/clear", auxScreenClear, 0);
                 
+               
                 msgIn.dispatch("/ready", sendReady, 0);
                 msgIn.dispatch("/shutdown", sendShutdown, 0);
                 msgIn.dispatch("/led", setLED, 0);
@@ -190,7 +216,6 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/gohome", goHome, 0);
                 msgIn.dispatch("/enablepatchsub", enablePatchSubMenu, 0);
                 msgIn.dispatch("/enableauxsub", enableAuxSubMenu, 0);
-                msgIn.dispatch("/oled/invertline", invertScreenLine, 0);
                 msgIn.dispatch("/loadPatch", loadPatch, 0);
                 msgIn.dispatch("/midiConfig", midiConfig, 0);
                 msgIn.dispatch("/patchLoaded", patchLoaded, 0);
@@ -347,6 +372,45 @@ void setPatchScreenLine5(OSCMessage &msg){
     setScreenLine(app.patchScreen, 5, msg);
     app.newScreen = 1;
 }
+
+void gShowInfoBar(OSCMessage &msg){
+
+}
+void gClear(OSCMessage &msg){
+    if (msg.isInt(0)) if (msg.getInt(0) == 1) app.patchScreen.clear();
+    app.newScreen = 1;
+}
+void gSetPixel(OSCMessage &msg){
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2)) {
+        app.patchScreen.put_pixel(msg.getInt(0), msg.getInt(1), msg.getInt(2));
+        app.newScreen = 1;
+    }
+}
+void gRect(OSCMessage &msg){
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
+        app.patchScreen.draw_rect(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
+        app.newScreen = 1;
+    }
+}
+void gCircle(OSCMessage &msg){
+
+}
+void gLine(OSCMessage &msg){
+
+}
+void gCharSmall(OSCMessage &msg){
+
+}
+void gChar16(OSCMessage &msg){
+
+}
+void gChar24(OSCMessage &msg){
+
+}
+void gChar32(OSCMessage &msg){
+
+}
+
 
 // setting aux screen
 void setAuxScreenLine1(OSCMessage &msg) {

@@ -20,6 +20,7 @@ class OledScreen
         void clear(void);
         
         void draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y);
+        void draw_rect(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y, uint8_t color);
         void drawInfoBar(int inR, int inL, int outR, int outL);
 
         void drawNotification(const char * line );
