@@ -374,7 +374,12 @@ void setPatchScreenLine5(OSCMessage &msg){
 }
 
 void gShowInfoBar(OSCMessage &msg){
-
+    if (msg.isInt(0)) {
+        if (msg.getInt(0) == 0)
+            app.patchScreen.showInfoBar = false;
+        else 
+            app.patchScreen.showInfoBar = true;
+    }
 }
 void gClear(OSCMessage &msg){
     if (msg.isInt(0)) if (msg.getInt(0) == 1) app.patchScreen.clear();
@@ -399,17 +404,30 @@ void gLine(OSCMessage &msg){
 
 }
 void gCharSmall(OSCMessage &msg){
-
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
+        app.patchScreen.put_char_small(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+    }
 }
 void gChar16(OSCMessage &msg){
-
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
+        app.patchScreen.put_char_arial16(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+    }
 }
 void gChar24(OSCMessage &msg){
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
+        app.patchScreen.put_char_arial24(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+    }
 
 }
 void gChar32(OSCMessage &msg){
-
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
+        app.patchScreen.put_char_arial32(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+    }
 }
+
+
+
+
 
 
 // setting aux screen
@@ -473,8 +491,10 @@ void vuMeter(OSCMessage &msg){
     if (msg.isInt(2)) outR = msg.getInt(2);
     if (msg.isInt(3)) outL = msg.getInt(3);
 
-    app.patchScreen.drawInfoBar(inR, inL, outR, outL);
-    app.newScreen = 1;
+    if (app.patchScreen.showInfoBar) {
+        app.patchScreen.drawInfoBar(inR, inL, outR, outL);
+        app.newScreen = 1;
+    }
 }
 
 void setScreen(OSCMessage &msg){

@@ -11,6 +11,7 @@ class OledScreen
     public:
         OledScreen();
         uint8_t pix_buf[1024];
+        bool showInfoBar;
 
         void setLine(int lineNumber, const char * line);
         void clearLine(int lineNum);

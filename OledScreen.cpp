@@ -7,6 +7,7 @@
 
 OledScreen::OledScreen(){
     clear();
+    showInfoBar = true;
     printf("init oled screen, clearing oled screen\n");
 }
 
