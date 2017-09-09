@@ -190,7 +190,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/rect", gRect, 0);
                 msgIn.dispatch("/oled/circle", gCircle, 0);
                 msgIn.dispatch("/oled/line", gLine, 0);
-                msgIn.dispatch("/oled/smallChar", gCharSmall, 0);
+                msgIn.dispatch("/oled/char8", gCharSmall, 0);
                 msgIn.dispatch("/oled/char16", gChar16, 0);
                 msgIn.dispatch("/oled/char24", gChar24, 0);
                 msgIn.dispatch("/oled/char32", gChar32, 0);
@@ -406,22 +406,26 @@ void gLine(OSCMessage &msg){
 void gCharSmall(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
         app.patchScreen.put_char_small(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        app.newScreen = 1;
     }
 }
 void gChar16(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
         app.patchScreen.put_char_arial16(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        app.newScreen = 1;
     }
 }
 void gChar24(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
         app.patchScreen.put_char_arial24(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        app.newScreen = 1;
     }
 
 }
 void gChar32(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
         app.patchScreen.put_char_arial32(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        app.newScreen = 1;
     }
 }
 

@@ -328,6 +328,9 @@ unsigned int OledScreen::put_char_arial32(unsigned char character, unsigned int 
   int charWidth;
   int charOffset;
   
+  if (character < 32) character = 32;
+  if (character > 127) character = 127; 
+
   if (character == 32)
     return 8;
   
@@ -355,6 +358,9 @@ unsigned int OledScreen::put_char_arial24(unsigned char character, unsigned int 
   int k;
   int charWidth;
   int charOffset;
+ 
+  if (character < 32) character = 32;
+  if (character > 127) character = 127; 
 
   if (character == 32)
     return 6;
@@ -385,6 +391,9 @@ unsigned int OledScreen::put_char_arial16(unsigned char character, unsigned int 
   int k;
   int charWidth;
   int charOffset;
+  
+  if (character < 32) character = 32;
+  if (character > 127) character = 127; 
 
   if (character == 32)
     return 4;
@@ -412,6 +421,9 @@ unsigned int OledScreen::put_char_arial16(unsigned char character, unsigned int 
 
 unsigned int OledScreen::put_char_small(unsigned char c, unsigned int y, unsigned int x, unsigned int color){
 	int i, j;
+    if (c < 32) c = 32;
+    if (c > 127) c = 127; 
+
 	c -= 32;
 	for (i = 0; i < 5; i++){
 		for (j = 0; j < 8; j++){
