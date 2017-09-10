@@ -80,6 +80,85 @@ void OledScreen::draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y){
    
 }
 
+// bresenham line algorithm from http://www.cs.unc.edu/~mcmillan/comp136/Lecture6/Lines.html
+void OledScreen::draw_line(int x0, int y0, int x1, int y1, unsigned int color) {
+
+    x0 &= 0x7f;   // just constrain them here to screen size
+    y0 &= 0x3f;
+    x1 &= 0x7f;
+    y1 &= 0x3f;
+
+	int dy = y1 - y0;
+	int dx = x1 - x0;
+	int stepx, stepy;
+	int fraction;
+
+	if (dy < 0) { dy = -dy;  stepy = -1; } else { stepy = 1; }
+	if (dx < 0) { dx = -dx;  stepx = -1; } else { stepx = 1; }
+	dy <<= 1;                                                  // dy is now 2*dy
+	dx <<= 1;                                                  // dx is now 2*dx
+
+	put_pixel(color, x0, y0);
+	if (dx > dy) {
+		fraction = dy - (dx >> 1);                         // same as 2*dy - dx
+		while (x0 != x1) {
+			if (fraction >= 0) {
+				y0 += stepy;
+				fraction -= dx;                                // same as fraction -= 2*dx
+			}
+			x0 += stepx;
+			fraction += dy;                                    // same as fraction -= 2*dy
+			put_pixel(color, x0, y0);
+		}
+	} else {
+		int fraction = dx - (dy >> 1);
+		while (y0 != y1) {
+			if (fraction >= 0) {
+				x0 += stepx;
+				fraction -= dy;
+			}
+			y0 += stepy;
+			fraction += dx;
+			put_pixel(color, x0, y0);
+		}
+	}
+}
+
+// bresenham circle algorithm
+void OledScreen::draw_circle(unsigned int h, unsigned int k, unsigned int r, unsigned int color){
+
+	    h &= 0x7f;   // just constrain them here to screen size
+    	k &= 0x3f;
+
+       int x=0;
+       int y=r;
+       int p=(3-(2*r));
+
+       do
+	  {
+	     put_pixel(color,(h+x),(k+y));
+	     put_pixel(color,(h+y),(k+x));
+	     put_pixel(color,(h+y),(k-x));
+	     put_pixel(color,(h+x),(k-y));
+	     put_pixel(color,(h-x),(k-y));
+	     put_pixel(color,(h-y),(k-x));
+	     put_pixel(color,(h-y),(k+x));
+	     put_pixel(color,(h-x),(k+y));
+
+	     x++;
+
+	     if(p<0)
+		p+=((4*x)+6);
+
+	     else
+		{
+		   y--;
+		   p+=((4*(x-y))+10);
+		}
+	  }
+       while(x<=y);
+}
+
 void OledScreen::draw_rect(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y, uint8_t color){
     uint8_t i, j;
     printf("draiwing rect: %d, %d, %d, %d, c %d\n", sizex, sizey, x, y, color);
@@ -202,26 +281,6 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
     for (i = 0; i < (outL); i++){
         draw_box(3, 4, 73 + (5 * i), 4);
     }
-
- 
-//    println_8("---x", 4,  90, 0);
-
-   
-
-    // other info
-/*    put_char_small('M', 95, 0, 1);
-    draw_box(1, 3, 103, 0);
-    draw_box(1, 1, 104, 1);
-    draw_box(1, 3, 103, 2);
-
-    draw_box(1, 1, 104, 4);
-    draw_box(1, 1, 103, 5);
-    draw_box(1, 1, 105, 5);
-    draw_box(1, 1, 104, 6);
-    
-    put_char_small('D', 110, 0, 1);
-    put_char_small('F', 116, 0, 1);*/
-
 }
 
 void OledScreen::println_16(const char * line, int len, int x, int y){
@@ -263,11 +322,9 @@ void OledScreen::put_pixel(unsigned int on, unsigned int x, unsigned int y){
     
     if (on){
        tmp8 |= (1 << (y & 0x7)); 
-       //tmp8 |= (1 << (7 - (y & 0x7))); 
     }
     else{
        tmp8 &= ~(1 << (y & 0x7));
-       //tmp8 &= ~(1 << (7 - (y & 0x7)));
    }
 
    pix_buf[(page * 128) + column] = tmp8;
@@ -287,15 +344,11 @@ void OledScreen::invert_area(unsigned int y0, unsigned int y1) {
     for (y = y0; y < y1; y++) {
         for (x= 0; x<128; x++){
             if (get_pixel(x,y))
-               // put_pixel(1,x,y);
                 put_pixel(0,x,y);
             else 
-                //put_pixel(0,x,y);
                 put_pixel(1,x,y);
         }
     }
-
-
 }
 
 unsigned int OledScreen::get_pixel(unsigned int x, unsigned int y){
@@ -344,8 +397,6 @@ unsigned int OledScreen::put_char_arial32(unsigned char character, unsigned int 
       for (k = 0; k < charWidth; k++){
         if ((arial32[charOffset + k + (i * charWidth)] >> j) & 0x01)
           put_pixel(color, (y + k),  (x + (i * 8) + j));
-        else
-          put_pixel(0, (y + k),  (x + (i * 8) + j));
       }
     }
   }
@@ -377,8 +428,6 @@ unsigned int OledScreen::put_char_arial24(unsigned char character, unsigned int 
       for (k = 0; k < charWidth; k++){
         if ((arial24[charOffset + k + (i * charWidth)] >> j) & 0x01)
           put_pixel(color, (y + k), (x + (i * 8) + j));
-        else
-          put_pixel(0, (y + k), (x + (i * 8) + j));
       }
     }
   }
@@ -410,8 +459,6 @@ unsigned int OledScreen::put_char_arial16(unsigned char character, unsigned int 
       for (k = 0; k < charWidth; k++){
         if ((arial16[charOffset + k + (i * charWidth)] >> j) & 0x01)
           put_pixel(color, (y + k), (x + (i * 8) + j));
-        else
-          put_pixel(0, (y + k), (x + (i * 8) + j));
       }
     }
   }
@@ -429,8 +476,6 @@ unsigned int OledScreen::put_char_small(unsigned char c, unsigned int y, unsigne
 		for (j = 0; j < 8; j++){
 		    if ((characters[(c * 5) + i] >> j) & 0x01)
 			    put_pixel(color, y + i, x + j);
-			else
-                put_pixel(0, y + i, x + j);
 		}
 	}
         return 5;

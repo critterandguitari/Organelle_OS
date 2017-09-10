@@ -78,6 +78,7 @@ void gCharSmall(OSCMessage &msg);
 void gChar16(OSCMessage &msg);
 void gChar24(OSCMessage &msg);
 void gChar32(OSCMessage &msg);
+void gWave(OSCMessage &msg);
 
 void setAuxScreenLine0(OSCMessage &msg);
 void setAuxScreenLine1(OSCMessage &msg);
@@ -194,6 +195,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/char16", gChar16, 0);
                 msgIn.dispatch("/oled/char24", gChar24, 0);
                 msgIn.dispatch("/oled/char32", gChar32, 0);
+                msgIn.dispatch("/oled/waveform", gWave, 0);
 
                 
                 msgIn.dispatch("/oled/aux/line/1", setAuxScreenLine1, 0);
@@ -397,11 +399,38 @@ void gRect(OSCMessage &msg){
         app.newScreen = 1;
     }
 }
+
+void gWave(OSCMessage &msg){
+    uint8_t tmp[132];
+    int len = 0;
+    if (msg.isBlob(0)){
+        len = msg.getBlob(0, tmp, 132);
+        //printf("got blob len %d: \n", len);
+    }
+    int i;
+    int last = tmp[i+4];
+    for (i = 0; i<127; i++){
+        //printf("%d, ", tmp[i]);
+        //filled app.patchScreen.draw_line(i, 32, i, tmp[i + 4], 1);
+        app.patchScreen.draw_line(i, last, i+1, tmp[i + 4], 1);
+        last = tmp[i + 4];
+    }
+    app.newScreen = 1;
+    //printf("\n");
+}
+
 void gCircle(OSCMessage &msg){
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
+        app.patchScreen.draw_circle(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        app.newScreen = 1;
+    }
 
 }
 void gLine(OSCMessage &msg){
-
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
+        app.patchScreen.draw_line(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
+        app.newScreen = 1;
+    }
 }
 void gCharSmall(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
