@@ -113,25 +113,30 @@ void MainMenu::runSaveNew(const char* name,const char* arg) {
 
 
 void MainMenu::runSystemCommand(const char* name,const char* arg){
-    char buf[256];
-    printf("%s \n", buf);
-    sprintf(buf, "\"%s/%s/run.sh\" &", app.getSystemDir(),arg);
-    system(buf);
+    char location[256];
+    char script[256];
+    sprintf(location, "%s/%s", app.getSystemDir(),arg);
+    sprintf(script, "\"%s/run.sh\" &", location);
+    setEnv(location);
+    system(script);
 }
 
 void MainMenu::runPatch(const char* name,const char* arg){
     char buf[256];
     char buf2[256];
+    char patchfile[256];
+    char location[256];
  
     if (strcmp(arg, "") == 0) {
         printf("Empty menu entry\n");
         return;
     }
-    
-    sprintf(buf, "%s/%s/main.pd", app.getPatchDir(), arg);
-    printf("Checking for Patch File: %s\n", buf);
-    if (checkFileExists(buf)) {
-        setEnv();
+
+    sprintf(location, "%s/%s", app.getPatchDir(), arg);
+    sprintf(patchfile,"%s/main.pd", location, arg);
+    printf("Checking for Patch File: %s\n", patchfile);
+    if (checkFileExists(patchfile)) {
+        setEnv(location);
     
         // check for X,
         // run pd with nogui if no X. also use smaller audio buf with nogui
@@ -149,19 +154,17 @@ void MainMenu::runPatch(const char* name,const char* arg){
         if(app.isAlsa()) adv_args = adv_args + "-alsamidi ";
         if(execScript("check-for-x.sh")){
             printf("starting in GMainMenu mode\n");
-            sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 %s %s \"%s/%s/main.pd\" &", 
+            sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 %s %s \"%s\" &", 
                 adv_args.c_str(), 
                 motherpd, 
-                app.getPatchDir(), 
-                arg);
+                patchfile);
         }
         else {
             printf("starting in NON GMainMenu mode\n");
-            sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 %s %s \"%s/%s/main.pd\" &", 
+            sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 %s %s \"%s\" &", 
                 adv_args.c_str(), 
                 motherpd, 
-                app.getPatchDir(), 
-                arg);
+                patchfile);
         }
 
         // first kill any other PD
@@ -209,7 +212,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
         }
         app.menuScreen.drawNotification(buf);
     } else {
-        printf("Patch File Not Found: %s\n", buf);
+        printf("Patch File Not Found: %s\n", patchfile);
     }
 }
 
@@ -561,17 +564,18 @@ bool MainMenu::loadPatch(const char* patchName) {
     return true;
 }
 
-void MainMenu::setEnv() {
+void MainMenu::setEnv(const char* location) {
     setenv("PATCH_DIR",app.getPatchDir(),1);
     setenv("FW_DIR",app.getFirmwareDir(),1);
     setenv("USER_DIR",app.getUserDir(),1);
+    setenv("WORK_DIR",location,1);
 }
 
 
 int MainMenu::execScript(const char* cmd) {
     char buf[128];
     sprintf(buf,"%s/scripts/%s",app.getFirmwareDir(),cmd);
-    setEnv();
+    setEnv(app.getUserDir());
     return system(buf);
 }
 

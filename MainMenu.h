@@ -30,7 +30,7 @@ private:
     void drawPatchList(void);
     int  checkFileExists (const char * filename);
     int  execScript(const char*);
-    void setEnv();
+    void setEnv(const char* workdir);
 
 
     void addMenuItem(int i, const char* name, const char* arg, void (MainMenu::* func) (const char*, const char*));
