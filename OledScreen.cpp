@@ -177,10 +177,12 @@ void OledScreen::draw_circle(unsigned int h, unsigned int k, unsigned int r, uns
 
 void OledScreen::fill_area(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y, uint8_t color){
     uint8_t i, j;
-    printf("draiwing rect: %d, %d, %d, %d, c %d\n", sizex, sizey, x, y, color);
 
-    for (i = 0; i<sizey; i++)
-        for (j = 0; j<sizex; j++)
+    sizex &= 0x7f;
+    sizey &= 0x3f;
+
+    for (i = 0; i<sizex; i++)
+        for (j = 0; j<sizey; j++)
             put_pixel(color, x+i, y+j);
    
 }

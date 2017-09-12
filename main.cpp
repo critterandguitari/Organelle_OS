@@ -378,13 +378,14 @@ void setPatchScreenLine5(OSCMessage &msg){
     setScreenLine(app.patchScreen, 5, msg);
     app.newScreen = 1;
 }
-
+// graphics for patch screen
 void gShowInfoBar(OSCMessage &msg){
     if (msg.isInt(0)) {
         if (msg.getInt(0) == 0)
             app.patchScreen.showInfoBar = false;
         else 
             app.patchScreen.showInfoBar = true;
+        app.newScreen = 1;
     }
 }
 void gClear(OSCMessage &msg){
@@ -397,7 +398,7 @@ void gInvert(OSCMessage &msg){
 }
 void gSetPixel(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2)) {
-        app.patchScreen.put_pixel(msg.getInt(0), msg.getInt(1), msg.getInt(2));
+        app.patchScreen.put_pixel(msg.getInt(2), msg.getInt(0), msg.getInt(1));
         app.newScreen = 1;
     }
 }
@@ -407,7 +408,6 @@ void gFillArea(OSCMessage &msg){
         app.newScreen = 1;
     }
 }
-
 void gWaveform(OSCMessage &msg){
     uint8_t tmp[132];
     int len = 0;
