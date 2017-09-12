@@ -71,13 +71,29 @@ void OledScreen::invertLine(int lineNum){
     invert_area(9 + lineNum * 11, 20 + lineNum * 11);
 }
 
-void OledScreen::draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y){
+void OledScreen::draw_box_filled(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y){
     uint8_t i, j;
 
     for (i = 0; i<sizey; i++)
         for (j = 0; j<sizex; j++)
             put_pixel(1, x+i, y+j);
    
+}
+
+void OledScreen::draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y, uint8_t color){
+    uint8_t i;
+
+    sizex &= 0x7f;
+    sizey &= 0x3f;
+
+    for (i = 0; i<sizex; i++){
+        put_pixel(color, i+x, y);
+        put_pixel(color, i+x, y+sizey-1);
+    }
+    for (i = 0; i<sizey; i++){
+        put_pixel(color, x, y+i);
+        put_pixel(color, x+sizex-1, y+i);
+    }
 }
 
 // bresenham line algorithm from http://www.cs.unc.edu/~mcmillan/comp136/Lecture6/Lines.html
@@ -159,7 +175,7 @@ void OledScreen::draw_circle(unsigned int h, unsigned int k, unsigned int r, uns
        while(x<=y);
 }
 
-void OledScreen::draw_rect(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y, uint8_t color){
+void OledScreen::fill_area(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y, uint8_t color){
     uint8_t i, j;
     printf("draiwing rect: %d, %d, %d, %d, c %d\n", sizex, sizey, x, y, color);
 
@@ -214,81 +230,98 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
     // VU meter
     // after I
     // little guys
-    draw_box(1, 2, 7, 1); 
-    draw_box(1, 2, 12, 1); 
-    draw_box(1, 2, 17, 1); 
-    draw_box(1, 2, 22, 1); 
-    draw_box(1, 2, 27, 1); 
-    draw_box(1, 2, 32, 1); 
-    draw_box(1, 2, 37, 1); 
-    draw_box(1, 2, 42, 1); 
-    draw_box(1, 2, 47, 1); 
-    draw_box(1, 2, 52, 1); 
-    draw_box(1, 2, 57, 1); 
+    draw_box_filled(1, 2, 7, 1); 
+    draw_box_filled(1, 2, 12, 1); 
+    draw_box_filled(1, 2, 17, 1); 
+    draw_box_filled(1, 2, 22, 1); 
+    draw_box_filled(1, 2, 27, 1); 
+    draw_box_filled(1, 2, 32, 1); 
+    draw_box_filled(1, 2, 37, 1); 
+    draw_box_filled(1, 2, 42, 1); 
+    draw_box_filled(1, 2, 47, 1); 
+    draw_box_filled(1, 2, 52, 1); 
+    draw_box_filled(1, 2, 57, 1); 
 
-    draw_box(1, 2, 7, 5);
-    draw_box(1, 2, 12, 5);
-    draw_box(1, 2, 17, 5);
-    draw_box(1, 2, 22, 5);
-    draw_box(1, 2, 27, 5);
-    draw_box(1, 2, 32, 5);
-    draw_box(1, 2, 37, 5);
-    draw_box(1, 2, 42, 5);
-    draw_box(1, 2, 47, 5);
-    draw_box(1, 2, 52, 5);
-    draw_box(1, 2, 57, 5);
+    draw_box_filled(1, 2, 7, 5);
+    draw_box_filled(1, 2, 12, 5);
+    draw_box_filled(1, 2, 17, 5);
+    draw_box_filled(1, 2, 22, 5);
+    draw_box_filled(1, 2, 27, 5);
+    draw_box_filled(1, 2, 32, 5);
+    draw_box_filled(1, 2, 37, 5);
+    draw_box_filled(1, 2, 42, 5);
+    draw_box_filled(1, 2, 47, 5);
+    draw_box_filled(1, 2, 52, 5);
+    draw_box_filled(1, 2, 57, 5);
 
     // big guys
     for (i = 0; i < (inR); i++){
-        draw_box(3, 4, 7 + (5 * i), 0); 
+        draw_box_filled(3, 4, 7 + (5 * i), 0); 
     }
 
     for (i = 0; i < (inL); i++){
-        draw_box(3, 4, 7 + (5 * i), 4);
+        draw_box_filled(3, 4, 7 + (5 * i), 4);
     }
 
     // after O
     // small guys
-    draw_box(1, 2, 73, 1); 
-    draw_box(1, 2, 78, 1); 
-    draw_box(1, 2, 83, 1); 
-    draw_box(1, 2, 88, 1); 
-    draw_box(1, 2, 93, 1); 
-    draw_box(1, 2, 98, 1); 
-    draw_box(1, 2, 103, 1); 
-    draw_box(1, 2, 108, 1); 
-    draw_box(1, 2, 113, 1); 
-    draw_box(1, 2, 118, 1); 
-    draw_box(1, 2, 123, 1); 
+    draw_box_filled(1, 2, 73, 1); 
+    draw_box_filled(1, 2, 78, 1); 
+    draw_box_filled(1, 2, 83, 1); 
+    draw_box_filled(1, 2, 88, 1); 
+    draw_box_filled(1, 2, 93, 1); 
+    draw_box_filled(1, 2, 98, 1); 
+    draw_box_filled(1, 2, 103, 1); 
+    draw_box_filled(1, 2, 108, 1); 
+    draw_box_filled(1, 2, 113, 1); 
+    draw_box_filled(1, 2, 118, 1); 
+    draw_box_filled(1, 2, 123, 1); 
 
-    draw_box(1, 2, 73, 5);
-    draw_box(1, 2, 78, 5);
-    draw_box(1, 2, 83, 5);
-    draw_box(1, 2, 88, 5);
-    draw_box(1, 2, 93, 5);
-    draw_box(1, 2, 98, 5);
-    draw_box(1, 2, 103, 5);
-    draw_box(1, 2, 108, 5);
-    draw_box(1, 2, 113, 5);
-    draw_box(1, 2, 118, 5);
-    draw_box(1, 2, 123, 5);
+    draw_box_filled(1, 2, 73, 5);
+    draw_box_filled(1, 2, 78, 5);
+    draw_box_filled(1, 2, 83, 5);
+    draw_box_filled(1, 2, 88, 5);
+    draw_box_filled(1, 2, 93, 5);
+    draw_box_filled(1, 2, 98, 5);
+    draw_box_filled(1, 2, 103, 5);
+    draw_box_filled(1, 2, 108, 5);
+    draw_box_filled(1, 2, 113, 5);
+    draw_box_filled(1, 2, 118, 5);
+    draw_box_filled(1, 2, 123, 5);
     
     // big guys
     for (i = 0; i < (outR); i++){
-        draw_box(3, 4, 73 + (5 * i), 0); 
+        draw_box_filled(3, 4, 73 + (5 * i), 0); 
     }
 
     for (i = 0; i < (outL); i++){
-        draw_box(3, 4, 73 + (5 * i), 4);
+        draw_box_filled(3, 4, 73 + (5 * i), 4);
     }
 }
 
-void OledScreen::println_16(const char * line, int len, int x, int y){
+void OledScreen::println(const char * line, int x, int y, int h, int color){
     int i, deltax;
     deltax = x;
+
+    int len = strlen(line);
+
     for (i = 0; i < len; i++) {
-        deltax += put_char_arial16(line[i], deltax, y, 1);
-        deltax += 2;
+        if (h == 8) {
+            deltax += put_char_small(line[i], deltax, y, color);
+            deltax += 1;
+        }
+        if (h == 16) {
+            deltax += put_char_arial16(line[i], deltax, y, color);
+            deltax += 2;
+        }
+        if (h == 24) {
+            deltax += put_char_arial24(line[i], deltax, y, color);
+            deltax += 3;
+        }
+        if (h == 32) {
+            deltax += put_char_arial32(line[i], deltax, y, color);
+            deltax += 4;
+        }
     }
 }
 

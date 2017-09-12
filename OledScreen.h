@@ -16,36 +16,24 @@ class OledScreen
         void setLine(int lineNumber, const char * line);
         void clearLine(int lineNum);
         void invertLine(int lineNum);
-
-        
         void clear(void);
-        
         void draw_line(int x0, int y0, int x1, int y1, unsigned int color);
         void draw_circle(unsigned int h, unsigned int k, unsigned int r, unsigned int color);
-        void draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y);
-        void draw_rect(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y, uint8_t color);
+        void draw_box_filled(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y);
+        void draw_box(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y, uint8_t color);
+        void fill_area(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y, uint8_t color);
         void drawInfoBar(int inR, int inL, int outR, int outL);
-
         void drawNotification(const char * line );
-
         void put_pixel(unsigned int color, unsigned int x, unsigned int y);
-
         unsigned int get_pixel(unsigned int x, unsigned int y);
         void invert_screen(void);
-
         void invert_area(unsigned int y0, unsigned int y1);
         unsigned int put_char_arial32(unsigned char character, unsigned int y, unsigned int x, unsigned int color);
-
         unsigned int put_char_arial24(unsigned char character, unsigned int y, unsigned int x, unsigned int color);
-
         unsigned int put_char_arial16(unsigned char character, unsigned int y, unsigned int x, unsigned int color);
-
         unsigned int put_char_small(unsigned char c, unsigned int y, unsigned int x, unsigned int color);
-
-        void println_16(const char * line, int len, int x, int y);
-
+        void println(const char * line, int x, int y, int h, int color);
         void println_8(const char * line, int len, int x, int y);
-
         void saveSVG(const char * filename);
 };
 

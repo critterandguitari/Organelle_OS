@@ -60,26 +60,29 @@ int execScript(const char* cmd) {
 
 
 /** OSC messages received internally (from PD or other program) **/
+// messages for patch screen
 void setPatchScreenLine1(OSCMessage &msg);
 void setPatchScreenLine2(OSCMessage &msg);
 void setPatchScreenLine3(OSCMessage &msg);
 void setPatchScreenLine4(OSCMessage &msg);
 void setPatchScreenLine5(OSCMessage &msg);
 void invertScreenLine(OSCMessage &msg);
+void vuMeter(OSCMessage &msg);
 
-// graphics messages for the patch screen
-void gShowInfoBar(OSCMessage &msg);
+// graphics messages for patch screen
+void gShowInfoBar(OSCMessage &msg); // turns the vu meter on / off
 void gClear(OSCMessage &msg);
 void gSetPixel(OSCMessage &msg);
-void gRect(OSCMessage &msg);
+void gFillArea(OSCMessage &msg);
 void gCircle(OSCMessage &msg);
 void gLine(OSCMessage &msg);
-void gCharSmall(OSCMessage &msg);
-void gChar16(OSCMessage &msg);
-void gChar24(OSCMessage &msg);
-void gChar32(OSCMessage &msg);
-void gWave(OSCMessage &msg);
+void gBox(OSCMessage &msg);
+void gInvert(OSCMessage &msg);
+void gCharacter(OSCMessage &msg);
+void gPrintln(OSCMessage &msg);
+void gWaveform(OSCMessage &msg);
 
+// messages for aux screen
 void setAuxScreenLine0(OSCMessage &msg);
 void setAuxScreenLine1(OSCMessage &msg);
 void setAuxScreenLine2(OSCMessage &msg);
@@ -89,21 +92,23 @@ void setAuxScreenLine5(OSCMessage &msg);
 void invertAuxScreenLine(OSCMessage &msg);
 void auxScreenClear(OSCMessage &msg);
 
+// other ui messages
 void setLED(OSCMessage &msg);
-void vuMeter(OSCMessage &msg);
 void setScreen(OSCMessage &msg);
+void screenShot(OSCMessage &msg);
+void enablePatchSubMenu(OSCMessage &msg);
+void enableAuxSubMenu(OSCMessage &msg);
+void goHome(OSCMessage &msg);
+
+// system message 
+void loadPatch(OSCMessage &msg);
+void midiConfig(OSCMessage &msg);
+void patchLoaded(OSCMessage &msg);
 void reload(OSCMessage &msg);
 void sendReady(OSCMessage &msg);
 void sendShutdown(OSCMessage &msg);
 void quitMother(OSCMessage &msg);
-void screenShot(OSCMessage &msg);
 void programChange(OSCMessage &msg);
-void goHome(OSCMessage &msg);
-void enablePatchSubMenu(OSCMessage &msg);
-void enableAuxSubMenu(OSCMessage &msg);
-void loadPatch(OSCMessage &msg);
-void midiConfig(OSCMessage &msg);
-void patchLoaded(OSCMessage &msg);
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
@@ -165,7 +170,6 @@ int main(int argc, char* argv[]) {
        usleep(20000); // wait 20 ms
     }
     
-    //playFirst();
     quit = 0;
 
     // full udp -> serial -> serial -> udp
@@ -185,18 +189,18 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/line/4", setPatchScreenLine4, 0);
                 msgIn.dispatch("/oled/line/5", setPatchScreenLine5, 0);
                 msgIn.dispatch("/oled/invertline", invertScreenLine, 0);
-                msgIn.dispatch("/oled/showInfoBar", gShowInfoBar, 0);
-                msgIn.dispatch("/oled/clear", gClear, 0);
-                msgIn.dispatch("/oled/setPixel", gSetPixel, 0);
-                msgIn.dispatch("/oled/rect", gRect, 0);
-                msgIn.dispatch("/oled/circle", gCircle, 0);
-                msgIn.dispatch("/oled/line", gLine, 0);
-                msgIn.dispatch("/oled/char8", gCharSmall, 0);
-                msgIn.dispatch("/oled/char16", gChar16, 0);
-                msgIn.dispatch("/oled/char24", gChar24, 0);
-                msgIn.dispatch("/oled/char32", gChar32, 0);
-                msgIn.dispatch("/oled/waveform", gWave, 0);
 
+                msgIn.dispatch("/oled/gShowInfoBar", gShowInfoBar, 0);
+                msgIn.dispatch("/oled/gClear", gClear, 0);
+                msgIn.dispatch("/oled/gSetPixel", gSetPixel, 0);
+                msgIn.dispatch("/oled/gFillArea", gFillArea, 0);
+                msgIn.dispatch("/oled/gCircle", gCircle, 0);
+                msgIn.dispatch("/oled/gLine", gLine, 0);
+                msgIn.dispatch("/oled/gBox", gBox, 0);
+                msgIn.dispatch("/oled/gInvert", gInvert, 0);
+                msgIn.dispatch("/oled/gCharacter", gCharacter, 0);
+                msgIn.dispatch("/oled/gPrintln", gPrintln, 0);
+                msgIn.dispatch("/oled/gWaveform", gWaveform, 0);
                 
                 msgIn.dispatch("/oled/aux/line/1", setAuxScreenLine1, 0);
                 msgIn.dispatch("/oled/aux/line/2", setAuxScreenLine2, 0);
@@ -387,36 +391,38 @@ void gClear(OSCMessage &msg){
     if (msg.isInt(0)) if (msg.getInt(0) == 1) app.patchScreen.clear();
     app.newScreen = 1;
 }
+void gInvert(OSCMessage &msg){
+    if (msg.isInt(0)) if (msg.getInt(0) == 1) app.patchScreen.invert_screen();
+    app.newScreen = 1;
+}
 void gSetPixel(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2)) {
         app.patchScreen.put_pixel(msg.getInt(0), msg.getInt(1), msg.getInt(2));
         app.newScreen = 1;
     }
 }
-void gRect(OSCMessage &msg){
+void gFillArea(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
-        app.patchScreen.draw_rect(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
+        app.patchScreen.fill_area(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
         app.newScreen = 1;
     }
 }
 
-void gWave(OSCMessage &msg){
+void gWaveform(OSCMessage &msg){
     uint8_t tmp[132];
     int len = 0;
+    int i;
     if (msg.isBlob(0)){
         len = msg.getBlob(0, tmp, 132);
-        //printf("got blob len %d: \n", len);
+        // only if we got 128 values (len and tmp includes the 4 size bytes of blob)
+        if (len == 132) {
+            // draw 127 connected lines
+            for (i = 1; i<128; i++){
+                app.patchScreen.draw_line(i-1, tmp[i + 3], i, tmp[i + 4], 1);
+            }
+            app.newScreen = 1;
+        }
     }
-    int i;
-    int last = tmp[i+4];
-    for (i = 0; i<127; i++){
-        //printf("%d, ", tmp[i]);
-        //filled app.patchScreen.draw_line(i, 32, i, tmp[i + 4], 1);
-        app.patchScreen.draw_line(i, last, i+1, tmp[i + 4], 1);
-        last = tmp[i + 4];
-    }
-    app.newScreen = 1;
-    //printf("\n");
 }
 
 void gCircle(OSCMessage &msg){
@@ -424,7 +430,6 @@ void gCircle(OSCMessage &msg){
         app.patchScreen.draw_circle(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
         app.newScreen = 1;
     }
-
 }
 void gLine(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
@@ -432,36 +437,61 @@ void gLine(OSCMessage &msg){
         app.newScreen = 1;
     }
 }
-void gCharSmall(OSCMessage &msg){
+
+void gPrintln(OSCMessage &msg){
+
+    char str[256];
+    char line[256];
+    int i;
+    int x, y, height, color;
+
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
-        app.patchScreen.put_char_small(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        x = msg.getInt(0);
+        y = msg.getInt(1);
+        height = msg.getInt(2);
+        color = msg.getInt(3);
+        // since there are no strings in pd, the line message will be made of different types
+        // cat the line together, then throw it up on the patch screen
+        i = 4;
+        line[0] = 0;
+        while (msg.isString(i) || msg.isFloat(i) || msg.isInt(i)){
+            if (msg.isString(i)){
+                msg.getString(i, str, 256);
+                strcat(line, str);
+                strcat(line, " ");
+            }
+            if (msg.isFloat(i)){
+                sprintf(str, "%g ", msg.getFloat(i));
+                strcat(line, str);
+            }
+            if (msg.isInt(i)){
+                sprintf(str, "%d ", msg.getInt(i));
+                strcat(line, str);
+            }
+            i++;
+        }
+        app.patchScreen.println(line, x, y, height, color);
+        app.newScreen = 1;
+    }  
+}
+
+void gBox(OSCMessage &msg){
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
+        app.patchScreen.draw_box(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
         app.newScreen = 1;
     }
 }
-void gChar16(OSCMessage &msg){
-    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
-        app.patchScreen.put_char_arial16(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+void gCharacter(OSCMessage &msg){
+    int size = 8;
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
+        size = msg.getInt(4);
+        if (size == 8) app.patchScreen.put_char_small(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        if (size == 16) app.patchScreen.put_char_arial16(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        if (size == 24) app.patchScreen.put_char_arial24(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        if (size == 32) app.patchScreen.put_char_arial32(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
         app.newScreen = 1;
     }
 }
-void gChar24(OSCMessage &msg){
-    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
-        app.patchScreen.put_char_arial24(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
-        app.newScreen = 1;
-    }
-
-}
-void gChar32(OSCMessage &msg){
-    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
-        app.patchScreen.put_char_arial32(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
-        app.newScreen = 1;
-    }
-}
-
-
-
-
-
 
 // setting aux screen
 void setAuxScreenLine1(OSCMessage &msg) {
