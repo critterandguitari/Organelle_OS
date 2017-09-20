@@ -35,16 +35,16 @@ mv /tmp/files.sha1 .
 if grep critter  /root/.gitconfig ; then rm /root/.gitconfig; fi
 
 # copy files
-cp -f ${IMAGE_DIR}/mother.pd /root
-cp -f ${IMAGE_DIR}/mother /root
-cp -f ${IMAGE_DIR}/version /root
-cp -f ${IMAGE_DIR}/buildtag /root
+cp -f ${IMAGE_DIR}/root/mother.pd /root
+cp -f ${IMAGE_DIR}/root/mother /root
+cp -f ${IMAGE_DIR}/root/version /root
+cp -f ${IMAGE_DIR}/root/buildtag /root
 cp -f ${IMAGE_DIR}/scripts/* /root/scripts
 
 # system config
-cp -f ${IMAGE_DIR}/.bash_profile /root
-cp -f ${IMAGE_DIR}/.jwmrc /root
-cp -f ${IMAGE_DIR}/.pdsettings /root
+cp -f ${IMAGE_DIR}/root/.bash_profile /root
+cp -f ${IMAGE_DIR}/root/.jwmrc /root
+cp -f ${IMAGE_DIR}/root/.pdsettings /root
 
 mkdir -p /root/.ssh
 cp -f ${IMAGE_DIR}/.ssh/environment /root/.ssh/environment
