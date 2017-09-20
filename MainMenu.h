@@ -31,7 +31,7 @@ private:
     int  checkFileExists (const char * filename);
     int  execScript(const char*);
     void setEnv(const char* workdir);
-
+    bool isMotherPdCompatible(const char* motherpd);
 
     void addMenuItem(int i, const char* name, const char* arg, void (MainMenu::* func) (const char*, const char*));
 
