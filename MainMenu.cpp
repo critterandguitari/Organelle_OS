@@ -23,11 +23,11 @@ MainMenu::MainMenu(){
     actionTrigger = false;
 }
 
-#define MOTHER_PD_VERSION 1.2
+#define MOTHER_PD_VERSION "1.2"
 
 bool MainMenu::isMotherPdCompatible(const char* motherpd) {
     char cmd[128];
-    sprintf(cmd,"check-mother-pd.sh \"%s\" %f", motherpd, MOTHER_PD_VERSION);
+    sprintf(cmd,"check-mother-pd.sh \"%s\" %s", motherpd, MOTHER_PD_VERSION);
     return ! execScript(cmd);
 }
 
@@ -169,7 +169,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
         bool motherFound = false;
         char motherpd[128];
         sprintf(motherpd, "%s/mother.pd", patchlocation);
-        if(!checkFileExists(motherpd)) {
+        if(checkFileExists(motherpd)) {
             motherFound = isMotherPdCompatible(motherpd);
             if(!motherFound) {
                 sprintf(buf2, "mv %s %s.review",motherpd,motherpd);
@@ -178,7 +178,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
         }
         if(!motherFound) {
             sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
-            if(!checkFileExists(motherpd)) {
+            if(checkFileExists(motherpd)) {
                 motherFound = isMotherPdCompatible(motherpd);
                 if(!motherFound) {
                     sprintf(buf2, "mv %s %s.review",motherpd,motherpd);
