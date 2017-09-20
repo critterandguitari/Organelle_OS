@@ -23,6 +23,14 @@ MainMenu::MainMenu(){
     actionTrigger = false;
 }
 
+#define MOTHER_PD_VERSION "1.2"
+
+bool MainMenu::isMotherPdCompatible(const char* motherpd) {
+    char cmd[128];
+    sprintf(cmd,"check-mother-pd.sh \"%s\" %s", motherpd, MOTHER_PD_VERSION);
+    return ! execScript(cmd);
+}
+
 int MainMenu::checkFileExists (const char * filename){
     struct stat st;
     int result = stat(filename, &st);
@@ -158,13 +166,29 @@ void MainMenu::runPatch(const char* name,const char* arg){
         setEnv(patchlocation);
     
         // find mother patchdir->systemdir->firmwaredir (root)
+        bool motherFound = false;
         char motherpd[128];
         sprintf(motherpd, "%s/mother.pd", patchlocation);
-        if(!checkFileExists(motherpd)) {
-            sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
-            if(!checkFileExists(motherpd)) {
-                sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
+        if(checkFileExists(motherpd)) {
+            motherFound = isMotherPdCompatible(motherpd);
+            if(!motherFound) {
+                sprintf(buf2, "mv %s %s.review",motherpd,motherpd);
+                system(buf2);
             }
+        }
+        if(!motherFound) {
+            sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
+            if(checkFileExists(motherpd)) {
+                motherFound = isMotherPdCompatible(motherpd);
+                if(!motherFound) {
+                    sprintf(buf2, "mv %s %s.review",motherpd,motherpd);
+                    system(buf2);
+                }
+            }
+        }
+        if(!motherFound) {
+            sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
+            // dont bother with checks, if its wrong not alot can be done!
         }
 
         // pd arguments
