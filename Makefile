@@ -86,15 +86,16 @@ deployToUSB : main
 
 image : main
 	@echo creating image $(IMAGE_VERSION) in $(IMAGE_DIR)
+	mkdir -p $(IMAGE_DIR)/root
+	cp -f host/root/mother.pd $(IMAGE_DIR)/root
+	cp -f host/root/mother $(IMAGE_DIR)/root
+	cp -f host/root/version $(IMAGE_DIR)/root
+	cp -f host/root/buildtag $(IMAGE_DIR)/root
+	cp -f host/root/.bash_profile $(IMAGE_DIR)/root
+	cp -f host/root/.jwmrc $(IMAGE_DIR)/root
+	cp -f host/root/.pdsettings $(IMAGE_DIR)/root
 	mkdir -p $(IMAGE_DIR)/scripts
-	cp -f host/root/mother.pd $(IMAGE_DIR)
-	cp -f host/root/mother $(IMAGE_DIR)
 	cp -f host/root/scripts/* $(IMAGE_DIR)/scripts
-	cp -f host/root/version $(IMAGE_DIR)
-	cp -f host/root/buildtag $(IMAGE_DIR)
-	cp -f host/root/.bash_profile $(IMAGE_DIR)
-	cp -f host/root/.jwmrc $(IMAGE_DIR)
-	cp -f host/root/.pdsettings $(IMAGE_DIR)
 	mkdir -p ${IMAGE_DIR}/.ssh
 	cp -f host/root/.ssh/environment $(IMAGE_DIR)/.ssh/environment
 	mkdir -p ${IMAGE_DIR}/system/etc/ssh 
