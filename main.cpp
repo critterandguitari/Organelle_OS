@@ -15,7 +15,7 @@
 #include "AppData.h"
 
 int       previousScreen = -1;
-int       encoderDownTime = 0;
+int       encoderDownTime = -1;
 const int SHUTDOWN_TIME=4;
 
 // for communicating with OSC over serial with MCU
@@ -279,12 +279,16 @@ int main(int argc, char* argv[]) {
                     updateScreenPage(6, app.menuScreen);
                     updateScreenPage(7, app.menuScreen);
                 }
-                // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
-                if (app.isPatchRunning() || app.isPatchLoading()){
-                    if (app.menuScreenTimeout > 0) app.menuScreenTimeout -= 50;
-                    else {
-                        app.currentScreen = PATCH;
-                        app.newScreen = 1;
+
+                // don't timeout to patch screen, whilst holding down encoder
+                if(encoderDownTime==-1) {
+                    // if there is a patch running while on menu screen, switch back to patch screen after the timeout 
+                    if (app.isPatchRunning() || app.isPatchLoading()){
+                        if (app.menuScreenTimeout > 0) app.menuScreenTimeout -= 50;
+                        else {
+                            app.currentScreen = PATCH;
+                            app.newScreen = 1;
+                        }
                     }
                 }
             }
@@ -774,6 +778,9 @@ void encoderButton(OSCMessage &msg){
             }
             if (msg.getInt(0) == 0) {
                 menu.encoderRelease();
+                // reset menu timeout when action is performed
+                // (which is when we release encoder)
+                app.menuScreenTimeout = MENU_TIMEOUT;
             }
         }   
     }
