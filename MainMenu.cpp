@@ -125,54 +125,25 @@ void MainMenu::runPatch(const char* name,const char* arg){
     char buf[256];
     char buf2[256];
     char patchfile[256];
-    char location[256];
+    char patchlocation[256];
  
     if (strcmp(arg, "") == 0) {
         printf("Empty menu entry\n");
         return;
     }
 
-    sprintf(location, "%s/%s", app.getPatchDir(), arg);
-    sprintf(patchfile,"%s/main.pd", location, arg);
-    printf("Checking for Patch File: %s\n", patchfile);
-    if (checkFileExists(patchfile)) {
-        setEnv(location);
+    sprintf(patchlocation, "\"%s/%s\"", app.getPatchDir(), arg);
+    sprintf(patchfile,"%s/main.pd", patchlocation);
+    printf("Checking for Patch File: %s\n", patchlocation);
     
-        // check for X,
-        // run pd with nogui if no X. also use smaller audio buf with nogui
-        // the rest of the settings are in /root/.pdsettings
-        char motherpd[128];
-        sprintf(motherpd, "%s/mother.pd", app.getPatchDir());
-        if(!checkFileExists(motherpd)) {
-            sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
-            if(!checkFileExists(motherpd)) {
-                sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
-            }
-        }
-
-        std::string adv_args;
-        if(app.isAlsa()) adv_args = adv_args + "-alsamidi ";
-        if(execScript("check-for-x.sh")){
-            printf("starting in GMainMenu mode\n");
-            sprintf(buf, "/usr/bin/pd -rt -audiobuf 10 %s %s \"%s\" &", 
-                adv_args.c_str(), 
-                motherpd, 
-                patchfile);
-        }
-        else {
-            printf("starting in NON GMainMenu mode\n");
-            sprintf(buf, "/usr/bin/pd -rt -nogui -audiobuf 4 %s %s \"%s\" &", 
-                adv_args.c_str(), 
-                motherpd, 
-                patchfile);
-        }
+    if (checkFileExists(patchfile)) {
 
         // first kill any other PD
         execScript("killpd.sh");
 
         // remove previous symlink, make new one
         system("rm /tmp/patch");   
-        sprintf(buf2, "ln -s \"%s/%s\" /tmp/patch", app.getPatchDir(), arg);
+        sprintf(buf2, "ln -s %s /tmp/patch", patchlocation);
         system(buf2);
 
         // save the name 
@@ -180,15 +151,44 @@ void MainMenu::runPatch(const char* name,const char* arg){
         sprintf(buf2, "mkdir -p /tmp/curpatchname/\"%s\"", arg);
         system(buf2);
 
-        //printf("%s \n", buf2);
-    
         // disable encoder override
         app.setPatchScreenEncoderOverride(false);
         
-        // start patch
+        // set environment for PD to run in
+        setEnv(patchlocation);
+    
+        // find mother patchdir->systemdir->firmwaredir (root)
+        char motherpd[128];
+        sprintf(motherpd, "%s/mother.pd", patchlocation);
+        if(!checkFileExists(motherpd)) {
+            sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
+            if(!checkFileExists(motherpd)) {
+                sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
+            }
+        }
+
+        // pd arguments
+        std::string pd_args = "-rt ";
+        bool guimode = execScript("check-for-x.sh");
+        if(guimode) {
+            pd_args = pd_args + " -audiobuf 10";
+        } else {
+            pd_args = pd_args + " -nogui -audiobuf 4";
+        }
+
+        if(app.isAlsa()) pd_args = pd_args + " -alsamidi";
+
+        // prepare cmd line
+        sprintf(buf, "/usr/bin/pd %s %s %s &", 
+            pd_args.c_str(), 
+            motherpd, 
+            patchfile);
+
+        // start pure data with mother and patch
+        printf("starting Pure Data : %s \n", buf);
         system(buf);
 
-            // update stuff
+        // update stuff
         app.setPatchLoading(true);
         app.patchScreen.clear();
         app.currentScreen = PATCH;
@@ -210,6 +210,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
         else {
             sprintf(buf, "> %s", arg);
         }
+
         app.menuScreen.drawNotification(buf);
     } else {
         printf("Patch File Not Found: %s\n", patchfile);
