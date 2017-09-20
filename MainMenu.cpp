@@ -132,7 +132,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
         return;
     }
 
-    sprintf(patchlocation, "\"%s/%s\"", app.getPatchDir(), arg);
+    sprintf(patchlocation, "%s/%s", app.getPatchDir(), arg);
     sprintf(patchfile,"%s/main.pd", patchlocation);
     printf("Checking for Patch File: %s\n", patchlocation);
     
@@ -143,7 +143,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
 
         // remove previous symlink, make new one
         system("rm /tmp/patch");   
-        sprintf(buf2, "ln -s %s /tmp/patch", patchlocation);
+        sprintf(buf2, "ln -s \"%s\" /tmp/patch", patchlocation);
         system(buf2);
 
         // save the name 
@@ -179,7 +179,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
         if(app.isAlsa()) pd_args = pd_args + " -alsamidi";
 
         // prepare cmd line
-        sprintf(buf, "/usr/bin/pd %s %s %s &", 
+        sprintf(buf, "/usr/bin/pd %s \"%s\" \"%s\" &", 
             pd_args.c_str(), 
             motherpd, 
             patchfile);
