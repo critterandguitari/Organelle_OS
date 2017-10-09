@@ -624,7 +624,7 @@ int MainMenu::execScript(const char* cmd) {
 
 std::string  MainMenu::getPDOptions(const std::string& file) {
     std::string pd_opts;
-    std::ifstream infile(file);
+    std::ifstream infile(file.c_str());
     std::string line;
     while (std::getline(infile, line))
     {
