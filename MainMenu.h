@@ -34,6 +34,7 @@ private:
     bool isMotherPdCompatible(const char* motherpd);
 
     void addMenuItem(int i, const char* name, const char* arg, void (MainMenu::* func) (const char*, const char*));
+    std::string getPDOptions(const std::string& file);
 
     struct MenuItem {
         char name[22];
