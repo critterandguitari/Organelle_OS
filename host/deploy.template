@@ -10,7 +10,7 @@ IMAGE_DIR=${PATCH_DIR}/UpdateOS-XXXXXXXXXX
 cd ${IMAGE_DIR}
 
 
-echo "Updating OS to " `cat ${IMAGE_DIR}/version` `cat ${IMAGE_DIR}/buildtag`
+echo "Updating OS to " `cat ${IMAGE_DIR}/root/version` `cat ${IMAGE_DIR}/root/buildtag`
 
 mv files.sha1 /tmp
 openssl sha1 `cat manifest` > /tmp/files.tmp

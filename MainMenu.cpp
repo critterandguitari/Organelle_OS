@@ -192,18 +192,36 @@ void MainMenu::runPatch(const char* name,const char* arg){
         }
 
         // pd arguments
+
+        char pdoptsfile[128];
+        std::string pd_opts;
+        sprintf(pdoptsfile, "%s/pd-opts.txt", patchlocation);
+        if(checkFileExists(pdoptsfile)) {
+            pd_opts = getPDOptions(pdoptsfile);
+        } else {
+            sprintf(pdoptsfile, "%s/pd-opts.txt", app.getSystemDir());
+            if(checkFileExists(pdoptsfile)) {
+                pd_opts = getPDOptions(pdoptsfile);
+            }
+        }
+
         std::string pd_args = "-rt ";
         bool guimode = execScript("check-for-x.sh");
         if(guimode) {
-            pd_args = pd_args + " -audiobuf 10";
+            pd_args += " -audiobuf 10";
         } else {
-            pd_args = pd_args + " -nogui -audiobuf 4";
+            pd_args += " -nogui -audiobuf 4";
         }
 
-        if(app.isAlsa()) pd_args = pd_args + " -alsamidi";
+
+        if(app.isAlsa()) pd_args += " -alsamidi";
+
+        pd_args += std::string(" -path ") + app.getUserDir() + "/PdExtraLibs";
+
+        pd_args += pd_opts;
 
         // prepare cmd line
-        sprintf(buf, "/usr/bin/pd %s \"%s\" \"%s\" &", 
+        sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" \"%s\" )&", 
             pd_args.c_str(), 
             motherpd, 
             patchfile);
@@ -604,6 +622,18 @@ int MainMenu::execScript(const char* cmd) {
     return system(buf);
 }
 
+std::string  MainMenu::getPDOptions(const std::string& file) {
+    std::string pd_opts;
+    std::ifstream infile(file.c_str());
+    std::string line;
+    while (std::getline(infile, line))
+    {
+        if(line.length() >0 ) {
+            pd_opts += " " + line;
+        }
+    }
+    return pd_opts;
+}
 
 
 
