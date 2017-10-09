@@ -203,7 +203,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
         if(app.isAlsa()) pd_args = pd_args + " -alsamidi";
 
         // prepare cmd line
-        sprintf(buf, "/usr/bin/pd %s \"%s\" \"%s\" &", 
+        sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" \"%s\" )&", 
             pd_args.c_str(), 
             motherpd, 
             patchfile);
