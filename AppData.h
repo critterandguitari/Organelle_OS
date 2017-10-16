@@ -30,6 +30,10 @@ class AppData
         // userdir/System
         const char*  getSystemDir() { return system_path.c_str();}
 
+        // media directory
+        const char* getMediaDir() { return "/tmp/media";}
+        // data directory
+        const char* getDataDir() { return "/tmp/data";}
 
         // mother/mother.pd , scripts
         const char* getFirmwareDir() {return firmware_path.c_str(); }
@@ -85,6 +89,9 @@ class AppData
         OledScreen auxScreen;
 
     private:
+        void initMediaDir();
+        void initDataDir();
+        
         int patchScreenEncoderOverride;  // when 1, encoder input is ignored in menu scree, routed to patch
         int auxScreenEncoderOverride; // when 1, encoder input is routed to aux
         bool patchIsLoading;
