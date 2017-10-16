@@ -91,6 +91,8 @@ void AppData::setUserDir(const char* path) {
     } else {
         user_path=path;
     }
+    initMediaDir();
+    initDataDir();
     system_path=user_path + "/System";
 }
 
@@ -101,9 +103,6 @@ void AppData::setFirmwareDir(const char* path) {
     } else {
         firmware_path=path;
     }
-    // if firmware directory changes, init media/data directories
-    initMediaDir();
-    initDataDir();
 }
 
 void AppData::readMidiConfig() {
