@@ -388,7 +388,7 @@ void MainMenu::drawPatchList(void){
     if ((selectedEntry >= patchMenuOffset) && !numPatches) {
     }
     else {
-        app.menuScreen.invertLine(cursorOffset);   
+        app.menuScreen.invertLine(cursorOffset + 1);   
     }
 
     if (! (app.isPatchRunning() || app.isPatchLoading()) ) {

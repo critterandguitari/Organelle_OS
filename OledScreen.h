@@ -28,6 +28,7 @@ class OledScreen
         unsigned int get_pixel(unsigned int x, unsigned int y);
         void invert_screen(void);
         void invert_area(unsigned int y0, unsigned int y1);
+        void invert_area(unsigned int x0, unsigned int x1, unsigned int y0, unsigned int y1);
         unsigned int put_char_arial32(unsigned char character, unsigned int y, unsigned int x, unsigned int color);
         unsigned int put_char_arial24(unsigned char character, unsigned int y, unsigned int x, unsigned int color);
         unsigned int put_char_arial16(unsigned char character, unsigned int y, unsigned int x, unsigned int color);

@@ -78,6 +78,7 @@ void gCircle(OSCMessage &msg);
 void gLine(OSCMessage &msg);
 void gBox(OSCMessage &msg);
 void gInvert(OSCMessage &msg);
+void gInvertArea(OSCMessage &msg);
 void gCharacter(OSCMessage &msg);
 void gPrintln(OSCMessage &msg);
 void gWaveform(OSCMessage &msg);
@@ -201,6 +202,7 @@ int main(int argc, char* argv[]) {
                 msgIn.dispatch("/oled/gCharacter", gCharacter, 0);
                 msgIn.dispatch("/oled/gPrintln", gPrintln, 0);
                 msgIn.dispatch("/oled/gWaveform", gWaveform, 0);
+                msgIn.dispatch("/oled/gInvertArea", gInvertArea, 0);
                 
                 msgIn.dispatch("/oled/aux/line/1", setAuxScreenLine1, 0);
                 msgIn.dispatch("/oled/aux/line/2", setAuxScreenLine2, 0);
@@ -412,6 +414,14 @@ void gFillArea(OSCMessage &msg){
         app.newScreen = 1;
     }
 }
+
+void gInvertArea(OSCMessage &msg){
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
+        app.patchScreen.invert_area(msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        app.newScreen = 1;
+    }
+}
+
 void gWaveform(OSCMessage &msg){
     uint8_t tmp[132];
     int len = 0;
@@ -637,7 +647,8 @@ void patchLoaded(OSCMessage &msg){
 
 void invertScreenLine(OSCMessage &msg){
     if (msg.isInt(0)){
-        int line = msg.getInt(0);
+        // + 1 for backwards compatibility
+        int line = msg.getInt(0) + 1;
         //printf("inverting %d\n", line);
         app.patchScreen.invertLine(line % 5);
         app.newScreen = 1;
@@ -646,7 +657,8 @@ void invertScreenLine(OSCMessage &msg){
 
 void invertAuxScreenLine(OSCMessage &msg){
     if (msg.isInt(0)){
-        int line = msg.getInt(0);
+        // + 1 for backwards compatibility
+        int line = msg.getInt(0) + 1;
         //printf("inverting %d\n", line);
         app.auxScreen.invertLine(line % 5);
         app.newScreen = 1;

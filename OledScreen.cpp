@@ -40,21 +40,18 @@ void OledScreen::clear(void){
     for (i = 0; i < 1024; i++) pix_buf[i] = 0;
 }
 
+unsigned calcxpos(unsigned line) {
+    return ((line-1) * 11) + ((line>0) *9 );
+}
+
 void OledScreen::setLine(int lineNum, const char * line) {
 
     int i, len;
 
-    lineNum -= 1;
-
     clearLine(lineNum);
 
     len = strlen(line);
-    if (len > 21)
-        println_8(line, 21,  2, (lineNum * 11) + 10);
-    else
-        println_8(line, len,  2, (lineNum * 11) + 10);
-
-
+    println_8(line, (len > 21 ? 21 : len), 2, calcxpos(lineNum) + 1);
 }
 
 void OledScreen::clearLine(int lineNum){
@@ -62,13 +59,15 @@ void OledScreen::clearLine(int lineNum){
 
     for (i = 0; i<128; i++)
         for (j = 0; j<11; j++)
-            put_pixel(0, i, j+9+(lineNum * 11));
+            put_pixel(0, i, j+calcxpos(lineNum));
 
 }
 
 void OledScreen::invertLine(int lineNum){
 
-    invert_area(9 + lineNum * 11, 20 + lineNum * 11);
+    int l1 = calcxpos(lineNum);
+    int l2 = calcxpos(lineNum+1);
+    invert_area(l2-l1,l1);
 }
 
 void OledScreen::draw_box_filled(uint8_t sizex, uint8_t sizey, uint8_t x, uint8_t y){
@@ -373,17 +372,17 @@ void OledScreen::invert_screen(void) {
 
 }
 
-void OledScreen::invert_area(unsigned int y0, unsigned int y1) {
-    int y, x;
+void OledScreen::invert_area(unsigned int sizex, unsigned sizey,unsigned int x, unsigned int y) {
 
-    for (y = y0; y < y1; y++) {
-        for (x= 0; x<128; x++){
-            if (get_pixel(x,y))
-                put_pixel(0,x,y);
-            else 
-                put_pixel(1,x,y);
+    for (int i = x; i < x+sizex; i++) {
+        for (int j=y; j< y+sizey;j++) {
+            put_pixel(!get_pixel(i,j) ,i,j);
         }
     }
+}
+
+void OledScreen::invert_area(unsigned int sizey, unsigned int y) {
+    invert_area(128,sizey,0,y);
 }
 
 unsigned int OledScreen::get_pixel(unsigned int x, unsigned int y){
