@@ -240,7 +240,9 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/patchLoaded", patchLoaded, 0)
                     ;
                 if (!processed) {
-                    fprintf(stderr, "unrecognised message received\n");
+                    char buf[128];
+                    msgIn.getAddress(buf,0,128);
+                    fprintf(stderr, "unrecognised osc message received %s %i\n",buf,msgIn.size());
                 }
             }
             else {
@@ -258,10 +260,8 @@ int main(int argc, char* argv[]) {
             msgIn.fill(slip.decodedBuf, slip.decodedLength);
             bool processed =
                 msgIn.dispatch("/enc", encoderInput, 0)
-                ||  msgIn.dispatch("/encbut", encoderButton, 0);
-            if (!processed) {
-                fprintf(stderr, "unrecognised message received\n");
-            }
+            ||  msgIn.dispatch("/encbut", encoderButton, 0);
+            // note, we dont dispatch knobs, so these will fall thru ok
 
             msgIn.empty();
         }
@@ -487,13 +487,13 @@ void gPrintln(OSCMessage &msg) {
     int x, y, height, color;
 
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
-        x = msg.getInt(1);
-        y = msg.getInt(2);
-        height = msg.getInt(3);
-        color = msg.getInt(4);
+        i = 1;
+        x = msg.getInt(i++);
+        y = msg.getInt(i++);
+        height = msg.getInt(i++);
+        color = msg.getInt(i++);
         // since there are no strings in pd, the line message will be made of different types
         // cat the line together, then throw it up on the patch screen
-        i = 4;
         line[0] = 0;
         while (msg.isString(i) || msg.isFloat(i) || msg.isInt(i)) {
             if (msg.isString(i)) {

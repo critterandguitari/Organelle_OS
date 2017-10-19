@@ -8,7 +8,7 @@
 OledScreen::OledScreen() {
   clear();
   showInfoBar = true;
-  printf("init oled screen, clearing oled screen\n");
+  //printf("init oled screen, clearing oled screen\n");
 }
 
 void OledScreen::saveSVG(const char * filename) {
@@ -165,11 +165,9 @@ void OledScreen::draw_circle(unsigned int h, unsigned int k, unsigned int r, uns
 
     x++;
 
-    if (p < 0)
+    if (p < 0) {
       p += ((4 * x) + 6);
-
-    else
-    {
+    } else {
       y--;
       p += ((4 * (x - y)) + 10);
     }
@@ -198,11 +196,7 @@ void OledScreen::drawNotification(const char * line) {
     pix_buf[i] = 0;
 
   len = strlen(line);
-  if (len > 21)
-    println_8(line, 21,  2, 0);
-  else
-    println_8(line, len,  2, 0);
-
+  println_8(line, len>21 ? 21: len,  2, 0);
 }
 
 
@@ -314,15 +308,15 @@ void OledScreen::println(const char * line, int x, int y, int h, int color) {
       deltax += put_char_small(line[i], deltax, y, color);
       deltax += 1;
     }
-    if (h == 16) {
+    else if (h == 16) {
       deltax += put_char_arial16(line[i], deltax, y, color);
       deltax += 2;
     }
-    if (h == 24) {
+    else if (h == 24) {
       deltax += put_char_arial24(line[i], deltax, y, color);
       deltax += 3;
     }
-    if (h == 32) {
+    else if (h == 32) {
       deltax += put_char_arial32(line[i], deltax, y, color);
       deltax += 4;
     }
