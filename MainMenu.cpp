@@ -93,8 +93,8 @@ void MainMenu::runShutdown(const char* name,const char* arg) {
 
 void MainMenu::runInfo(const char* name,const char* arg) {
     printf("Displaying system info... \n");
-    app.auxScreen.clear();
-    app.auxScreen.drawNotification("     System Info     ");
+    app.oled(AppData::AUX).clear();
+    app.oled(AppData::AUX).drawNotification("     System Info     ");
     execScript("info.sh &");
 }
 
@@ -232,8 +232,8 @@ void MainMenu::runPatch(const char* name,const char* arg){
 
         // update stuff
         app.setPatchLoading(true);
-        app.patchScreen.clear();
-        app.currentScreen = PATCH;
+        app.oled(AppData::PATCH).clear();
+        app.currentScreen = AppData::PATCH;
         app.newScreen = 1;
         strcpy(app.currentPatch, arg);
         strcpy(app.currentPatchPath, app.getPatchDir());
@@ -253,7 +253,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
             sprintf(buf, "> %s", arg);
         }
 
-        app.menuScreen.drawNotification(buf);
+        app.oled(AppData::MENU).drawNotification(buf);
     } else {
         printf("Patch File Not Found: %s\n", patchfile);
     }
@@ -381,18 +381,18 @@ void MainMenu::drawPatchList(void){
         else {
             sprintf(line, "%s", menuItems[i + menuOffset].name);
         }
-        app.menuScreen.setLine(i + 1, line);
+        app.oled(AppData::MENU).setLine(i + 1, line);
     }
  
     // dont invert patch lines if there are no patches
     if ((selectedEntry >= patchMenuOffset) && !numPatches) {
     }
     else {
-        app.menuScreen.invertLine(cursorOffset + 1);   
+        app.oled(AppData::MENU).invertLine(cursorOffset + 1);   
     }
 
     if (! (app.isPatchRunning() || app.isPatchLoading()) ) {
-        app.menuScreen.drawNotification("Select a patch...");
+        app.oled(AppData::MENU).drawNotification("Select a patch...");
     }
 
     app.newScreen = 1;
