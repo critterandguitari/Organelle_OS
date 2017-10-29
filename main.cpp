@@ -119,9 +119,10 @@ void quitMother(OSCMessage &msg);
 void programChange(OSCMessage &msg);
 /* end internal OSC messages received */
 
-/* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
+/* OSC messages received from MCU (we only use ecncoder input, and smooth knobs,  key messages get passed righ to PD or other program */
 void encoderInput(OSCMessage &msg);
 void encoderButton(OSCMessage &msg);
+void knobsInput(OSCMessage &msg);
 /* end OSC messages received from MCU */
 
 /* helpers */
@@ -259,9 +260,9 @@ int main(int argc, char* argv[]) {
             msgIn.empty();
             msgIn.fill(slip.decodedBuf, slip.decodedLength);
             bool processed =
-                msgIn.dispatch("/enc", encoderInput, 0)
+                msgIn.dispatch("/knobs", knobsInput, 0)
+            ||  msgIn.dispatch("/enc", encoderInput, 0)
             ||  msgIn.dispatch("/encbut", encoderButton, 0);
-            // note, we dont dispatch knobs, so these will fall thru ok
 
             msgIn.empty();
         }
@@ -772,9 +773,29 @@ void encoderInput(OSCMessage &msg) {
     }
 }
 
-
-
-
+void knobsInput(OSCMessage &msg) {
+    static const unsigned int MAX_KNOBS = 6;
+    static int knobs_[MAX_KNOBS];
+    bool changed = false;
+    // knob 1-4 + volume + expr , all 0-1023
+    for(unsigned i = 0; i < MAX_KNOBS;i++) {
+        if(msg.isInt(i)) {
+            uint16_t v = msg.getInt(i);
+            // 75% new value, 25% old value
+            uint16_t nv = (v >> 2) + (v >> 3) + (knobs_[i] >> 3);
+            changed |= nv != knobs_[i];
+            knobs_[i] = nv;
+        }
+    }
+    if(changed) {
+        OSCMessage msgOut("/knobs");
+        for(unsigned i = 0; i < MAX_KNOBS;i++) {
+            msgOut.add(knobs_[i]);
+        }
+        msgOut.send(dump);
+        udpSock.writeBuffer(dump.buffer, dump.length);        
+    }
+}
 
 // this is when the encoder gets pressed
 // in menu screen, execute the menu entry
