@@ -254,14 +254,18 @@ int main(int argc, char* argv[]) {
 
         // receive serial, send udp
         if (slip.recvMessage(serial)) {
-            udpSock.writeBuffer(slip.decodedBuf, slip.decodedLength);
 
             // check if we need to do something with this message
             msgIn.empty();
             msgIn.fill(slip.decodedBuf, slip.decodedLength);
-            bool processed =
-                msgIn.dispatch("/knobs", knobsInput, 0)
-            ||  msgIn.dispatch("/enc", encoderInput, 0)
+            bool knobs = msgIn.dispatch("/knobs", knobsInput, 0);
+
+            if(!knobs) {
+                udpSock.writeBuffer(slip.decodedBuf, slip.decodedLength);
+            }
+
+            bool processed = 
+                msgIn.dispatch("/enc", encoderInput, 0)
             ||  msgIn.dispatch("/encbut", encoderButton, 0);
 
             msgIn.empty();
@@ -782,7 +786,7 @@ void knobsInput(OSCMessage &msg) {
         if(msg.isInt(i)) {
             uint16_t v = msg.getInt(i);
             // 75% new value, 25% old value
-            uint16_t nv = (v >> 2) + (v >> 3) + (knobs_[i] >> 3);
+            uint16_t nv = (v >> 1) + (v >> 2) + (knobs_[i] >> 2);
             changed |= nv != knobs_[i];
             knobs_[i] = nv;
         }
