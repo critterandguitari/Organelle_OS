@@ -779,16 +779,19 @@ void encoderInput(OSCMessage &msg) {
 
 void knobsInput(OSCMessage &msg) {
     static const unsigned int MAX_KNOBS = 6;
-    static int knobs_[MAX_KNOBS];
+    static int16_t knobs_[MAX_KNOBS];
     bool changed = false;
     // knob 1-4 + volume + expr , all 0-1023
     for(unsigned i = 0; i < MAX_KNOBS;i++) {
         if(msg.isInt(i)) {
-            uint16_t v = msg.getInt(i);
+            int16_t v = msg.getInt(i);
             // 75% new value, 25% old value
-            uint16_t nv = (v >> 1) + (v >> 2) + (knobs_[i] >> 2);
-            changed |= nv != knobs_[i];
-            knobs_[i] = nv;
+            int16_t nv = (v >> 1) + (v >> 2) + (knobs_[i] >> 2);
+            int diff = nv - knobs_[i];
+            if(diff>1 || diff <-1) {
+                changed |= nv != knobs_[i];
+                knobs_[i] = nv;
+            }
         }
     }
     if(changed) {
