@@ -14,6 +14,8 @@
 #include "Timer.h"
 #include "AppData.h"
 
+static const unsigned int MAX_KNOBS = 6;
+static int16_t knobs_[MAX_KNOBS];
 int       previousScreen = -1;
 int       encoderDownTime = -1;
 const int SHUTDOWN_TIME = 4;
@@ -659,16 +661,28 @@ void patchLoaded(bool b) {
     app.setPatchRunning(true);
     printf("patch loaded, send config");
 
-    // send patch midi channel to use
-    OSCMessage msgOut("/midich");
-    msgOut.add(app.getMidiChannel());
-    msgOut.send(dump);
-    udpSock.writeBuffer(dump.buffer, dump.length);
+    {
+        // send patch midi channel to use
+        OSCMessage msgOut("/midich");
+        msgOut.add(app.getMidiChannel());
+        msgOut.send(dump);
+        udpSock.writeBuffer(dump.buffer, dump.length);
+    }
 
     // if using alsa, connect alsa device to PD virtual device
     if (app.isAlsa()) {
         std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
         execScript(cmd.c_str());
+    }
+
+    {
+        // send current knob positions
+        OSCMessage msgOut("/knobs");
+        for(unsigned i = 0; i < MAX_KNOBS;i++) {
+            msgOut.add(knobs_[i]);
+        }
+        msgOut.send(dump);
+        udpSock.writeBuffer(dump.buffer, dump.length);        
     }
 }
 
@@ -778,8 +792,6 @@ void encoderInput(OSCMessage &msg) {
 }
 
 void knobsInput(OSCMessage &msg) {
-    static const unsigned int MAX_KNOBS = 6;
-    static int16_t knobs_[MAX_KNOBS];
     bool changed = false;
     // knob 1-4 + volume + expr , all 0-1023
     for(unsigned i = 0; i < MAX_KNOBS;i++) {
