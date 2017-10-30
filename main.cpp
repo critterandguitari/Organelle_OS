@@ -14,6 +14,8 @@
 #include "Timer.h"
 #include "AppData.h"
 
+static const unsigned int MAX_KNOBS = 6;
+static int16_t knobs_[MAX_KNOBS];
 int       previousScreen = -1;
 int       encoderDownTime = -1;
 const int SHUTDOWN_TIME = 4;
@@ -119,9 +121,10 @@ void quitMother(OSCMessage &msg);
 void programChange(OSCMessage &msg);
 /* end internal OSC messages received */
 
-/* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
+/* OSC messages received from MCU (we only use ecncoder input, and smooth knobs,  key messages get passed righ to PD or other program */
 void encoderInput(OSCMessage &msg);
 void encoderButton(OSCMessage &msg);
+void knobsInput(OSCMessage &msg);
 /* end OSC messages received from MCU */
 
 /* helpers */
@@ -253,15 +256,19 @@ int main(int argc, char* argv[]) {
 
         // receive serial, send udp
         if (slip.recvMessage(serial)) {
-            udpSock.writeBuffer(slip.decodedBuf, slip.decodedLength);
 
             // check if we need to do something with this message
             msgIn.empty();
             msgIn.fill(slip.decodedBuf, slip.decodedLength);
-            bool processed =
+            bool knobs = msgIn.dispatch("/knobs", knobsInput, 0);
+
+            if(!knobs) {
+                udpSock.writeBuffer(slip.decodedBuf, slip.decodedLength);
+            }
+
+            bool processed = 
                 msgIn.dispatch("/enc", encoderInput, 0)
             ||  msgIn.dispatch("/encbut", encoderButton, 0);
-            // note, we dont dispatch knobs, so these will fall thru ok
 
             msgIn.empty();
         }
@@ -654,16 +661,28 @@ void patchLoaded(bool b) {
     app.setPatchRunning(true);
     printf("patch loaded, send config");
 
-    // send patch midi channel to use
-    OSCMessage msgOut("/midich");
-    msgOut.add(app.getMidiChannel());
-    msgOut.send(dump);
-    udpSock.writeBuffer(dump.buffer, dump.length);
+    {
+        // send patch midi channel to use
+        OSCMessage msgOut("/midich");
+        msgOut.add(app.getMidiChannel());
+        msgOut.send(dump);
+        udpSock.writeBuffer(dump.buffer, dump.length);
+    }
 
     // if using alsa, connect alsa device to PD virtual device
     if (app.isAlsa()) {
         std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
         execScript(cmd.c_str());
+    }
+
+    {
+        // send current knob positions
+        OSCMessage msgOut("/knobs");
+        for(unsigned i = 0; i < MAX_KNOBS;i++) {
+            msgOut.add(knobs_[i]);
+        }
+        msgOut.send(dump);
+        udpSock.writeBuffer(dump.buffer, dump.length);        
     }
 }
 
@@ -772,9 +791,36 @@ void encoderInput(OSCMessage &msg) {
     }
 }
 
-
-
-
+void knobsInput(OSCMessage &msg) {
+    bool changed = false;
+    // knob 1-4 + volume + expr , all 0-1023
+    for(unsigned i = 0; i < MAX_KNOBS;i++) {
+        if(msg.isInt(i)) {
+            int16_t v = msg.getInt(i);
+            if(v==0 || v==1023) {
+                // allow extremes
+                changed |= v != knobs_[i];
+                knobs_[i] = v;
+            } else {
+                // 75% new value, 25% old value
+                int16_t nv = (v >> 1) + (v >> 2) + (knobs_[i] >> 2);
+                int diff = nv - knobs_[i];
+                if(diff>2 || diff <-2) {
+                    changed = true;
+                    knobs_[i] = nv;
+                }
+            }
+        }
+    }
+    if(changed) {
+        OSCMessage msgOut("/knobs");
+        for(unsigned i = 0; i < MAX_KNOBS;i++) {
+            msgOut.add(knobs_[i]);
+        }
+        msgOut.send(dump);
+        udpSock.writeBuffer(dump.buffer, dump.length);        
+    }
+}
 
 // this is when the encoder gets pressed
 // in menu screen, execute the menu entry
