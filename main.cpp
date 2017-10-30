@@ -797,12 +797,18 @@ void knobsInput(OSCMessage &msg) {
     for(unsigned i = 0; i < MAX_KNOBS;i++) {
         if(msg.isInt(i)) {
             int16_t v = msg.getInt(i);
-            // 75% new value, 25% old value
-            int16_t nv = (v >> 1) + (v >> 2) + (knobs_[i] >> 2);
-            int diff = nv - knobs_[i];
-            if(diff>1 || diff <-1) {
-                changed |= nv != knobs_[i];
-                knobs_[i] = nv;
+            if(v==0 || v==1023) {
+                // allow extremes
+                changed |= v != knobs_[i];
+                knobs_[i] = v;
+            } else {
+                // 75% new value, 25% old value
+                int16_t nv = (v >> 1) + (v >> 2) + (knobs_[i] >> 2);
+                int diff = nv - knobs_[i];
+                if(diff>2 || diff <-2) {
+                    changed = true;
+                    knobs_[i] = nv;
+                }
             }
         }
     }
