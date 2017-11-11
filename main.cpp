@@ -696,7 +696,7 @@ void invertScreenLine(OSCMessage &msg) {
         // + 1 for backwards compatibility
         int line = msg.getInt(0) + 1;
         //printf("inverting %d\n", line);
-        app.oled(AppData::PATCH).invertLine(line % 5);
+        app.oled(AppData::PATCH).invertLine(line % 6);
         app.newScreen = 1;
     }
 }
@@ -706,7 +706,7 @@ void invertAuxScreenLine(OSCMessage &msg) {
         // + 1 for backwards compatibility
         int line = msg.getInt(0) + 1;
         //printf("inverting %d\n", line);
-        app.oled(AppData::AUX).invertLine(line % 5);
+        app.oled(AppData::AUX).invertLine(line % 6);
         app.newScreen = 1;
     }
 }
