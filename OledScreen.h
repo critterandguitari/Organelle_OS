@@ -19,6 +19,7 @@ class OledScreen
         void clear(void);
         void draw_line(int x0, int y0, int x1, int y1, unsigned int color);
         void draw_circle(unsigned int h, unsigned int k, unsigned int r, unsigned int color);
+        void draw_filled_circle(unsigned int h, unsigned int k, unsigned int r, unsigned int color);
         void draw_box_filled(uint8_t x, uint8_t y, uint8_t sizex, uint8_t sizey );
         void draw_box(uint8_t x, uint8_t y, uint8_t sizex, uint8_t sizey, uint8_t color);
         void fill_area(uint8_t x, uint8_t y, uint8_t sizex, uint8_t sizey,uint8_t color);

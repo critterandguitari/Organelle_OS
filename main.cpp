@@ -80,6 +80,7 @@ void gClear(OSCMessage &msg);
 void gSetPixel(OSCMessage &msg);
 void gFillArea(OSCMessage &msg);
 void gCircle(OSCMessage &msg);
+void gFilledCircle(OSCMessage &msg);
 void gLine(OSCMessage &msg);
 void gBox(OSCMessage &msg);
 void gInvert(OSCMessage &msg);
@@ -205,6 +206,7 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/oled/gSetPixel", gSetPixel, 0)
                     || msgIn.dispatch("/oled/gFillArea", gFillArea, 0)
                     || msgIn.dispatch("/oled/gCircle", gCircle, 0)
+                    || msgIn.dispatch("/oled/gFilledCircle", gFilledCircle, 0)
                     || msgIn.dispatch("/oled/gLine", gLine, 0)
                     || msgIn.dispatch("/oled/gBox", gBox, 0)
                     || msgIn.dispatch("/oled/gInvert", gInvert, 0)
@@ -438,7 +440,7 @@ void gInvert(OSCMessage &msg) {
 
 void gSetPixel(OSCMessage &msg) {
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) ) {
-        app.oled(gScreen(msg.getInt(0))).put_pixel(msg.getInt(1), msg.getInt(2), msg.getInt(3));
+        app.oled(gScreen(msg.getInt(0))).put_pixel(msg.getInt(3), msg.getInt(1), msg.getInt(2));
         app.newScreen = 1;
     }
 }
@@ -479,6 +481,14 @@ void gCircle(OSCMessage &msg) {
         app.newScreen = 1;
     }
 }
+
+void gFilledCircle(OSCMessage &msg) {
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
+        app.oled(gScreen(msg.getInt(0))).draw_filled_circle(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
+        app.newScreen = 1;
+    }
+}
+
 void gLine(OSCMessage &msg) {
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4) && msg.isInt(5)) {
         app.oled(gScreen(msg.getInt(0))).draw_line(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4), msg.getInt(5));

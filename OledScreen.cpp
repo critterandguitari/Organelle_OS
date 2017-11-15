@@ -175,6 +175,34 @@ void OledScreen::draw_circle(unsigned int h, unsigned int k, unsigned int r, uns
   while (x <= y);
 }
 
+// bresenham circle algorithm, filled
+void OledScreen::draw_filled_circle(unsigned int h, unsigned int k, unsigned int r, unsigned int color) {
+
+  h &= 0x7f;   // just constrain them here to screen size
+  k &= 0x3f;
+
+  int x = 0;
+  int y = r;
+  int p = (3 - (2 * r));
+
+  do
+  {
+    draw_line(h+x, k+y, h+x, k-y, color); 
+    draw_line(h+y, k+x, h+y, k-x, color); 
+    draw_line(h-x, k+y, h-x, k-y, color); 
+    draw_line(h-y, k-x, h-y, k+x, color); 
+
+    x++;
+
+    if (p < 0) {
+      p += ((4 * x) + 6);
+    } else {
+      y--;
+      p += ((4 * (x - y)) + 10);
+    }
+  }
+  while (x <= y);
+}
 void OledScreen::fill_area(uint8_t x, uint8_t y, uint8_t sizex, uint8_t sizey, uint8_t color) {
   uint8_t i, j;
 
