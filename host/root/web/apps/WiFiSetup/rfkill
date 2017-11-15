@@ -1,0 +1,83 @@
+## /usr/lib/network/globals needs to be sourced before this file
+
+
+## Determine the system interface of an rfkill device
+# $1: interface name
+# $2: rfkill name
+rf_get_path() {
+    local interface=$1 rfkill_name=${2:-auto} path
+
+    if [[ $rfkill_name == "auto" ]]; then
+        path=$(find -L "/sys/class/net/$interface/" -maxdepth 2 -type d -name "rfkill*" 2> /dev/null | head -n 1)
+        if [[ $path ]]; then
+            echo "$path"
+            return 0
+        fi
+        report_error "No rfkill switch available on interface '$interface'"
+    else
+        for path in /sys/class/rfkill/*; do
+            if [[ $(< "$path/name") == "$rfkill_name" ]]; then
+                echo "$path"
+                return 0
+            fi
+        done
+        report_error "No rfkill switch with name '$rfkill_name'"
+    fi
+    return 1
+}
+
+## Determine the blocking status of an rfkill device
+# $1: interface name
+# $2: rfkill name
+rf_status() {
+    local path
+    path=$(rf_get_path "$@") || return 1
+
+    if (( $(< "$path/hard" ) )); then
+        echo "hard"
+    elif (( $(< "$path/soft" ) )); then
+        echo "soft"
+    fi
+}
+
+## Set the soft blocking status of an rfkill device
+# $1: blocking status
+# $2: interface name
+# $3: rfkill name
+rf_set() {
+    local block=$1 path
+    shift
+    path=$(rf_get_path "$@") || return 1
+
+    report_debug "${FUNCNAME[1]}: echo '$block' > '$path/soft'"
+    echo "$block" > "$path/soft"
+    timeout_wait 1 '(( $(< "$path/soft") == block ))'
+}
+
+## Block transmission through a wireless device
+# $1: interface name
+# $2: rfkill name
+rf_disable() {
+    rf_set 1 "$@"
+}
+
+## Unblock transmission through a wireless device
+# $1: interface name
+# $2: rfkill name
+rf_enable() {
+    local status
+    status=$(rf_status "$@") || return 1
+
+    case $status in
+      hard)
+        report_error "Transmission is hard-blocked on interface '$interface'"
+        return 1
+      ;;
+      soft)
+        rf_set 0 "$@"
+      ;;
+    esac
+}
+
+
+# vim: ft=sh ts=4 et sw=4:

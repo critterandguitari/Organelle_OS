@@ -1,0 +1,5 @@
+#! /bin/bash
+
+. ./wpa
+
+echo $(wpa_supplicant_scan)
