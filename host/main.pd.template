@@ -1,4 +1,4 @@
-#N canvas 588 498 1265 639 10;
+#N canvas 515 165 1265 639 10;
 #X obj 540 312 shell;
 #X obj 135 58 loadbang;
 #X msg 129 91 \; screenLine1 Press Aux to begin. \; screenLine2 When
@@ -8,9 +8,8 @@ will \; screenLine5 shutdown. \;;
 #X obj 494 62 r aux;
 #X obj 494 161 t b b;
 #X obj 539 189 s clear-oled;
-#X msg 292 303 \; screenLine2 Updating... \;;
 #X obj 535 236 delay 1000;
-#N canvas 7 50 450 300 clear-oled 0;
+#N canvas 8 50 450 300 clear-oled 0;
 #X msg 91 123 \; oscOut send /oled/line/1 \; oscOut send /oled/line/2
 \; oscOut send /oled/line/3 \; oscOut send /oled/line/4 \; oscOut send
 /oled/line/5 \;;
@@ -27,14 +26,15 @@ will \; screenLine5 shutdown. \;;
 #X text 708 316 deploy will usually shutdown. but if it doesn't it
 coudl be an old version of mother host running \, so go to usbdrive
 ;
-#X connect 0 1 12 0;
+#X msg 292 303 \; screenLine2 Starting... \;;
+#X connect 0 1 11 0;
 #X connect 1 0 2 0;
 #X connect 3 0 5 0;
 #X connect 4 0 3 0;
+#X connect 5 0 14 0;
 #X connect 5 0 7 0;
-#X connect 5 0 8 0;
 #X connect 5 1 6 0;
-#X connect 8 0 10 0;
-#X connect 10 0 0 0;
-#X connect 12 0 13 0;
-#X connect 13 0 11 0;
+#X connect 7 0 9 0;
+#X connect 9 0 0 0;
+#X connect 11 0 12 0;
+#X connect 12 0 10 0;

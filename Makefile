@@ -45,7 +45,9 @@ deploy : main
 	mkdir -p /root/.ssh
 	cp -f host/root/.ssh/environment /root/.ssh/environment
 	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
-	sync 
+	mkdir -p /root/web
+	cp -fr host/root/web/* /root/web
+	sync
 
 deployToSD : main
 	cp main host/root/mother
@@ -96,10 +98,14 @@ image : main
 	cp -f host/root/.pdsettings $(IMAGE_DIR)/root
 	mkdir -p $(IMAGE_DIR)/scripts
 	cp -f host/root/scripts/* $(IMAGE_DIR)/scripts
+	mkdir -p $(IMAGE_DIR)/web
+	cp -fr host/root/web/* $(IMAGE_DIR)/web
 	mkdir -p ${IMAGE_DIR}/.ssh
 	cp -f host/root/.ssh/environment $(IMAGE_DIR)/.ssh/environment
 	mkdir -p ${IMAGE_DIR}/system/etc/ssh 
 	cp -f host/etc/ssh/sshd_config $(IMAGE_DIR)/system/etc/ssh/sshd_config
+	cp -f host/etc/nsswitch.conf $(IMAGE_DIR)/system/etc/
+	cp -fr host/extra $(IMAGE_DIR)/extra/
 	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/deploy.template > $(IMAGE_DIR)/deploy.sh
 	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/main.pd.template > $(IMAGE_DIR)/main.pd
 	(cd $(IMAGE_DIR) ; find . -type f | sort > manifest ; openssl sha1 `cat manifest` > files.sha1)
