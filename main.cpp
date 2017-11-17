@@ -1,4 +1,3 @@
-
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -88,7 +87,7 @@ void gInvertArea(OSCMessage &msg);
 void gCharacter(OSCMessage &msg);
 void gPrintln(OSCMessage &msg);
 void gWaveform(OSCMessage &msg);
-
+void gFlip(OSCMessage &msg);
 
 
 // older legacy messages for screen
@@ -198,6 +197,9 @@ int main(int argc, char* argv[]) {
                 msgIn.fill(udpPacketIn[i]);
             }
             if (!msgIn.hasError()) {
+                    //char buf[128];
+                    //msgIn.getAddress(buf,0,128);
+                    //printf("osc message received %s %i\n",buf,msgIn.size());
                 // or'ing will do lazy eval, i.e. as soon as one succeeds it will stop
                 bool processed =
                     msgIn.dispatch("/oled/vumeter", vuMeter, 0)
@@ -214,6 +216,7 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/oled/gPrintln", gPrintln, 0)
                     || msgIn.dispatch("/oled/gWaveform", gWaveform, 0)
                     || msgIn.dispatch("/oled/gInvertArea", gInvertArea, 0)
+                    || msgIn.dispatch("/oled/gFlip", gFlip, 0)
 
                     || msgIn.dispatch("/oled/line/1", setPatchScreenLine1, 0)
                     || msgIn.dispatch("/oled/line/2", setPatchScreenLine2, 0)
@@ -282,8 +285,8 @@ int main(int argc, char* argv[]) {
             // we can do a whole screen,  but not faster than 20fps
             if (screenFpsTimer.getElapsed() > 50.f) {
                 screenFpsTimer.reset();
-                if (app.newScreen) {
-                    app.newScreen = 0;
+                if (app.oled(AppData::AUX).newScreen) {
+                    app.oled(AppData::AUX).newScreen = 0;
                     updateScreenPage(0, app.oled(AppData::AUX));
                     updateScreenPage(1, app.oled(AppData::AUX));
                     updateScreenPage(2, app.oled(AppData::AUX));
@@ -299,8 +302,8 @@ int main(int argc, char* argv[]) {
             // we can do a whole screen,  but not faster than 20fps
             if (screenFpsTimer.getElapsed() > 50.f) {
                 screenFpsTimer.reset();
-                if (app.newScreen) {
-                    app.newScreen = 0;
+                if (app.oled(AppData::MENU).newScreen) {
+                    app.oled(AppData::MENU).newScreen = 0;
                     updateScreenPage(0, app.oled(AppData::MENU));
                     updateScreenPage(1, app.oled(AppData::MENU));
                     updateScreenPage(2, app.oled(AppData::MENU));
@@ -318,7 +321,7 @@ int main(int argc, char* argv[]) {
                         if (app.menuScreenTimeout > 0) app.menuScreenTimeout -= 50;
                         else {
                             app.currentScreen = AppData::PATCH;
-                            app.newScreen = 1;
+                            app.oled(AppData::PATCH).newScreen = 1;
                         }
                     }
                 }
@@ -327,8 +330,8 @@ int main(int argc, char* argv[]) {
         else if (app.currentScreen == AppData::PATCH) {
             if (screenFpsTimer.getElapsed() > 50.f) {
                 screenFpsTimer.reset();
-                if (app.newScreen) {
-                    app.newScreen = 0;
+                if (app.oled(AppData::PATCH).newScreen) {
+                    app.oled(AppData::PATCH).newScreen = 0;
                     updateScreenPage(0, app.oled(AppData::PATCH));
                     updateScreenPage(1, app.oled(AppData::PATCH));
                     updateScreenPage(2, app.oled(AppData::PATCH));
@@ -356,7 +359,7 @@ int main(int argc, char* argv[]) {
                     app.oled(AppData::AUX).clear();
                     app.oled(AppData::AUX).setLine(2, "HOLD to shutdown");
                     app.oled(AppData::AUX).setLine(4, "release to abort");
-                    app.newScreen = 1;
+                    app.oled(AppData::AUX).newScreen = 1;
                     previousScreen = app.currentScreen;
                     app.currentScreen = AppData::AUX;
                 }
@@ -364,7 +367,7 @@ int main(int argc, char* argv[]) {
                     fprintf(stderr, "shutting down.....\n");
                     app.oled(AppData::AUX).clear();
                     app.oled(AppData::AUX).setLine(3, "Shutting down");
-                    app.newScreen = 1;
+                    app.oled(AppData::AUX).newScreen = 1;
                     menu.runShutdown(0, 0);
                 }
             }
@@ -395,66 +398,75 @@ int main(int argc, char* argv[]) {
 // settin patch screen
 void setPatchScreenLine1(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::PATCH), 1, msg);
-    app.newScreen = 1;
+    app.oled(AppData::PATCH).newScreen = 1;
 }
 void setPatchScreenLine2(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::PATCH), 2, msg);
-    app.newScreen = 1;
+    app.oled(AppData::PATCH).newScreen = 1;
 }
 void setPatchScreenLine3(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::PATCH), 3, msg);
-    app.newScreen = 1;
+    app.oled(AppData::PATCH).newScreen = 1;
 }
 void setPatchScreenLine4(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::PATCH), 4, msg);
-    app.newScreen = 1;
+    app.oled(AppData::PATCH).newScreen = 1;
 }
 void setPatchScreenLine5(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::PATCH), 5, msg);
-    app.newScreen = 1;
+    app.oled(AppData::PATCH).newScreen = 1;
 }
 
 inline AppData::Screen gScreen(unsigned s) {
     return (s - 1) < AppData::SCREEN_MAX ? (AppData::Screen) (s - 1) : AppData::PATCH;
 }
-// graphics for patch screen
+
+// graphics messages
+// these clear any pending newScreen flag
+// and require sending gFlip to cause screen update
 void gShowInfoBar(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1)) {
         app.oled(gScreen(msg.getInt(0))).showInfoBar = (msg.getInt(1));
-        app.newScreen = 1;
     }
 }
 void gClear(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1)) {
         if (msg.getInt(1) == 1) app.oled(gScreen(msg.getInt(0))).clear();
-        app.newScreen = 1;
     }
 }
 
 void gInvert(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1)) {
         if (msg.getInt(1) == 1) app.oled(gScreen(msg.getInt(0))).invert_screen();
-        app.newScreen = 1;
     }
 }
 
 void gSetPixel(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) ) {
         app.oled(gScreen(msg.getInt(0))).put_pixel(msg.getInt(3), msg.getInt(1), msg.getInt(2));
-        app.newScreen = 1;
     }
 }
 void gFillArea(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4) && msg.isInt(5)) {
         app.oled(gScreen(msg.getInt(0))).fill_area(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4), msg.getInt(5));
-        app.newScreen = 1;
     }
 }
 
 void gInvertArea(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
         app.oled(gScreen(msg.getInt(0))).invert_area(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
-        app.newScreen = 1;
+    }
+}
+
+void gFlip(OSCMessage &msg) {
+    if (msg.isInt(0)) {
+        app.oled(gScreen(msg.getInt(0))).newScreen = 1;
     }
 }
 
@@ -462,6 +474,7 @@ void gWaveform(OSCMessage &msg) {
     uint8_t tmp[132];
     int len = 0;
     int i;
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isBlob(1)) {
         len = msg.getBlob(1, tmp, 132);
         // only if we got 128 values (len and tmp includes the 4 size bytes of blob)
@@ -470,29 +483,28 @@ void gWaveform(OSCMessage &msg) {
             for (i = 1; i < 128; i++) {
                 app.oled(gScreen(msg.getInt(0))).draw_line(i - 1, tmp[i + 3], i, tmp[i + 4], 1);
             }
-            app.newScreen = 1;
         }
     }
 }
 
 void gCircle(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
         app.oled(gScreen(msg.getInt(0))).draw_circle(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
-        app.newScreen = 1;
     }
 }
 
 void gFilledCircle(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
         app.oled(gScreen(msg.getInt(0))).draw_filled_circle(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
-        app.newScreen = 1;
     }
 }
 
 void gLine(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4) && msg.isInt(5)) {
         app.oled(gScreen(msg.getInt(0))).draw_line(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4), msg.getInt(5));
-        app.newScreen = 1;
     }
 }
 
@@ -502,7 +514,7 @@ void gPrintln(OSCMessage &msg) {
     char line[256];
     int i;
     int x, y, height, color;
-
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
         i = 1;
         x = msg.getInt(i++);
@@ -529,52 +541,52 @@ void gPrintln(OSCMessage &msg) {
             i++;
         }
         app.oled(gScreen(msg.getInt(0))).println(line, x, y, height, color);
-        app.newScreen = 1;
+        
     }
 }
 
 void gBox(OSCMessage &msg) {
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4) && msg.isInt(5)) {
         app.oled(gScreen(msg.getInt(0))).draw_box(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4), msg.getInt(5));
-        app.newScreen = 1;
     }
 }
 void gCharacter(OSCMessage &msg) {
     int size = 8;
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4) && msg.isInt(5)) {
         size = msg.getInt(5);
         if (size == 8) app.oled(gScreen(msg.getInt(0))).put_char_small(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
         else if (size == 16) app.oled(gScreen(msg.getInt(0))).put_char_arial16(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
         else if (size == 24) app.oled(gScreen(msg.getInt(0))).put_char_arial24(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
         else if (size == 32) app.oled(gScreen(msg.getInt(0))).put_char_arial32(msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4));
-        app.newScreen = 1;
     }
 }
 
 // setting aux screen
 void setAuxScreenLine1(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::AUX), 1, msg);
-    app.newScreen = 1;
+    app.oled(AppData::AUX).newScreen = 1;
 }
 void setAuxScreenLine2(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::AUX), 2, msg);
-    app.newScreen = 1;
+    app.oled(AppData::AUX).newScreen = 1;
 }
 void setAuxScreenLine3(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::AUX), 3, msg);
-    app.newScreen = 1;
+    app.oled(AppData::AUX).newScreen = 1;
 }
 void setAuxScreenLine4(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::AUX), 4, msg);
-    app.newScreen = 1;
+    app.oled(AppData::AUX).newScreen = 1;
 }
 void setAuxScreenLine5(OSCMessage &msg) {
     setScreenLine(app.oled(AppData::AUX), 5, msg);
-    app.newScreen = 1;
+    app.oled(AppData::AUX).newScreen = 1;
 }
 void auxScreenClear(OSCMessage &msg) {
     app.oled(AppData::AUX).clear();
-    app.newScreen = 1;
+    app.oled(AppData::AUX).newScreen = 1;
 }
 
 void screenShot(OSCMessage &msg) {
@@ -614,13 +626,13 @@ void vuMeter(OSCMessage &msg) {
 
     if (app.oled((AppData::Screen) app.currentScreen).showInfoBar) {
         app.oled((AppData::Screen) app.currentScreen).drawInfoBar(inR, inL, outR, outL);
-        app.newScreen = 1;
+        app.oled((AppData::Screen) app.currentScreen).newScreen = 1;
     }
 }
 
 void setScreen(OSCMessage &msg) {
     if (msg.isInt(0)) app.currentScreen = msg.getInt(0) - 1;
-    app.newScreen = 1;
+    app.oled( (AppData::Screen) app.currentScreen).newScreen = 1;
 }
 
 void reload(OSCMessage &msg) {
@@ -707,7 +719,7 @@ void invertScreenLine(OSCMessage &msg) {
         int line = msg.getInt(0);
         //printf("inverting %d\n", line);
         app.oled(AppData::PATCH).invertLine((line % 5)+1);
-        app.newScreen = 1;
+        app.oled(AppData::PATCH).newScreen = 1;
     }
 }
 
@@ -717,14 +729,14 @@ void invertAuxScreenLine(OSCMessage &msg) {
         int line = msg.getInt(0);
         //printf("inverting %d\n", line);
         app.oled(AppData::AUX).invertLine((line % 5)+1);
-        app.newScreen = 1;
+        app.oled(AppData::AUX).newScreen = 1;
     }
 }
 
 void goHome(OSCMessage &msg ) {
     printf("returning to main menu\n");
     app.currentScreen = AppData::MENU;
-    app.newScreen = 1;
+    app.oled(AppData::MENU).newScreen = 1;
     app.menuScreenTimeout = MENU_TIMEOUT;
 
 }
@@ -757,7 +769,7 @@ void encoderInput(OSCMessage &msg) {
     if (previousScreen >= 0) {
         app.currentScreen = previousScreen;
         previousScreen = -1;
-        app.newScreen = 1;
+        app.oled((AppData::Screen) app.currentScreen).newScreen = 1;
     }
 
     if (app.currentScreen == AppData::MENU) {
@@ -779,7 +791,7 @@ void encoderInput(OSCMessage &msg) {
             else {
                 app.currentScreen = AppData::MENU;
                 app.menuScreenTimeout = MENU_TIMEOUT;
-                app.newScreen = 1;
+                app.oled(AppData::MENU).newScreen = 1;
             }
         }
     }
@@ -795,7 +807,7 @@ void encoderInput(OSCMessage &msg) {
             else {
                 app.currentScreen = AppData::MENU;
                 app.menuScreenTimeout = MENU_TIMEOUT;
-                app.newScreen = 1;
+                app.oled(AppData::MENU).newScreen = 1;
             }
         }
     }
@@ -851,7 +863,7 @@ void encoderButton(OSCMessage &msg) {
                 if (previousScreen >= 0) {
                     app.currentScreen = previousScreen;
                     previousScreen = -1;
-                    app.newScreen = 1;
+                    app.oled((AppData::Screen) app.currentScreen ).newScreen = 1;
                 }
             }
 
@@ -860,7 +872,7 @@ void encoderButton(OSCMessage &msg) {
             if (previousScreen >= 0) {
                 app.currentScreen = previousScreen;
                 previousScreen = -1;
-                app.newScreen = 1;
+                app.oled((AppData::Screen) app.currentScreen ).newScreen = 1;
             }
         }
     }

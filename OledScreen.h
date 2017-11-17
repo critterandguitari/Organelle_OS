@@ -12,6 +12,7 @@ class OledScreen
         OledScreen();
         uint8_t pix_buf[1024];
         bool showInfoBar;
+        unsigned newScreen;              // flag indicating screen changed and needs to be sent to oled
 
         void setLine(int lineNumber, const char * line);
         void clearLine(int lineNum);

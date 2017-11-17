@@ -234,7 +234,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
         app.setPatchLoading(true);
         app.oled(AppData::PATCH).clear();
         app.currentScreen = AppData::PATCH;
-        app.newScreen = 1;
+        app.oled(AppData::PATCH).newScreen = 1;
         strcpy(app.currentPatch, arg);
         strcpy(app.currentPatchPath, app.getPatchDir());
         
@@ -395,7 +395,7 @@ void MainMenu::drawPatchList(void){
         app.oled(AppData::MENU).drawNotification("Select a patch...");
     }
 
-    app.newScreen = 1;
+    app.oled(AppData::MENU).newScreen = 1;
 //    printf("c %d, p %d\n", cursorOffset, menuOffset);
 }
 

@@ -87,7 +87,6 @@ public:
     char currentPatch[256];
     char currentPatchPath[256];
 
-    unsigned newScreen;              // flag indicating screen changed and needs to be sent to oled
     unsigned currentScreen;          // the current screen (AUX, MENU or PATCH)
     int menuScreenTimeout;
 

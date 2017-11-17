@@ -59,7 +59,6 @@ AppData::AppData(){
     patchIsRunning =false;
     patchIsLoading =false;
     menuScreenTimeout = MENU_TIMEOUT;
-    newScreen = 0;
     currentScreen = MENU;
     patchScreenEncoderOverride = 0;
     auxScreenEncoderOverride = 0;
