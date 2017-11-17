@@ -232,6 +232,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
 
         // update stuff
         app.setPatchLoading(true);
+        app.oled(AppData::PATCH).showInfoBar = true;
         app.oled(AppData::PATCH).clear();
         app.currentScreen = AppData::PATCH;
         app.oled(AppData::PATCH).newScreen = 1;
