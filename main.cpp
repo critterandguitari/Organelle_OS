@@ -513,10 +513,10 @@ void gPrintln(OSCMessage &msg) {
     char str[256];
     char line[256];
     int i;
-    int x, y, height, color;
-    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
+    int x, y, height, color, screenNum;
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
-        i = 1;
+        i = 0;
+        screenNum = msg.getInt(i++);
         x = msg.getInt(i++);
         y = msg.getInt(i++);
         height = msg.getInt(i++);
@@ -524,7 +524,7 @@ void gPrintln(OSCMessage &msg) {
         // since there are no strings in pd, the line message will be made of different types
         // cat the line together, then throw it up on the patch screen
         line[0] = 0;
-        while (msg.isString(i) || msg.isFloat(i) || msg.isInt(i)) {
+        while(i < msg.size()) {
             if (msg.isString(i)) {
                 msg.getString(i, str, 256);
                 strcat(line, str);
@@ -540,8 +540,8 @@ void gPrintln(OSCMessage &msg) {
             }
             i++;
         }
-        app.oled(gScreen(msg.getInt(0))).println(line, x, y, height, color);
-        
+        app.oled(gScreen(screenNum)).newScreen = 0;
+        app.oled(gScreen(screenNum)).println(line, x, y, height, color);
     }
 }
 
@@ -928,7 +928,7 @@ void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg) {
 
     // since there are no strings in pd, the line message will be made of different types
     // cat the line together, then throw it up on the patch screen
-    while (msg.isString(i) || msg.isFloat(i) || msg.isInt(i)) {
+    while (i < msg.size()) {
         if (msg.isString(i)) {
             msg.getString(i, str, 256);
             strcat(screenLine, str);
