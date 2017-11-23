@@ -328,7 +328,7 @@ int main(int argc, char* argv[]) {
             }
         }
         else if (app.currentScreen == AppData::PATCH) {
-            if (screenFpsTimer.getElapsed() > 50.f) {
+            if (screenFpsTimer.getElapsed() > 500.f) {
                 screenFpsTimer.reset();
                 if (app.oled(AppData::PATCH).newScreen) {
                     app.oled(AppData::PATCH).newScreen = 0;
@@ -958,13 +958,22 @@ void sendGetKnobs(void) {
 void updateScreenPage(uint8_t page, OledScreen &screen) {
 
     uint8_t oledPage[128];
-    uint32_t i, j;
+    uint8_t tmp;
+    uint32_t i, j, esc;
 
     i = page;
-
+    esc = 0;
     // copy 128 byte page from the screen buffer
     for (j = 0; j < 128; j++) {
-        oledPage[j] = screen.pix_buf[j + (i * 128)];
+
+        // hack to avoid too many SLIP END characters (192) in packet 
+        // which causes packet size to increase and causes problems down the line
+        tmp = screen.pix_buf[j + (i * 128)];
+        if (tmp == 192){
+            esc++;
+            if (esc > 64) tmp = 128; // replace 192 with 128 'next best' 
+        }
+        oledPage[j] = tmp;
     }
     OSCMessage oledMsg("/oled");
     oledMsg.add(i);
