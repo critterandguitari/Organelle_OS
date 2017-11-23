@@ -328,7 +328,7 @@ int main(int argc, char* argv[]) {
             }
         }
         else if (app.currentScreen == AppData::PATCH) {
-            if (screenFpsTimer.getElapsed() > 500.f) {
+            if (screenFpsTimer.getElapsed() > 50.f) {
                 screenFpsTimer.reset();
                 if (app.oled(AppData::PATCH).newScreen) {
                     app.oled(AppData::PATCH).newScreen = 0;
