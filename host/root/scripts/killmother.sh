@@ -6,8 +6,8 @@ export FW_DIR=${FW_DIR:="/root"}
 SCRIPTS_DIR=$FW_DIR/scripts
 
 
-# quit Pd 
-$SCRIPTS_DIR/killpd.sh
+# quit patch
+$SCRIPTS_DIR/killpatch.sh
 # then mother
 # give a chance to shut itself off
 oscsend localhost 4001 /quitmother i 1

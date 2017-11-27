@@ -9,7 +9,7 @@ echo "Stopping pd, unmounting USB drive..."
 oscsend localhost 4001 /oled/aux/clear i 1
 oscsend localhost 4001 /oled/aux/line/1 s "Ejecting USB drive..."
 oscsend localhost 4001 /oled/setscreen i 1
-$SCRIPTS_DIR/killpd.sh
+$SCRIPTS_DIR/killpatch.sh
 
 if grep -qs " /usbdrive" /proc/mounts; then
     fuser -km /usbdrive/

@@ -132,7 +132,9 @@ void MainMenu::runSystemCommand(const char* name,const char* arg){
 void MainMenu::runPatch(const char* name,const char* arg){
     char buf[256];
     char buf2[256];
-    char patchfile[256];
+    char pdfile[256];
+    char shellfile[256];
+    char scfile[256];
     char patchlocation[256];
  
     if (strcmp(arg, "") == 0) {
@@ -141,13 +143,19 @@ void MainMenu::runPatch(const char* name,const char* arg){
     }
 
     sprintf(patchlocation, "%s/%s", app.getPatchDir(), arg);
-    sprintf(patchfile,"%s/main.pd", patchlocation);
+    sprintf(pdfile,"%s/main.pd", patchlocation);
+    sprintf(scfile,"%s/main.scd", patchlocation);
+    sprintf(shellfile,"%s/run.sh", patchlocation);
     printf("Checking for Patch File: %s\n", patchlocation);
-    
-    if (checkFileExists(patchfile)) {
 
-        // first kill any other PD
-        execScript("killpd.sh");
+    bool isPD = checkFileExists(pdfile);
+    bool isSC = checkFileExists(scfile);
+    bool isShell = checkFileExists(shellfile);
+    
+    if (isPD || isSC || isShell) {
+
+        // first kill any other patches
+        execScript("killpatch.sh");
 
         // remove previous symlink, make new one
         system("rm /tmp/patch");   
@@ -162,22 +170,14 @@ void MainMenu::runPatch(const char* name,const char* arg){
         // disable encoder override
         app.setPatchScreenEncoderOverride(false);
         
-        // set environment for PD to run in
+        // set environment for patch to run in
         setEnv(patchlocation);
     
-        // find mother patchdir->systemdir->firmwaredir (root)
-        bool motherFound = false;
-        char motherpd[128];
-        sprintf(motherpd, "%s/mother.pd", patchlocation);
-        if(checkFileExists(motherpd)) {
-            motherFound = isMotherPdCompatible(motherpd);
-            if(!motherFound) {
-                sprintf(buf2, "mv %s %s.review",motherpd,motherpd);
-                system(buf2);
-            }
-        }
-        if(!motherFound) {
-            sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
+        if(isPD) {
+            // find mother patchdir->systemdir->firmwaredir (root)
+            bool motherFound = false;
+            char motherpd[128];
+            sprintf(motherpd, "%s/mother.pd", patchlocation);
             if(checkFileExists(motherpd)) {
                 motherFound = isMotherPdCompatible(motherpd);
                 if(!motherFound) {
@@ -185,50 +185,80 @@ void MainMenu::runPatch(const char* name,const char* arg){
                     system(buf2);
                 }
             }
-        }
-        if(!motherFound) {
-            sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
-            // dont bother with checks, if its wrong not alot can be done!
-        }
+            if(!motherFound) {
+                sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
+                if(checkFileExists(motherpd)) {
+                    motherFound = isMotherPdCompatible(motherpd);
+                    if(!motherFound) {
+                        sprintf(buf2, "mv %s %s.review",motherpd,motherpd);
+                        system(buf2);
+                    }
+                }
+            }
+            if(!motherFound) {
+                sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
+                // dont bother with checks, if its wrong not alot can be done!
+            }
 
-        // pd arguments
+            // pd arguments
 
-        char pdoptsfile[128];
-        std::string pd_opts;
-        sprintf(pdoptsfile, "%s/pd-opts.txt", patchlocation);
-        if(checkFileExists(pdoptsfile)) {
-            pd_opts = getPDOptions(pdoptsfile);
-        } else {
-            sprintf(pdoptsfile, "%s/pd-opts.txt", app.getSystemDir());
+            char pdoptsfile[128];
+            std::string pd_opts;
+            sprintf(pdoptsfile, "%s/pd-opts.txt", patchlocation);
             if(checkFileExists(pdoptsfile)) {
                 pd_opts = getPDOptions(pdoptsfile);
+            } else {
+                sprintf(pdoptsfile, "%s/pd-opts.txt", app.getSystemDir());
+                if(checkFileExists(pdoptsfile)) {
+                    pd_opts = getPDOptions(pdoptsfile);
+                }
             }
+
+            std::string pd_args = "-rt ";
+            bool guimode = execScript("check-for-x.sh");
+            if(guimode) {
+                pd_args += " -audiobuf 10";
+            } else {
+                pd_args += " -nogui -audiobuf 4";
+            }
+
+
+            if(app.isAlsa()) pd_args += " -alsamidi";
+
+            pd_args += std::string(" -path ") + app.getUserDir() + "/PdExtraLibs";
+
+            pd_args += pd_opts;
+
+            // prepare cmd line
+            sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" \"%s\" )&", 
+                pd_args.c_str(), 
+                motherpd, 
+                pdfile);
+
+            // start pure data with mother and patch
+            printf("starting Pure Data : %s \n", buf);
+            system(buf);
+
+        } else if (isSC) {
+            printf("starting jackd\n");
+            execScript("start-jack.sh; echo $! >> /tmp/jack.pid");
+
+            std::string sc_args;
+            sprintf(buf, "( cd /tmp/patch ; /usr/local/bin/sclang %s \"%s\" ) & echo $! >> /tmp/sc.pid", 
+                sc_args.c_str(), 
+                scfile);
+            printf("starting Supercollider : %s \n", buf);
+            system(buf);
+
+        } else if (isShell) {
+            std::string shell_args;
+            sprintf(buf, "( cd /tmp/patch ; \"%s\" %s ) & echo $! >> /tmp/patchsh.pid", 
+                shell_args.c_str(), 
+                shellfile);
+            printf("starting shell : %s \n", buf);
+            system(buf);
+
         }
-
-        std::string pd_args = "-rt ";
-        bool guimode = execScript("check-for-x.sh");
-        if(guimode) {
-            pd_args += " -audiobuf 10";
-        } else {
-            pd_args += " -nogui -audiobuf 4";
-        }
-
-
-        if(app.isAlsa()) pd_args += " -alsamidi";
-
-        pd_args += std::string(" -path ") + app.getUserDir() + "/PdExtraLibs";
-
-        pd_args += pd_opts;
-
-        // prepare cmd line
-        sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" \"%s\" )&", 
-            pd_args.c_str(), 
-            motherpd, 
-            patchfile);
-
-        // start pure data with mother and patch
-        printf("starting Pure Data : %s \n", buf);
-        system(buf);
 
         // update stuff
         app.setPatchLoading(true);
@@ -256,7 +286,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
 
         app.oled(AppData::MENU).drawNotification(buf);
     } else {
-        printf("Patch File Not Found: %s\n", patchfile);
+        printf("No patch found: %s\n", patchlocation);
     }
 }
 
@@ -541,8 +571,15 @@ void MainMenu::buildMenu(void){
            for(i = 0; i < n; i++) {
                 if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
                     char mainpd[256];
+                    char mainscd[256];
+                    char runsh[256];
                     sprintf(mainpd, "%s/%s/main.pd", app.getPatchDir(), namelist[i]->d_name);
-                    if(checkFileExists(mainpd)) {
+                    sprintf(mainscd, "%s/%s/main.scd", app.getPatchDir(), namelist[i]->d_name);
+                    sprintf(runsh, "%s/%s/run.sh", app.getPatchDir(), namelist[i]->d_name);
+                    if(     checkFileExists(mainpd)
+                        ||  checkFileExists(mainscd)
+                        ||  checkFileExists(runsh)
+                        ) {
                         addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runPatch);
                     } else {
                         char dirpath[255];
