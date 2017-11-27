@@ -241,18 +241,24 @@ void MainMenu::runPatch(const char* name,const char* arg){
 
         } else if (isSC) {
             printf("starting jackd\n");
-            execScript("start-jack.sh; echo $! >> /tmp/jack.pid");
+            execScript("start-jack.sh");
 
-            std::string sc_args;
-            sprintf(buf, "( cd /tmp/patch ; /usr/local/bin/sclang %s \"%s\" ) & echo $! >> /tmp/sc.pid", 
-                sc_args.c_str(), 
+            std::string scs_args="-u 57110 -a 1024 -i 2 -o 2 -b 1026 -R 0 -C 0 -l 3";
+            sprintf(buf, "/usr/local/bin/scsynth %s  & echo $! > /tmp/pids/sc.pid", 
+                scs_args.c_str());
+            printf("starting Supercollider synth: %s \n", buf);
+            system(buf);
+
+            std::string scl_args="";
+            sprintf(buf, "( cd /tmp/patch ; /usr/local/bin/sclang %s \"%s\" ) ",
+                scl_args.c_str(), 
                 scfile);
-            printf("starting Supercollider : %s \n", buf);
+            printf("starting Supercollider lang: %s \n", buf);
             system(buf);
 
         } else if (isShell) {
             std::string shell_args;
-            sprintf(buf, "( cd /tmp/patch ; \"%s\" %s ) & echo $! >> /tmp/patchsh.pid", 
+            sprintf(buf, "( cd /tmp/patch ; \"%s\" %s ) & echo $! > /tmp/pids/patchsh.pid", 
                 shell_args.c_str(), 
                 shellfile);
             printf("starting shell : %s \n", buf);
