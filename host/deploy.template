@@ -80,6 +80,10 @@ cp -f ${IMAGE_DIR}/system/etc/nsswitch.conf /etc/nsswitch.conf
 systemctl start avahi-daemon
 systemctl enable avahi-daemon
 
+# config for supercollider
+mkdir -p /root/.config/SuperCollider
+cp -f ${IMAGE_DIR}/.config/SuperCollider/* /root/.config/SuperCollider
+
 oscsend localhost 4001 /oled/aux/line/2 s "Done"
 oscsend localhost 4001 /oled/aux/line/3 s " "
 

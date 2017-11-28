@@ -47,6 +47,8 @@ deploy : main
 	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
 	mkdir -p /root/web
 	cp -fr host/root/web/* /root/web
+	mkdir -p /root/.config/SuperCollider
+	cp -f host/root/.config/SuperCollider/* /root/.config/SuperCollider
 	sync
 
 deployToSD : main
