@@ -1,2 +1,2 @@
-Server.local.options.maxLogins = 3;§
+Server.local.options.maxLogins = 3;
 

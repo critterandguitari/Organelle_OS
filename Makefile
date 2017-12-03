@@ -35,6 +35,7 @@ deploy : main
 	echo "Updating OS to $(IMAGE_VERSION)"
 	host/root/scripts/remount-rw.sh
 	cp -f host/root/mother.pd /root
+	cp -f host/root/mother.scd /root
 	cp -f host/root/mother /root
 	cp -f host/root/scripts/* /root/scripts
 	cp -f host/root/version /root
@@ -57,6 +58,7 @@ deployToSD : main
 	host/root/scripts/remount-rw.sh
 	mkdir -p /sdcard/Firmware/scripts
 	cp -f host/root/mother.pd /sdcard/Firmware
+	cp -f host/root/mother.scd /sdcard/Firmware
 	cp -f host/root/mother /sdcard/Firmware
 	cp -f host/root/scripts/* /sdcard/Firmware/scripts
 	cp -f host/root/version /sdcard/Firmware
@@ -67,6 +69,10 @@ deployToSD : main
 	mkdir -p /root/.ssh
 	cp -f host/root/.ssh/environment /root/.ssh/environment
 	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
+	mkdir -p /root/web
+	cp -fr host/root/web/* /root/web
+	mkdir -p /root/.config/SuperCollider
+	cp -f host/root/.config/SuperCollider/* /root/.config/SuperCollider
 	sync 
 
 deployToUSB : main
@@ -75,6 +81,7 @@ deployToUSB : main
 	/host/root/scripts/remount-rw.sh
 	mkdir -p /usbdrive/Firmware/scripts
 	cp -f host/root/mother.pd /usbdrive/Firmware
+	cp -f host/root/mother.scd /usbdrive/Firmware
 	cp -f host/root/mother /usbdrive/Firmware
 	cp -f host/root/scripts/* /usbdrive/Firmware/scripts
 	cp -f host/root/version /usbdrive/Firmware
@@ -85,6 +92,10 @@ deployToUSB : main
 	mkdir -p /root/.ssh
 	cp -f host/root/.ssh/environment /root/.ssh/environment
 	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
+	mkdir -p /root/web
+	cp -fr host/root/web/* /root/web
+	mkdir -p /root/.config/SuperCollider
+	cp -f host/root/.config/SuperCollider/* /root/.config/SuperCollider
 	sync 
 
 
@@ -92,6 +103,7 @@ image : main
 	@echo creating image $(IMAGE_VERSION) in $(IMAGE_DIR)
 	mkdir -p $(IMAGE_DIR)/root
 	cp -f host/root/mother.pd $(IMAGE_DIR)/root
+	cp -f host/root/mother.scd $(IMAGE_DIR)/root
 	cp -f host/root/mother $(IMAGE_DIR)/root
 	cp -f host/root/version $(IMAGE_DIR)/root
 	cp -f host/root/buildtag $(IMAGE_DIR)/root
@@ -108,6 +120,8 @@ image : main
 	cp -f host/etc/ssh/sshd_config $(IMAGE_DIR)/system/etc/ssh/sshd_config
 	cp -f host/etc/nsswitch.conf $(IMAGE_DIR)/system/etc/
 	cp -fr host/extra $(IMAGE_DIR)/extra/
+	mkdir -p $(IMAGE_DIR)/.config/SuperCollider
+	cp -f host/root/.config/SuperCollider/* $(IMAGE_DIR)/.config/SuperCollider
 	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/deploy.template > $(IMAGE_DIR)/deploy.sh
 	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/main.pd.template > $(IMAGE_DIR)/main.pd
 	(cd $(IMAGE_DIR) ; find . -type f | sort > manifest ; openssl sha1 `cat manifest` > files.sha1)

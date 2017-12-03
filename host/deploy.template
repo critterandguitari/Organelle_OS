@@ -40,6 +40,7 @@ if grep critter  /root/.gitconfig ; then rm /root/.gitconfig; fi
 # copy files
 oscsend localhost 4001 /oled/line/3 s "Copying files"
 cp -f ${IMAGE_DIR}/root/mother.pd /root
+cp -f ${IMAGE_DIR}/root/mother.scd /root
 cp -f ${IMAGE_DIR}/root/mother /root
 cp -f ${IMAGE_DIR}/root/version /root
 cp -f ${IMAGE_DIR}/root/buildtag /root

@@ -243,9 +243,11 @@ void MainMenu::runPatch(const char* name,const char* arg){
             printf("starting jackd\n");
             execScript("start-jack.sh");
 
+            std::string mother_sc="/root/mother.scd";
             std::string scl_args="";
-            sprintf(buf, "( cd /tmp/patch ; echo "" | /usr/local/bin/sclang %s main.scd & echo $! > /tmp/pids/sclang.pid )",
-                scl_args.c_str()
+            sprintf(buf, "( cd /tmp/patch ; echo "" | /usr/local/bin/sclang %s \"%s\" & echo $! > /tmp/pids/sclang.pid )",
+                scl_args.c_str(),
+                mother_sc.c_str()
                 );
             printf("starting Supercollider lang: %s \n", buf);
             system(buf);
