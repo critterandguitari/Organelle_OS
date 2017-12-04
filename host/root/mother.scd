@@ -1,7 +1,6 @@
 // location of patch to run
 ~mainPatch = "/tmp/patch/main.scd".standardizePath;
 
-
 // mother host output
 ~motherHost = NetAddr("127.0.0.1", 4001);
 ~motherHost.sendMsg("/patchLoaded",1);
@@ -9,19 +8,20 @@
 
 // output for vumeter and volume control
 ~mainVolume = 0.8;
+~mainOut = nil;
 ~outL = Bus.audio(s,1);
 ~outR = Bus.audio(s,1);
-~mainOut = nil;
-
 ~mainOutDef = SynthDef(\mainOutput,
-	{
-		arg amp = ~mainVolume;
-		var sig;
-		sig = In.ar(~outL,2);
-		sig = sig * amp;
-		SendReply.kr(Impulse.kr(10),'/audioLevel',sig);
-		Out.ar(0,sig);
-	}
+    {
+        arg amp = 0.8;
+        var insig,sig, peaksig;
+        insig = SoundIn.ar([0,1]);
+        sig = In.ar(~outL,2);
+        sig = sig * amp;
+        Out.ar(0,sig);
+        peaksig=[insig[0],insig[1],sig[0],sig[1]];
+        SendPeakRMS.kr(peaksig, 5, 3, "/audioLevel");
+    }
 );
 
 /*
@@ -65,9 +65,9 @@ not implemented yet
 	if(~knobValues[knob] != val,
 		{
 			~knobValues[knob] = val;
-			if(knob==5, {
+			if(knob==4, {
 				~mainVolume = val;
-				if(~mainOut.isPlaying, { ~mainOut.set(\amp,~mainVolume);});
+				~mainOut.set(\amp,~mainVolume);
 			});
 
 			self.changed(\knob,knob,val);
@@ -189,24 +189,27 @@ OSCdef( \OrganelleFootSwitch,
 OSCdef( \OrganelleAudioLevel,
 	{
 		arg msg, time, addr, recvPort;
-		var outL, outR;
-		outL = msg[3];
-		outR = msg[4];
-		~motherHost.sendMsg("/oled/vumeter", (outL* 11).asInteger,  (outR * 11).asInteger);
+		var peakInL,peakInR,peakOutL,peakOutR;
+		peakInL = (msg[3] * 11).asInteger;
+		peakInR = (msg[5] * 11).asInteger;
+		peakOutL = (msg[7] * 11).asInteger;
+		peakOutR = (msg[9] * 11).asInteger;
+        
+		~motherHost.sendMsg("/oled/vumeter", peakInL,peakInR,peakOutL,peakOutR);
 	},
 	"/audioLevel"
 );
 
 
 // boot the server
-(
-
-s.waitForBoot {
+s.boot;
+s.doWhenBooted {
 	(
-		s.initTree;
+        Routine( {
+        1.wait;
 		~mainOut = ~mainOutDef.add.play;
 		~mainPatch.load;
+        }).play;
 	)
 };
-)
 
