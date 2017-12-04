@@ -18,7 +18,13 @@ extern AppData app;
 
 static const char* MM_STR[MainMenu::MenuMode::M_MAX_ENTRIES] = {
     "MAIN",
+    "PATCH",
     "UTIL"
+};
+static const char* MM_TITLE[MainMenu::MenuMode::M_MAX_ENTRIES] = {
+    "------ SYSTEM -------",
+    "-- Patch Functions --",
+    "-- Other Functions --"
 };
 
 MainMenu::MainMenu(){
@@ -28,6 +34,8 @@ MainMenu::MainMenu(){
     cursorOffset = 1;
     favouriteMenu = false;
     actionTrigger = false;
+    currentMenu = MenuMode::M_MAIN;
+    menuTitle=MM_TITLE[currentMenu];
 }
 
 #define MOTHER_PD_VERSION "1.2"
@@ -138,6 +146,7 @@ void MainMenu::runSystemCommand(const char* name,const char* arg){
     char script[256];
     sprintf(location, "%s/%s", app.getSystemDir(),arg);
     sprintf(script, "\"%s/run.sh\" &", location);
+    printf("running \"%s\"",script);
     setEnv(location);
     system(script);
     currentMenu = MenuMode::M_MAIN;
@@ -492,22 +501,20 @@ void MainMenu::buildMenu(void){
     numMenuEntries = 0; // total things 
 
     // System menu
-    addMenuItem(numMenuEntries++, "------ SYSTEM -------", "", &MainMenu::runDoNothing);
+    addMenuItem(numMenuEntries++, menuTitle.c_str(), "", &MainMenu::runDoNothing);
     systemMenuOffset = numMenuEntries;
 
+    addMenuItem(numMenuEntries++, "Shutdown","Shutdown", &MainMenu::runShutdown);
     switch(currentMenu) {
-        case M_UTILITY: {
-            addMenuItem(numMenuEntries++, "<-- Main Menu", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
+        case MenuMode::M_UTILITY: {
             addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
             addMenuItem(numMenuEntries++, "Info","Info", &MainMenu::runInfo);
             addMenuItem(numMenuEntries++, "Eject","Eject", &MainMenu::runEject);
             addMenuItem(numMenuEntries++, "Reload","Reload", &MainMenu::runReload);
+            addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
             break;
         }
-        case M_MAIN:
-        default: {
-            // main menu, generally commands will return them menu to here
-            addMenuItem(numMenuEntries++, "Shutdown","Shutdown", &MainMenu::runShutdown);
+        case MenuMode::M_PATCH: {
             addMenuItem(numMenuEntries++, "Save","Save", &MainMenu::runSave);
             addMenuItem(numMenuEntries++, "Save New", "Save New", &MainMenu::runSaveNew);
             if(favouriteMenu) {
@@ -515,7 +522,13 @@ void MainMenu::buildMenu(void){
             } else {
                 addMenuItem(numMenuEntries++, "Show Favourites", "Show Favourites", &MainMenu::runToggleFavourites);
             }
-            addMenuItem(numMenuEntries++, "> Utilities", MM_STR[MenuMode::M_UTILITY], &MainMenu::runCdMenu);
+            addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
+            break;
+        }
+        case MenuMode::M_MAIN:
+        default: {
+            addMenuItem(numMenuEntries++, "Patch Functions     >", MM_STR[MenuMode::M_PATCH], &MainMenu::runCdMenu);
+            addMenuItem(numMenuEntries++, "Other Functions     >", MM_STR[MenuMode::M_UTILITY], &MainMenu::runCdMenu);
         }
     }
  
@@ -524,7 +537,7 @@ void MainMenu::buildMenu(void){
 
 
     if(!app.isSystemHome()) { 
-        addMenuItem(numMenuEntries++, "<-- HOME", "", &MainMenu::runCdSystemHome);
+        addMenuItem(numMenuEntries++, "<-- Script Menu", "", &MainMenu::runCdSystemHome);
     }
 
     if(checkFileExists(app.getSystemDir())) {
@@ -554,7 +567,7 @@ void MainMenu::buildMenu(void){
                             name[20] = '>';
                             name[21] = 0;
                             
-                            sprintf(dirpath,"%s/%s",app.getPatchDir(),namelist[i]->d_name);
+                            sprintf(dirpath,"%s/%s",app.getSystemDir(),namelist[i]->d_name);
                             addMenuItem(numMenuEntries++, name , dirpath, &MainMenu::runCdSystemDirectory);
                         }
                     }
@@ -670,15 +683,24 @@ void MainMenu::buildMenu(void){
     drawPatchList();
 }
 
-void MainMenu::runCdMenu(const char* ,const char*mode) {
-    if(mode==MM_STR[MenuMode::M_MAIN]) {
+void MainMenu::runCdMenu(const char* name,const char*mode) {
+    printf("run cd menu %s:%s \n",name,mode);
+    if(strcmp(mode,MM_STR[MenuMode::M_MAIN])==0) {
+        printf("main menu\n");
         currentMenu = MenuMode::M_MAIN;
-    } else    if(mode==MM_STR[MenuMode::M_UTILITY]) {
+    } else if(strcmp(mode,MM_STR[MenuMode::M_PATCH])==0) {
+        printf("patch menu\n");
+        currentMenu = MenuMode::M_PATCH;
+    } else if(strcmp(mode,MM_STR[MenuMode::M_UTILITY])==0) {
+        printf("utility menu\n");
         currentMenu = MenuMode::M_UTILITY;
     } else {
         //default to main menu
+        printf("default menu\n");
         currentMenu = MenuMode::M_MAIN;
     }
+    menuTitle=MM_TITLE[currentMenu];
+    buildMenu();
 }
 
 void MainMenu::runCdPatchDirectory(const char* name,const char* arg) {

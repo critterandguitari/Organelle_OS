@@ -29,6 +29,7 @@ public:
 
     enum MenuMode {
         M_MAIN,
+        M_PATCH,
         M_UTILITY,
         M_MAX_ENTRIES
     };
@@ -89,6 +90,7 @@ private:
 
     bool actionTrigger;
 
+    std::string menuTitle;
     MenuMode currentMenu;
 
     bool favouriteMenu;
