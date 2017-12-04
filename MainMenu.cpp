@@ -18,13 +18,15 @@ extern AppData app;
 
 static const char* MM_STR[MainMenu::MenuMode::M_MAX_ENTRIES] = {
     "MAIN",
-    "PATCH",
-    "UTIL"
+    "Storage",
+    "Settings",
+    "Extra"
 };
 static const char* MM_TITLE[MainMenu::MenuMode::M_MAX_ENTRIES] = {
     "------ SYSTEM -------",
-    "-- Patch Functions --",
-    "-- Other Functions --"
+    "------ Storage ------",
+    "----- Settings ------",
+    "------- Extra -------"
 };
 
 MainMenu::MainMenu(){
@@ -506,17 +508,17 @@ void MainMenu::buildMenu(void){
 
     addMenuItem(numMenuEntries++, "Shutdown","Shutdown", &MainMenu::runShutdown);
     switch(currentMenu) {
-        case MenuMode::M_UTILITY: {
-            addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
-            addMenuItem(numMenuEntries++, "Info","Info", &MainMenu::runInfo);
+        case MenuMode::M_STORAGE: {
             addMenuItem(numMenuEntries++, "Eject","Eject", &MainMenu::runEject);
             addMenuItem(numMenuEntries++, "Reload","Reload", &MainMenu::runReload);
+            addMenuItem(numMenuEntries++, "Save","Save", &MainMenu::runSave);
+            addMenuItem(numMenuEntries++, "Save New", "Save New", &MainMenu::runSaveNew);
             addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
             break;
         }
-        case MenuMode::M_PATCH: {
-            addMenuItem(numMenuEntries++, "Save","Save", &MainMenu::runSave);
-            addMenuItem(numMenuEntries++, "Save New", "Save New", &MainMenu::runSaveNew);
+        case MenuMode::M_SETTINGS: {
+            addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
+            addMenuItem(numMenuEntries++, "Info","Info", &MainMenu::runInfo);
             if(favouriteMenu) {
                 addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
             } else {
@@ -525,57 +527,60 @@ void MainMenu::buildMenu(void){
             addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
             break;
         }
+        case MenuMode::M_EXTRA: {
+        if(checkFileExists(app.getSystemDir())) {
+                n = scandir(app.getSystemDir(), &namelist, NULL, alphasort);
+                if (n < 0)
+                    perror("scandir usercmds");
+                else {
+                    for (i = 0; i < n; i++) {
+                        if (namelist[i]->d_type == DT_DIR &&
+                        strcmp (namelist[i]->d_name, "..") != 0
+                        && strcmp (namelist[i]->d_name, ".") != 0) {
+
+                            char runsh[256];
+                            sprintf(runsh, "%s/%s/run.sh", app.getSystemDir(), namelist[i]->d_name);
+                            if (checkFileExists(runsh)) {
+                                addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runSystemCommand);
+                                // for the uncommon situation of having many system scripts
+                                if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
+                                    numMenuEntries = MAX_MENU_ENTRIES - 100;
+                                }
+                            } else {
+                                char dirpath[255];
+                                char name[22];
+                                int len = strlen(namelist[i]->d_name);
+                                strncpy(name,namelist[i]->d_name,22);
+                                if(len<22) memset(name+len,' ',22-len);
+                                name[20] = '>';
+                                name[21] = 0;
+                                
+                                sprintf(dirpath,"%s/%s",app.getSystemDir(),namelist[i]->d_name);
+                                addMenuItem(numMenuEntries++, name , dirpath, &MainMenu::runCdSystemDirectory);
+                            }
+                        }
+                        free(namelist[i]);
+                    }
+                    free(namelist);
+                }
+            }
+            if(!app.isSystemHome()) { 
+                addMenuItem(numMenuEntries++, "<-- Extra Home", "", &MainMenu::runCdSystemHome);
+            }
+
+            addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
+            break;
+        }
         case MenuMode::M_MAIN:
         default: {
-            addMenuItem(numMenuEntries++, "Patch Functions     >", MM_STR[MenuMode::M_PATCH], &MainMenu::runCdMenu);
-            addMenuItem(numMenuEntries++, "Other Functions     >", MM_STR[MenuMode::M_UTILITY], &MainMenu::runCdMenu);
+            addMenuItem(numMenuEntries++, "Storage             >", MM_STR[MenuMode::M_STORAGE], &MainMenu::runCdMenu);
+            addMenuItem(numMenuEntries++, "Settings            >", MM_STR[MenuMode::M_SETTINGS], &MainMenu::runCdMenu);
+            addMenuItem(numMenuEntries++, "Extra               >", MM_STR[MenuMode::M_EXTRA], &MainMenu::runCdMenu);
         }
     }
  
-    // system scripts from usb/sdcard
     systemUserMenuOffset = numMenuEntries; // the starting point of user system entries
 
-
-    if(!app.isSystemHome()) { 
-        addMenuItem(numMenuEntries++, "<-- Script Menu", "", &MainMenu::runCdSystemHome);
-    }
-
-    if(checkFileExists(app.getSystemDir())) {
-            n = scandir(app.getSystemDir(), &namelist, NULL, alphasort);
-            if (n < 0)
-                perror("scandir usercmds");
-            else {
-                for (i = 0; i < n; i++) {
-                    if (namelist[i]->d_type == DT_DIR &&
-                    strcmp (namelist[i]->d_name, "..") != 0
-                    && strcmp (namelist[i]->d_name, ".") != 0) {
-
-                        char runsh[256];
-                        sprintf(runsh, "%s/%s/run.sh", app.getSystemDir(), namelist[i]->d_name);
-                        if (checkFileExists(runsh)) {
-                            addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runSystemCommand);
-                            // for the uncommon situation of having many system scripts
-                            if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
-                                numMenuEntries = MAX_MENU_ENTRIES - 100;
-                            }
-                        } else {
-                            char dirpath[255];
-                            char name[22];
-                            int len = strlen(namelist[i]->d_name);
-                            strncpy(name,namelist[i]->d_name,22);
-                            if(len<22) memset(name+len,' ',22-len);
-                            name[20] = '>';
-                            name[21] = 0;
-                            
-                            sprintf(dirpath,"%s/%s",app.getSystemDir(),namelist[i]->d_name);
-                            addMenuItem(numMenuEntries++, name , dirpath, &MainMenu::runCdSystemDirectory);
-                        }
-                    }
-                    free(namelist[i]);
-                }
-                free(namelist);
-            }
-    }
 
     if(favouriteMenu) {
         addMenuItem(numMenuEntries++, "---- FAVOURITES -----", "", &MainMenu::runDoNothing);
@@ -686,14 +691,13 @@ void MainMenu::buildMenu(void){
 void MainMenu::runCdMenu(const char* name,const char*mode) {
     printf("run cd menu %s:%s \n",name,mode);
     if(strcmp(mode,MM_STR[MenuMode::M_MAIN])==0) {
-        printf("main menu\n");
         currentMenu = MenuMode::M_MAIN;
-    } else if(strcmp(mode,MM_STR[MenuMode::M_PATCH])==0) {
-        printf("patch menu\n");
-        currentMenu = MenuMode::M_PATCH;
-    } else if(strcmp(mode,MM_STR[MenuMode::M_UTILITY])==0) {
-        printf("utility menu\n");
-        currentMenu = MenuMode::M_UTILITY;
+    } else if(strcmp(mode,MM_STR[MenuMode::M_STORAGE])==0) {
+        currentMenu = MenuMode::M_STORAGE;
+    } else if(strcmp(mode,MM_STR[MenuMode::M_SETTINGS])==0) {
+        currentMenu = MenuMode::M_SETTINGS;
+    } else if(strcmp(mode,MM_STR[MenuMode::M_EXTRA])==0) {
+        currentMenu = MenuMode::M_EXTRA;
     } else {
         //default to main menu
         printf("default menu\n");

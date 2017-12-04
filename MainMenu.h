@@ -29,8 +29,9 @@ public:
 
     enum MenuMode {
         M_MAIN,
-        M_PATCH,
-        M_UTILITY,
+        M_STORAGE,
+        M_SETTINGS,
+        M_EXTRA,
         M_MAX_ENTRIES
     };
 
