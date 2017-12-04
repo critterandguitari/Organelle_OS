@@ -14,6 +14,21 @@
 
 extern AppData app; 
 
+
+
+static const char* MM_STR[MainMenu::MenuMode::M_MAX_ENTRIES] = {
+    "MAIN",
+    "Storage",
+    "Settings",
+    "Extra"
+};
+static const char* MM_TITLE[MainMenu::MenuMode::M_MAX_ENTRIES] = {
+    "------ SYSTEM -------",
+    "------ Storage ------",
+    "----- Settings ------",
+    "------- Extra -------"
+};
+
 MainMenu::MainMenu(){
     numPatches = 0;
     numMenuEntries = 0;
@@ -21,6 +36,8 @@ MainMenu::MainMenu(){
     cursorOffset = 1;
     favouriteMenu = false;
     actionTrigger = false;
+    currentMenu = MenuMode::M_MAIN;
+    menuTitle=MM_TITLE[currentMenu];
 }
 
 #define MOTHER_PD_VERSION "1.2"
@@ -84,6 +101,7 @@ void MainMenu::runReload(const char* name,const char* arg) {
     // set patch and user dir to defaults
     app.setPatchDir(NULL);
     app.setUserDir(NULL);
+    currentMenu = MenuMode::M_MAIN;
     buildMenu();
 }
 void MainMenu::runShutdown(const char* name,const char* arg) {
@@ -96,6 +114,7 @@ void MainMenu::runInfo(const char* name,const char* arg) {
     app.oled(AppData::AUX).clear();
     app.oled(AppData::AUX).drawNotification("     System Info     ");
     execScript("info.sh &");
+    currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runEject(const char* name,const char* arg) {
@@ -103,20 +122,24 @@ void MainMenu::runEject(const char* name,const char* arg) {
     execScript("eject.sh &");
     app.setPatchRunning(false);
     app.setPatchScreenEncoderOverride(false);
+    currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runMidiChannel(const char* name,const char* arg) {
     printf("Selecting MIDI ch... \n");
     execScript("midi-config.sh &");
+    currentMenu = MenuMode::M_MAIN;
 }
 void MainMenu::runSave(const char* name,const char* arg) {
     printf("Saving... \n");
     execScript("save-patch.sh &");
+    currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runSaveNew(const char* name,const char* arg) {
     printf("Saving new... \n");
     execScript("save-new-patch.sh &");
+    currentMenu = MenuMode::M_MAIN;
 }
 
 
@@ -125,14 +148,18 @@ void MainMenu::runSystemCommand(const char* name,const char* arg){
     char script[256];
     sprintf(location, "%s/%s", app.getSystemDir(),arg);
     sprintf(script, "\"%s/run.sh\" &", location);
+    printf("running \"%s\"",script);
     setEnv(location);
     system(script);
+    currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runPatch(const char* name,const char* arg){
     char buf[256];
     char buf2[256];
-    char patchfile[256];
+    char pdfile[256];
+    char shellfile[256];
+    char scfile[256];
     char patchlocation[256];
  
     if (strcmp(arg, "") == 0) {
@@ -141,13 +168,19 @@ void MainMenu::runPatch(const char* name,const char* arg){
     }
 
     sprintf(patchlocation, "%s/%s", app.getPatchDir(), arg);
-    sprintf(patchfile,"%s/main.pd", patchlocation);
+    sprintf(pdfile,"%s/main.pd", patchlocation);
+    sprintf(scfile,"%s/main.scd", patchlocation);
+    sprintf(shellfile,"%s/run.sh", patchlocation);
     printf("Checking for Patch File: %s\n", patchlocation);
-    
-    if (checkFileExists(patchfile)) {
 
-        // first kill any other PD
-        execScript("killpd.sh");
+    bool isPD = checkFileExists(pdfile);
+    bool isSC = checkFileExists(scfile);
+    bool isShell = checkFileExists(shellfile);
+    
+    if (isPD || isSC || isShell) {
+
+        // first kill any other patches
+        execScript("killpatch.sh");
 
         // remove previous symlink, make new one
         system("rm /tmp/patch");   
@@ -162,22 +195,14 @@ void MainMenu::runPatch(const char* name,const char* arg){
         // disable encoder override
         app.setPatchScreenEncoderOverride(false);
         
-        // set environment for PD to run in
+        // set environment for patch to run in
         setEnv(patchlocation);
     
-        // find mother patchdir->systemdir->firmwaredir (root)
-        bool motherFound = false;
-        char motherpd[128];
-        sprintf(motherpd, "%s/mother.pd", patchlocation);
-        if(checkFileExists(motherpd)) {
-            motherFound = isMotherPdCompatible(motherpd);
-            if(!motherFound) {
-                sprintf(buf2, "mv %s %s.review",motherpd,motherpd);
-                system(buf2);
-            }
-        }
-        if(!motherFound) {
-            sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
+        if(isPD) {
+            // find mother patchdir->systemdir->firmwaredir (root)
+            bool motherFound = false;
+            char motherpd[128];
+            sprintf(motherpd, "%s/mother.pd", patchlocation);
             if(checkFileExists(motherpd)) {
                 motherFound = isMotherPdCompatible(motherpd);
                 if(!motherFound) {
@@ -185,50 +210,82 @@ void MainMenu::runPatch(const char* name,const char* arg){
                     system(buf2);
                 }
             }
-        }
-        if(!motherFound) {
-            sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
-            // dont bother with checks, if its wrong not alot can be done!
-        }
+            if(!motherFound) {
+                sprintf(motherpd, "%s/mother.pd", app.getSystemDir());
+                if(checkFileExists(motherpd)) {
+                    motherFound = isMotherPdCompatible(motherpd);
+                    if(!motherFound) {
+                        sprintf(buf2, "mv %s %s.review",motherpd,motherpd);
+                        system(buf2);
+                    }
+                }
+            }
+            if(!motherFound) {
+                sprintf(motherpd,"%s/mother.pd", app.getFirmwareDir());
+                // dont bother with checks, if its wrong not alot can be done!
+            }
 
-        // pd arguments
+            // pd arguments
 
-        char pdoptsfile[128];
-        std::string pd_opts;
-        sprintf(pdoptsfile, "%s/pd-opts.txt", patchlocation);
-        if(checkFileExists(pdoptsfile)) {
-            pd_opts = getPDOptions(pdoptsfile);
-        } else {
-            sprintf(pdoptsfile, "%s/pd-opts.txt", app.getSystemDir());
+            char pdoptsfile[128];
+            std::string pd_opts;
+            sprintf(pdoptsfile, "%s/pd-opts.txt", patchlocation);
             if(checkFileExists(pdoptsfile)) {
                 pd_opts = getPDOptions(pdoptsfile);
+            } else {
+                sprintf(pdoptsfile, "%s/pd-opts.txt", app.getSystemDir());
+                if(checkFileExists(pdoptsfile)) {
+                    pd_opts = getPDOptions(pdoptsfile);
+                }
             }
+
+            std::string pd_args = "-rt ";
+            bool guimode = execScript("check-for-x.sh");
+            if(guimode) {
+                pd_args += " -audiobuf 10";
+            } else {
+                pd_args += " -nogui -audiobuf 4";
+            }
+
+
+            if(app.isAlsa()) pd_args += " -alsamidi";
+
+            pd_args += std::string(" -path ") + app.getUserDir() + "/PdExtraLibs";
+
+            pd_args += pd_opts;
+
+            // prepare cmd line
+            sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" \"%s\" )&", 
+                pd_args.c_str(), 
+                motherpd, 
+                pdfile);
+
+            // start pure data with mother and patch
+            printf("starting Pure Data : %s \n", buf);
+            system(buf);
+
+        } else if (isSC) {
+            printf("starting jackd\n");
+            execScript("start-jack.sh");
+
+            std::string mother_sc="/root/mother.scd";
+            std::string scl_args="";
+            sprintf(buf, "( cd /tmp/patch ; echo "" | /usr/local/bin/sclang %s \"%s\" & echo $! > /tmp/pids/sclang.pid )",
+                scl_args.c_str(),
+                mother_sc.c_str()
+                );
+            printf("starting Supercollider lang: %s \n", buf);
+            system(buf);
+
+        } else if (isShell) {
+            std::string shell_args;
+            sprintf(buf, "( cd /tmp/patch ; run.sh %s & echo $! > /tmp/pids/patchsh.pid ) ", 
+                shell_args.c_str() 
+                );
+            printf("starting shell : %s \n", buf);
+            system(buf);
+
         }
-
-        std::string pd_args = "-rt ";
-        bool guimode = execScript("check-for-x.sh");
-        if(guimode) {
-            pd_args += " -audiobuf 10";
-        } else {
-            pd_args += " -nogui -audiobuf 4";
-        }
-
-
-        if(app.isAlsa()) pd_args += " -alsamidi";
-
-        pd_args += std::string(" -path ") + app.getUserDir() + "/PdExtraLibs";
-
-        pd_args += pd_opts;
-
-        // prepare cmd line
-        sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" \"%s\" )&", 
-            pd_args.c_str(), 
-            motherpd, 
-            patchfile);
-
-        // start pure data with mother and patch
-        printf("starting Pure Data : %s \n", buf);
-        system(buf);
 
         // update stuff
         app.setPatchLoading(true);
@@ -256,7 +313,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
 
         app.oled(AppData::MENU).drawNotification(buf);
     } else {
-        printf("Patch File Not Found: %s\n", patchfile);
+        printf("No patch found: %s\n", patchlocation);
     }
 }
 
@@ -342,9 +399,9 @@ void MainMenu::programChange(int pgm){
     std::ifstream infile(favfile);
     std::string line;
     int idx = 0;
-    exists = std::getline(infile, line);
+    exists = std::getline(infile, line).good();
     for(idx = 0;idx<(pgm-1); idx++) {
-      exists = std::getline(infile, line);
+      exists = std::getline(infile, line).good();
     }
 
     if(exists) {
@@ -419,6 +476,10 @@ void MainMenu::buildMenu(void){
     int i;
     int mindex;
   
+    // set locale so sorting happens in right order
+    // not sure this does anything
+    std::setlocale(LC_ALL, "en_US.UTF-8");
+
     // clear em out
     for (i = 0; i < MAX_MENU_ENTRIES; i++){
         menuItems[i].name[0] = 0;
@@ -442,54 +503,84 @@ void MainMenu::buildMenu(void){
     numMenuEntries = 0; // total things 
 
     // System menu
-    addMenuItem(numMenuEntries++, "------ SYSTEM -------", "", &MainMenu::runDoNothing);
+    addMenuItem(numMenuEntries++, menuTitle.c_str(), "", &MainMenu::runDoNothing);
     systemMenuOffset = numMenuEntries;
 
     addMenuItem(numMenuEntries++, "Shutdown","Shutdown", &MainMenu::runShutdown);
-    addMenuItem(numMenuEntries++, "Eject","Eject", &MainMenu::runEject);
-    addMenuItem(numMenuEntries++, "Reload","Reload", &MainMenu::runReload);
-    addMenuItem(numMenuEntries++, "Info","Info", &MainMenu::runInfo);
-    addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
-    addMenuItem(numMenuEntries++, "Save","Save", &MainMenu::runSave);
-    addMenuItem(numMenuEntries++, "Save New", "Save New", &MainMenu::runSaveNew);
-    // addMenuItem(numMenuEntries++, "Save Preset", "Save Preset", &MainMenu::runSystemCommand);
+    switch(currentMenu) {
+        case MenuMode::M_STORAGE: {
+            addMenuItem(numMenuEntries++, "Eject","Eject", &MainMenu::runEject);
+            addMenuItem(numMenuEntries++, "Reload","Reload", &MainMenu::runReload);
+            addMenuItem(numMenuEntries++, "Save","Save", &MainMenu::runSave);
+            addMenuItem(numMenuEntries++, "Save New", "Save New", &MainMenu::runSaveNew);
+            addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
+            break;
+        }
+        case MenuMode::M_SETTINGS: {
+            addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
+            addMenuItem(numMenuEntries++, "Info","Info", &MainMenu::runInfo);
+            if(favouriteMenu) {
+                addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
+            } else {
+                addMenuItem(numMenuEntries++, "Show Favourites", "Show Favourites", &MainMenu::runToggleFavourites);
+            }
+            addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
+            break;
+        }
+        case MenuMode::M_EXTRA: {
+        if(checkFileExists(app.getSystemDir())) {
+                n = scandir(app.getSystemDir(), &namelist, NULL, alphasort);
+                if (n < 0)
+                    perror("scandir usercmds");
+                else {
+                    for (i = 0; i < n; i++) {
+                        if (namelist[i]->d_type == DT_DIR &&
+                        strcmp (namelist[i]->d_name, "..") != 0
+                        && strcmp (namelist[i]->d_name, ".") != 0) {
 
-    if(favouriteMenu) {
-        addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
-    } else {
-        addMenuItem(numMenuEntries++, "Show Favourites", "Show Favourites", &MainMenu::runToggleFavourites);
-    }
- 
-    // system scripts from usb/sdcard
-    // set locale so sorting happens in right order
-    // not sure this does anything
-    systemUserMenuOffset = numMenuEntries; // the starting point of user system entries
-    std::setlocale(LC_ALL, "en_US.UTF-8");
-    if(checkFileExists(app.getSystemDir())) {
-            n = scandir(app.getSystemDir(), &namelist, NULL, alphasort);
-            if (n < 0)
-                perror("scandir usercmds");
-            else {
-                for (i = 0; i < n; i++) {
-                    if (namelist[i]->d_type == DT_DIR &&
-                    strcmp (namelist[i]->d_name, "..") != 0
-                    && strcmp (namelist[i]->d_name, ".") != 0) {
-
-                        char runsh[256];
-                        sprintf(runsh, "%s/%s/run.sh", app.getSystemDir(), namelist[i]->d_name);
-                        if (checkFileExists(runsh)) {
-                            addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runSystemCommand);
-                            // for the uncommon situation of having many system scripts
-                            if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
-                                numMenuEntries = MAX_MENU_ENTRIES - 100;
+                            char runsh[256];
+                            sprintf(runsh, "%s/%s/run.sh", app.getSystemDir(), namelist[i]->d_name);
+                            if (checkFileExists(runsh)) {
+                                addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runSystemCommand);
+                                // for the uncommon situation of having many system scripts
+                                if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
+                                    numMenuEntries = MAX_MENU_ENTRIES - 100;
+                                }
+                            } else {
+                                char dirpath[255];
+                                char name[22];
+                                int len = strlen(namelist[i]->d_name);
+                                strncpy(name,namelist[i]->d_name,22);
+                                if(len<22) memset(name+len,' ',22-len);
+                                name[20] = '>';
+                                name[21] = 0;
+                                
+                                sprintf(dirpath,"%s/%s",app.getSystemDir(),namelist[i]->d_name);
+                                addMenuItem(numMenuEntries++, name , dirpath, &MainMenu::runCdSystemDirectory);
                             }
                         }
+                        free(namelist[i]);
                     }
-                    free(namelist[i]);
+                    free(namelist);
                 }
-                free(namelist);
             }
+            if(!app.isSystemHome()) { 
+                addMenuItem(numMenuEntries++, "<-- Extra Home", "", &MainMenu::runCdSystemHome);
+            }
+
+            addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
+            break;
+        }
+        case MenuMode::M_MAIN:
+        default: {
+            addMenuItem(numMenuEntries++, "Storage             >", MM_STR[MenuMode::M_STORAGE], &MainMenu::runCdMenu);
+            addMenuItem(numMenuEntries++, "Settings            >", MM_STR[MenuMode::M_SETTINGS], &MainMenu::runCdMenu);
+            addMenuItem(numMenuEntries++, "Extra               >", MM_STR[MenuMode::M_EXTRA], &MainMenu::runCdMenu);
+        }
     }
+ 
+    systemUserMenuOffset = numMenuEntries; // the starting point of user system entries
+
 
     if(favouriteMenu) {
         addMenuItem(numMenuEntries++, "---- FAVOURITES -----", "", &MainMenu::runDoNothing);
@@ -504,7 +595,7 @@ void MainMenu::buildMenu(void){
         sprintf(favfile, "%s/Favourites.txt", app.getUserDir());
         std::ifstream infile(favfile);
         std::string line;
-        while (std::getline(infile, line))
+        while (std::getline(infile, line).good())
         {
             if(line.length()>0 ) {
                 int sep = line.find(":");
@@ -541,8 +632,15 @@ void MainMenu::buildMenu(void){
            for(i = 0; i < n; i++) {
                 if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
                     char mainpd[256];
+                    char mainscd[256];
+                    char runsh[256];
                     sprintf(mainpd, "%s/%s/main.pd", app.getPatchDir(), namelist[i]->d_name);
-                    if(checkFileExists(mainpd)) {
+                    sprintf(mainscd, "%s/%s/main.scd", app.getPatchDir(), namelist[i]->d_name);
+                    sprintf(runsh, "%s/%s/run.sh", app.getPatchDir(), namelist[i]->d_name);
+                    if(     checkFileExists(mainpd)
+                        ||  checkFileExists(mainscd)
+                        ||  checkFileExists(runsh)
+                        ) {
                         addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runPatch);
                     } else {
                         char dirpath[255];
@@ -590,6 +688,25 @@ void MainMenu::buildMenu(void){
     drawPatchList();
 }
 
+void MainMenu::runCdMenu(const char* name,const char*mode) {
+    printf("run cd menu %s:%s \n",name,mode);
+    if(strcmp(mode,MM_STR[MenuMode::M_MAIN])==0) {
+        currentMenu = MenuMode::M_MAIN;
+    } else if(strcmp(mode,MM_STR[MenuMode::M_STORAGE])==0) {
+        currentMenu = MenuMode::M_STORAGE;
+    } else if(strcmp(mode,MM_STR[MenuMode::M_SETTINGS])==0) {
+        currentMenu = MenuMode::M_SETTINGS;
+    } else if(strcmp(mode,MM_STR[MenuMode::M_EXTRA])==0) {
+        currentMenu = MenuMode::M_EXTRA;
+    } else {
+        //default to main menu
+        printf("default menu\n");
+        currentMenu = MenuMode::M_MAIN;
+    }
+    menuTitle=MM_TITLE[currentMenu];
+    buildMenu();
+}
+
 void MainMenu::runCdPatchDirectory(const char* name,const char* arg) {
     printf("Changing Patch directory... %s\n",arg);
     app.setPatchDir(arg);
@@ -601,6 +718,20 @@ void MainMenu::runCdPatchHome(const char* name,const char*) {
     app.setPatchDir(NULL);
     buildMenu();
 }
+
+
+void MainMenu::runCdSystemDirectory(const char* name,const char* arg) {
+    printf("Changing System directory... %s\n",arg);
+    app.setSystemDir(arg);
+    buildMenu();
+}
+
+void MainMenu::runCdSystemHome(const char* name,const char*) {
+    printf("Resetting to system home\n");
+    app.setSystemDir(NULL);
+    buildMenu();
+}
+
 
 
 bool MainMenu::loadPatch(const char* patchName) {

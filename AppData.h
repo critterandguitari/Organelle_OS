@@ -22,6 +22,7 @@ public:
 
     AppData();
     bool isPatchHome();
+    bool isSystemHome();
 
     // writable space either /usbdrive if present, or /sdcard
     void setUserDir(const char*);
@@ -33,6 +34,7 @@ public:
 
     // userdir/System
     const char*  getSystemDir() { return system_path.c_str();}
+    void  setSystemDir(const char*);
 
     // media directory
     const char* getMediaDir() { return "/tmp/media";}

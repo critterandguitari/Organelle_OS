@@ -5,7 +5,9 @@
 # FW_DIR=${FW_DIR:="/root"}
 # SCRIPTS_DIR=$FW_DIR/scripts
 
-# quit Pd 
+# quiting patches
+# attempt to do 'kindly first', then get more brutal 
+# we do not if its pd, or sc or run script , try each
 
 # quit Pd in 3 steps
 
@@ -19,6 +21,16 @@ sleep .1
 
 # and kill SIGKILL 
 killall -s 9 pd
+
+#kill all pids with SIGTERM
+kill `cat /tmp/pids/*.pid`
+
+
+#kill all pids with SIGKILL
+kill -9 `cat /tmp/pids/*.pid`
+
+
+rm /tmp/pids/*.pid
 
 # turn off led, just to be sure
 oscsend localhost 4001 /led i 0

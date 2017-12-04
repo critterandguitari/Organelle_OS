@@ -10,6 +10,7 @@ $SCRIPTS_DIR/setup.sh
 #$SCRIPTS_DIR/check-for-usb-drive.sh
 $SCRIPTS_DIR/mount.sh 
 
+mkdir -p /tmp/pids
 
 if grep -qs "/usbdrive" /proc/mounts 
 then

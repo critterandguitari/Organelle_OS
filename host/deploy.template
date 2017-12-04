@@ -40,6 +40,7 @@ if grep critter  /root/.gitconfig ; then rm /root/.gitconfig; fi
 # copy files
 oscsend localhost 4001 /oled/line/3 s "Copying files"
 cp -f ${IMAGE_DIR}/root/mother.pd /root
+cp -f ${IMAGE_DIR}/root/mother.scd /root
 cp -f ${IMAGE_DIR}/root/mother /root
 cp -f ${IMAGE_DIR}/root/version /root
 cp -f ${IMAGE_DIR}/root/buildtag /root
@@ -79,6 +80,10 @@ cp -f ${IMAGE_DIR}/system/etc/nsswitch.conf /etc/nsswitch.conf
 # enable avahi
 systemctl start avahi-daemon
 systemctl enable avahi-daemon
+
+# config for supercollider
+mkdir -p /root/.config/SuperCollider
+cp -f ${IMAGE_DIR}/.config/SuperCollider/* /root/.config/SuperCollider
 
 oscsend localhost 4001 /oled/aux/line/2 s "Done"
 oscsend localhost 4001 /oled/aux/line/3 s " "
