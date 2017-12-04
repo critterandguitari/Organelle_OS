@@ -14,6 +14,13 @@
 
 extern AppData app; 
 
+
+
+static const char* MM_STR[MainMenu::MenuMode::M_MAX_ENTRIES] = {
+    "MAIN",
+    "UTIL"
+};
+
 MainMenu::MainMenu(){
     numPatches = 0;
     numMenuEntries = 0;
@@ -84,6 +91,7 @@ void MainMenu::runReload(const char* name,const char* arg) {
     // set patch and user dir to defaults
     app.setPatchDir(NULL);
     app.setUserDir(NULL);
+    currentMenu = MenuMode::M_MAIN;
     buildMenu();
 }
 void MainMenu::runShutdown(const char* name,const char* arg) {
@@ -96,6 +104,7 @@ void MainMenu::runInfo(const char* name,const char* arg) {
     app.oled(AppData::AUX).clear();
     app.oled(AppData::AUX).drawNotification("     System Info     ");
     execScript("info.sh &");
+    currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runEject(const char* name,const char* arg) {
@@ -103,20 +112,24 @@ void MainMenu::runEject(const char* name,const char* arg) {
     execScript("eject.sh &");
     app.setPatchRunning(false);
     app.setPatchScreenEncoderOverride(false);
+    currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runMidiChannel(const char* name,const char* arg) {
     printf("Selecting MIDI ch... \n");
     execScript("midi-config.sh &");
+    currentMenu = MenuMode::M_MAIN;
 }
 void MainMenu::runSave(const char* name,const char* arg) {
     printf("Saving... \n");
     execScript("save-patch.sh &");
+    currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runSaveNew(const char* name,const char* arg) {
     printf("Saving new... \n");
     execScript("save-new-patch.sh &");
+    currentMenu = MenuMode::M_MAIN;
 }
 
 
@@ -127,6 +140,7 @@ void MainMenu::runSystemCommand(const char* name,const char* arg){
     sprintf(script, "\"%s/run.sh\" &", location);
     setEnv(location);
     system(script);
+    currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runPatch(const char* name,const char* arg){
@@ -374,9 +388,9 @@ void MainMenu::programChange(int pgm){
     std::ifstream infile(favfile);
     std::string line;
     int idx = 0;
-    exists = std::getline(infile, line);
+    exists = std::getline(infile, line).good();
     for(idx = 0;idx<(pgm-1); idx++) {
-      exists = std::getline(infile, line);
+      exists = std::getline(infile, line).good();
     }
 
     if(exists) {
@@ -451,6 +465,10 @@ void MainMenu::buildMenu(void){
     int i;
     int mindex;
   
+    // set locale so sorting happens in right order
+    // not sure this does anything
+    std::setlocale(LC_ALL, "en_US.UTF-8");
+
     // clear em out
     for (i = 0; i < MAX_MENU_ENTRIES; i++){
         menuItems[i].name[0] = 0;
@@ -477,26 +495,38 @@ void MainMenu::buildMenu(void){
     addMenuItem(numMenuEntries++, "------ SYSTEM -------", "", &MainMenu::runDoNothing);
     systemMenuOffset = numMenuEntries;
 
-    addMenuItem(numMenuEntries++, "Shutdown","Shutdown", &MainMenu::runShutdown);
-    addMenuItem(numMenuEntries++, "Eject","Eject", &MainMenu::runEject);
-    addMenuItem(numMenuEntries++, "Reload","Reload", &MainMenu::runReload);
-    addMenuItem(numMenuEntries++, "Info","Info", &MainMenu::runInfo);
-    addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
-    addMenuItem(numMenuEntries++, "Save","Save", &MainMenu::runSave);
-    addMenuItem(numMenuEntries++, "Save New", "Save New", &MainMenu::runSaveNew);
-    // addMenuItem(numMenuEntries++, "Save Preset", "Save Preset", &MainMenu::runSystemCommand);
-
-    if(favouriteMenu) {
-        addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
-    } else {
-        addMenuItem(numMenuEntries++, "Show Favourites", "Show Favourites", &MainMenu::runToggleFavourites);
+    switch(currentMenu) {
+        case M_UTILITY: {
+            addMenuItem(numMenuEntries++, "<-- Main Menu", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
+            addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
+            addMenuItem(numMenuEntries++, "Info","Info", &MainMenu::runInfo);
+            addMenuItem(numMenuEntries++, "Eject","Eject", &MainMenu::runEject);
+            addMenuItem(numMenuEntries++, "Reload","Reload", &MainMenu::runReload);
+            break;
+        }
+        case M_MAIN:
+        default: {
+            // main menu, generally commands will return them menu to here
+            addMenuItem(numMenuEntries++, "Shutdown","Shutdown", &MainMenu::runShutdown);
+            addMenuItem(numMenuEntries++, "Save","Save", &MainMenu::runSave);
+            addMenuItem(numMenuEntries++, "Save New", "Save New", &MainMenu::runSaveNew);
+            if(favouriteMenu) {
+                addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
+            } else {
+                addMenuItem(numMenuEntries++, "Show Favourites", "Show Favourites", &MainMenu::runToggleFavourites);
+            }
+            addMenuItem(numMenuEntries++, "> Utilities", MM_STR[MenuMode::M_UTILITY], &MainMenu::runCdMenu);
+        }
     }
  
     // system scripts from usb/sdcard
-    // set locale so sorting happens in right order
-    // not sure this does anything
     systemUserMenuOffset = numMenuEntries; // the starting point of user system entries
-    std::setlocale(LC_ALL, "en_US.UTF-8");
+
+
+    if(!app.isSystemHome()) { 
+        addMenuItem(numMenuEntries++, "<-- HOME", "", &MainMenu::runCdSystemHome);
+    }
+
     if(checkFileExists(app.getSystemDir())) {
             n = scandir(app.getSystemDir(), &namelist, NULL, alphasort);
             if (n < 0)
@@ -515,6 +545,17 @@ void MainMenu::buildMenu(void){
                             if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
                                 numMenuEntries = MAX_MENU_ENTRIES - 100;
                             }
+                        } else {
+                            char dirpath[255];
+                            char name[22];
+                            int len = strlen(namelist[i]->d_name);
+                            strncpy(name,namelist[i]->d_name,22);
+                            if(len<22) memset(name+len,' ',22-len);
+                            name[20] = '>';
+                            name[21] = 0;
+                            
+                            sprintf(dirpath,"%s/%s",app.getPatchDir(),namelist[i]->d_name);
+                            addMenuItem(numMenuEntries++, name , dirpath, &MainMenu::runCdSystemDirectory);
                         }
                     }
                     free(namelist[i]);
@@ -536,7 +577,7 @@ void MainMenu::buildMenu(void){
         sprintf(favfile, "%s/Favourites.txt", app.getUserDir());
         std::ifstream infile(favfile);
         std::string line;
-        while (std::getline(infile, line))
+        while (std::getline(infile, line).good())
         {
             if(line.length()>0 ) {
                 int sep = line.find(":");
@@ -629,6 +670,17 @@ void MainMenu::buildMenu(void){
     drawPatchList();
 }
 
+void MainMenu::runCdMenu(const char* ,const char*mode) {
+    if(mode==MM_STR[MenuMode::M_MAIN]) {
+        currentMenu = MenuMode::M_MAIN;
+    } else    if(mode==MM_STR[MenuMode::M_UTILITY]) {
+        currentMenu = MenuMode::M_UTILITY;
+    } else {
+        //default to main menu
+        currentMenu = MenuMode::M_MAIN;
+    }
+}
+
 void MainMenu::runCdPatchDirectory(const char* name,const char* arg) {
     printf("Changing Patch directory... %s\n",arg);
     app.setPatchDir(arg);
@@ -640,6 +692,20 @@ void MainMenu::runCdPatchHome(const char* name,const char*) {
     app.setPatchDir(NULL);
     buildMenu();
 }
+
+
+void MainMenu::runCdSystemDirectory(const char* name,const char* arg) {
+    printf("Changing System directory... %s\n",arg);
+    app.setSystemDir(arg);
+    buildMenu();
+}
+
+void MainMenu::runCdSystemHome(const char* name,const char*) {
+    printf("Resetting to system home\n");
+    app.setSystemDir(NULL);
+    buildMenu();
+}
+
 
 
 bool MainMenu::loadPatch(const char* patchName) {

@@ -1,5 +1,7 @@
 CXX = g++
 
+CXXFLAGS += -std=c++11
+
 objects =  \
 	main.o \
 	AppData.o \
@@ -100,6 +102,7 @@ deployToUSB : main
 
 
 image : main
+	cp main host/root/mother
 	@echo creating image $(IMAGE_VERSION) in $(IMAGE_DIR)
 	mkdir -p $(IMAGE_DIR)/root
 	cp -f host/root/mother.pd $(IMAGE_DIR)/root

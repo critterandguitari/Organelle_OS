@@ -26,6 +26,13 @@ public:
     void buildMenu(void);
     bool loadPatch(const char* patchname);
     void runShutdown(const char* name,const char* arg);
+
+    enum MenuMode {
+        M_MAIN,
+        M_UTILITY,
+        M_MAX_ENTRIES
+    };
+
 private:
     void drawPatchList(void);
     int  checkFileExists (const char * filename);
@@ -54,9 +61,14 @@ private:
     void runDoNothing(const char* name,const char*);
     void runCdPatchDirectory(const char* name,const char*);
     void runCdPatchHome(const char* name,const char*);
+    void runCdSystemDirectory(const char* name,const char*);
+    void runCdSystemHome(const char* name,const char*);
 
     void runFavourite(const char* name,const char*);
     void runToggleFavourites(const char* name,const char*);
+
+    void runCdMenu(const char*,const char*);
+
 
     void runAddToFavourite(const char* name,const char*);
     void runDelFromFavourite(const char* name,const char*);
@@ -77,9 +89,12 @@ private:
 
     bool actionTrigger;
 
+    MenuMode currentMenu;
+
     bool favouriteMenu;
 
     void executeAction(void (MainMenu::*)(const char*, const char*),const char*, const char*);
+
 };
 
 

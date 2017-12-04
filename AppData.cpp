@@ -41,6 +41,9 @@ const char* getDefaultUserDir() {
     return DEFAULT_USERDIR;
 }
 
+const std::string getDefaultSystemDir(std::string& user_path) {
+    return (user_path + "/System");
+}
 
 
 const char* getDefaultFirwareDir() {
@@ -75,6 +78,10 @@ bool AppData::isPatchHome() {
     return patches_path==getDefaultPatchDir();
 }
 
+bool AppData::isSystemHome() {
+    return system_path==getDefaultSystemDir(user_path);
+}
+
 void AppData::setPatchDir(const char* path) {
     if(path==NULL) {
         patches_path=getDefaultPatchDir();
@@ -92,7 +99,15 @@ void AppData::setUserDir(const char* path) {
     }
     initMediaDir();
     initDataDir();
-    system_path=user_path + "/System";
+    system_path = getDefaultSystemDir(user_path);
+}
+
+void  AppData::setSystemDir(const char* path) {
+    if(path==NULL) {
+        system_path=getDefaultSystemDir(user_path);
+    } else {
+        system_path=path;
+    }
 }
 
 
