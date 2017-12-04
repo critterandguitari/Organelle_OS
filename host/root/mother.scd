@@ -7,6 +7,23 @@
 ~motherHost.sendMsg("/patchLoaded",1);
 ~motherHost.sendMsg("/oled/setscreen",3);
 
+// output for vumeter and volume control
+~mainVolume = 0.8;
+~outL = Bus.audio(s,1);
+~outR = Bus.audio(s,1);
+~mainOut = nil;
+
+~mainOutDef = SynthDef(\mainOutput,
+	{
+		arg amp = ~mainVolume;
+		var sig;
+		sig = In.ar(~outL,2);
+		sig = sig * amp;
+		SendReply.kr(Impulse.kr(10),'/audioLevel',sig);
+		Out.ar(0,sig);
+	}
+);
+
 /*
 OSC outbound
 /led i
@@ -44,12 +61,17 @@ not implemented yet
 ~knobValues = [0,0,0,0,0,0];
 
 ~knobs[\knob_changed] = {
-    arg self, knob,val;
-    if(~knobValues[knob] != val,
-    {
-        ~knobValues[knob] = val;
-        self.changed(\knob,knob,val);
-    });
+	arg self, knob,val;
+	if(~knobValues[knob] != val,
+		{
+			~knobValues[knob] = val;
+			if(knob==5, {
+				~mainVolume = val;
+				if(~mainOut.isPlaying, { ~mainOut.set(\amp,~mainVolume);});
+			});
+
+			self.changed(\knob,knob,val);
+	});
 };
 
 // expr is actually a 'knob', but we separate like PD
@@ -164,28 +186,15 @@ OSCdef( \OrganelleFootSwitch,
 	recvPort:4000
 );
 
-OSCdef( \OrganelleAudioLevel
+OSCdef( \OrganelleAudioLevel,
 	{
 		arg msg, time, addr, recvPort;
-		var sig;
-		sig = msg[3];
-		~motherHost.sendMsg("/oled/vumeter", (sig[0] * 11).asInteger,  (sig[1] * 11).asInteger);
+		var outL, outR;
+		outL = msg[3];
+		outR = msg[4];
+		~motherHost.sendMsg("/oled/vumeter", (outL* 11).asInteger,  (outR * 11).asInteger);
 	},
-	"/audioLevel",
-	recvPort:4000
-);
-~outL = Bus.audio(s,1);
-~outR = Bus.audio(s,1);
-
-~mainOutDef = SynthDef(\mainOutput,
-	{
-		arg amp = 0.8;
-		var sig;
-		sig = In.ar(~outL,2);
-		sig = sig * amp;
-		SendReply.kr(Impulse.kr(20),'/audioLevel',sig);
-		Out.ar(0,sig);
-	}
+	"/audioLevel"
 );
 
 
