@@ -142,6 +142,11 @@ void MainMenu::runSaveNew(const char* name,const char* arg) {
     currentMenu = MenuMode::M_MAIN;
 }
 
+void MainMenu::runWifiSetup(const char* name,const char* arg) {
+    printf("Setting up WiFi... \n");
+    execScript("wifi_setup_run.sh &");
+    currentMenu = MenuMode::M_MAIN;
+}
 
 void MainMenu::runSystemCommand(const char* name,const char* arg){
     char location[256];
@@ -518,6 +523,7 @@ void MainMenu::buildMenu(void){
         }
         case MenuMode::M_SETTINGS: {
             addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
+            addMenuItem(numMenuEntries++, "WiFi Setup", "WiFi Setup", &MainMenu::runWifiSetup);
             addMenuItem(numMenuEntries++, "Info","Info", &MainMenu::runInfo);
             if(favouriteMenu) {
                 addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
