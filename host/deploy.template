@@ -73,6 +73,7 @@ cp -f ${IMAGE_DIR}/root/.pdsettings /root
 mkdir -p /root/.ssh
 cp -f ${IMAGE_DIR}/.ssh/environment /root/.ssh/environment
 cp -f ${IMAGE_DIR}/system/etc/ssh/sshd_config /etc/ssh/sshd_config
+cp -f ${IMAGE_DIR}/system/lib/systemd/system/cherrypy.service /system/systemd/system/cherrypy.service
 
 # config for avahi
 cp -f ${IMAGE_DIR}/system/etc/nsswitch.conf /etc/nsswitch.conf
@@ -80,6 +81,7 @@ cp -f ${IMAGE_DIR}/system/etc/nsswitch.conf /etc/nsswitch.conf
 # enable avahi
 systemctl start avahi-daemon
 systemctl enable avahi-daemon
+systemctl daemon-reload
 
 # config for supercollider
 mkdir -p /root/.config/SuperCollider
