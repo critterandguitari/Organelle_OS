@@ -279,7 +279,7 @@ void MainMenu::runPatch(const char* name,const char* arg){
 
         } else if (isShell) {
             std::string shell_args;
-            sprintf(buf, "( cd /tmp/patch ; run.sh %s & echo $! > /tmp/pids/patchsh.pid ) ", 
+            sprintf(buf, "( cd /tmp/patch ; ./run.sh %s & echo $! > /tmp/pids/patchsh.pid ) ", 
                 shell_args.c_str() 
                 );
             printf("starting shell : %s \n", buf);
