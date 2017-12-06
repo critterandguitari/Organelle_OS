@@ -44,15 +44,15 @@ MainMenu menu;
 int quit = 0;
 
 void setEnv() {
-    setenv("PATCH_DIR", app.getPatchDir(), 1);
-    setenv("FW_DIR", app.getFirmwareDir(), 1);
-    setenv("USER_DIR", app.getUserDir(), 1);
+    setenv("PATCH_DIR", app.getPatchDir().c_str(), 1);
+    setenv("FW_DIR", app.getFirmwareDir().c_str(), 1);
+    setenv("USER_DIR", app.getUserDir().c_str(), 1);
 }
 
 
 int execScript(const char* cmd) {
     char buf[128];
-    sprintf(buf, "%s/scripts/%s", app.getFirmwareDir(), cmd);
+    sprintf(buf, "%s/scripts/%s", app.getFirmwareDir().c_str(), cmd);
     setEnv();
     return system(buf);
 }
