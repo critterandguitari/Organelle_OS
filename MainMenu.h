@@ -37,13 +37,13 @@ public:
 
 private:
     void drawPatchList(void);
-    int  checkFileExists (const char * filename);
+    int  checkFileExists (const std::string& file);
     int  execScript(const char*);
-    void setEnv(const char* workdir);
-    bool isMotherPdCompatible(const char* motherpd);
+    void setEnv(const std::string& workdir);
+    bool isMotherPdCompatible(const std::string& motherpd);
 
     void addMenuItem(int i, const char* name, const char* arg, void (MainMenu::* func) (const char*, const char*));
-    std::string getPDOptions(const std::string& file);
+    std::string getCmdOptions(const std::string& file);
 
     struct MenuItem {
         char name[22];

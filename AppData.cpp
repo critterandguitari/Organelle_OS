@@ -149,9 +149,9 @@ void AppData::readMidiConfig() {
 void AppData::initMediaDir() {
     std::string dir = std::string(getDefaultUserDir()) + "/media";
     std::string mkdircmd = std::string("mkdir -p ") + dir;
-    std::string rmcmd = std::string("rm /tmp/media");
-    std::string lncmd = std::string("ln -s ")+ dir +std::string(" /tmp/media");
-    system(mkdircmd.c_str());
+    std::string rmcmd = std::string("rm ") + mediaDir;
+    std::string lncmd = std::string("ln -s ")+ dir + mediaDir;
+    system(mkdircmd.c_str()); 
     system(rmcmd.c_str());
     system(lncmd.c_str());
 }
@@ -159,8 +159,8 @@ void AppData::initMediaDir() {
 void AppData::initDataDir() {
     std::string dir = std::string(getDefaultUserDir()) + "/data";
     std::string mkdircmd = std::string("mkdir -p ") + dir;
-    std::string rmcmd = std::string("rm /tmp/data");
-    std::string lncmd = std::string("ln -s ")+ dir +std::string(" /tmp/data");
+    std::string rmcmd = std::string("rm " + dataDir);
+    std::string lncmd = std::string("ln -s ")+ dir + dataDir;
     system(mkdircmd.c_str());
     system(rmcmd.c_str());
     system(lncmd.c_str());

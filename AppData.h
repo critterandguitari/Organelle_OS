@@ -26,23 +26,23 @@ public:
 
     // writable space either /usbdrive if present, or /sdcard
     void setUserDir(const char*);
-    const char* getUserDir() {return user_path.c_str(); }
+    const std::string&  getUserDir() {return user_path; }
 
     // home = userdir/patches, but changes if using sub directory
     void setPatchDir(const char*);
-    const char* getPatchDir() {return patches_path.c_str(); }
+    const std::string&  getPatchDir() {return patches_path; }
 
     // userdir/System
-    const char*  getSystemDir() { return system_path.c_str();}
+    const std::string&   getSystemDir() { return system_path;}
     void  setSystemDir(const char*);
 
     // media directory
-    const char* getMediaDir() { return "/tmp/media";}
+    const std::string&  getMediaDir() { return mediaDir;}
     // data directory
-    const char* getDataDir() { return "/tmp/data";}
+    const std::string&  getDataDir() { return dataDir;}
 
     // mother/mother.pd , scripts
-    const char* getFirmwareDir() {return firmware_path.c_str(); }
+    const std::string& getFirmwareDir() {return firmware_path; }
     void setFirmwareDir(const char*);
 
     const char* getCurrentPatch() { return currentPatch;}
@@ -97,6 +97,8 @@ private:
 
     void initMediaDir();
     void initDataDir();
+    const std::string dataDir = "/tmp/media";
+    const std::string mediaDir = "/tmp/media";
 
     int patchScreenEncoderOverride;  // when 1, encoder input is ignored in menu scree, routed to patch
     int auxScreenEncoderOverride; // when 1, encoder input is routed to aux
