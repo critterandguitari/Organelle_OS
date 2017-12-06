@@ -703,13 +703,16 @@ void MainMenu::buildMenu(void) {
                 case DT_REG: {
                     // zip file is for installation
                     int len = strlen(fname);
+                    std::cout << fname << std::endl;
                     if(len>4) {
-                        char ext[4];
+                        char ext[5];
                         ext[0] = fname[len-4];
+                        ext[4] = 0;
                         for(int i = 1; i<4;i++) {
-                            ext[i] = std::toupper(fname[len-4]);
+                            ext[i] = std::toupper(fname[len-4+i]);
                         }
                         if(strcmp(ext,".ZIP")==0) { 
+                            numPatches++;
                             std::string itm = std::string("Install ") + fname;
                             addMenuItem(numMenuEntries++, itm.c_str() , fname, &MainMenu::runInstaller);
                         }
@@ -803,14 +806,19 @@ void MainMenu::runInstaller(const char*, const char* arg) {
     sprintf(buf, "%s/scripts/install_zip.sh %s", app.getFirmwareDir().c_str(), zipfile.c_str());
     setEnv(app.getPatchDir());
     int ret = system(buf);
+    ret =  WEXITSTATUS(ret);
 
-    if(ret >= 0) {
+    if(ret < 128) {
         // if successful remove zip file
         sprintf(buf, "rm %s", filename.c_str());
         std::cout << "install removing zip  : " << buf << std::endl;
         system(buf);
+        buildMenu();
     }
 
+    // 0 success, no action , 1-127 = success, > 127  = error
+
+    std::cout << "install returned: " << ret << std::endl;
     switch(ret) {
         case 0: {
             // success - no action
@@ -822,30 +830,36 @@ void MainMenu::runInstaller(const char*, const char* arg) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
             std::cout << "install : success, restart mother" <<  std::endl;
             execScript("restart-mother.sh &");
+            break;
         }
         case 2 : {
+            // success - reboot
             std::this_thread::sleep_for(std::chrono::seconds(1));
             std::cout << "install : success,reboot" <<  std::endl;
             execScript("reboot.sh &");
-            // success - reboot
+            break;
         }
         case 3 : {
             // success - shutdown
             std::this_thread::sleep_for(std::chrono::seconds(1));
             std::cout << "install : success, shutdown" <<  std::endl;
             execScript("shutdown.sh &");
+            break;
         }
-        case -1 : {
+        case 128 : {
             std::cout << "install : failed to unzip " <<  std::endl;
             // error - sha1 corrupt
+            break;
         }
-        case -2 : {
+        case 129 : {
             std::cout << "install : failed sha1 error" <<  std::endl;
             // error - sha1 corrupt
+            break;
         }
         default : {
             std::cout << "install : failed other error" <<  std::endl;
             // other errors...
+            break;
         }
     }
 }
