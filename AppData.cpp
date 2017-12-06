@@ -97,8 +97,6 @@ void AppData::setUserDir(const char* path) {
     } else {
         user_path=path;
     }
-    initMediaDir();
-    initDataDir();
     system_path = getDefaultSystemDir(user_path);
 }
 
@@ -145,26 +143,5 @@ void AppData::readMidiConfig() {
     infile.close();
 
 }
-
-void AppData::initMediaDir() {
-    std::string dir = std::string(getDefaultUserDir()) + "/media";
-    std::string mkdircmd = std::string("mkdir -p ") + dir;
-    std::string rmcmd = std::string("rm ") + mediaDir;
-    std::string lncmd = std::string("ln -s ")+ dir + mediaDir;
-    system(mkdircmd.c_str()); 
-    system(rmcmd.c_str());
-    system(lncmd.c_str());
-}
-
-void AppData::initDataDir() {
-    std::string dir = std::string(getDefaultUserDir()) + "/data";
-    std::string mkdircmd = std::string("mkdir -p ") + dir;
-    std::string rmcmd = std::string("rm " + dataDir);
-    std::string lncmd = std::string("ln -s ")+ dir + dataDir;
-    system(mkdircmd.c_str());
-    system(rmcmd.c_str());
-    system(lncmd.c_str());
-}
-
 
 

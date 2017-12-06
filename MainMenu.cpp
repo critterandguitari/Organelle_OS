@@ -113,7 +113,7 @@ void MainMenu::runDoNothing(const char* name, const char* ) {
 }
 
 void MainMenu::runReload(const char* name, const char* arg) {
-    printf("Reloading... \n");
+    std::cout <<"Reloading... \n" << std::endl;
     execScript("mount.sh");
     // set patch and user dir to defaults
     app.setPatchDir(NULL);
@@ -121,6 +121,7 @@ void MainMenu::runReload(const char* name, const char* arg) {
     currentMenu = MenuMode::M_MAIN;
     buildMenu();
 }
+
 void MainMenu::runShutdown(const char* name, const char* arg) {
     std::cout << "Shutting down..." << std::endl;
     execScript("shutdown.sh &");
@@ -213,6 +214,25 @@ void MainMenu::runPatch(const char* name, const char* arg) {
         sprintf(buf2, "mkdir -p /tmp/curpatchname/\"%s\"", arg);
         system(buf2);
 
+        // setup /tmp/patch/media and /tmp/patch/data
+        std::vector<std::string> userPaths;
+        userPaths.push_back(patchlocation);
+        userPaths.push_back(app.getUserDir());
+        std::string mediaPath = getSystemFile(userPaths,"media");
+        // setup media path
+        if(mediaPath.length()>0) {
+            std::string lncmd = std::string("ln -s ") + mediaPath  + "/tmp/patch/media" ;
+            system(lncmd.c_str());
+        }
+
+        // setup data path
+        std::string dataPath = getSystemFile(userPaths,"data");
+        if(dataPath.length()>0) {
+            std::string lncmd = std::string("ln -s ") + dataPath  + "/tmp/patch/data" ;
+            system(lncmd.c_str());
+        }
+
+
         // disable encoder override
         app.setPatchScreenEncoderOverride(false);
 
@@ -256,11 +276,11 @@ void MainMenu::runPatch(const char* name, const char* arg) {
                     mother.c_str());
 
             // start pure data with mother and patch
-            printf("starting Pure Data : %s \n", buf);
+            std::cout << "starting Pure Data : " << buf << std::endl;
             system(buf);
 
         } else if (isSC) {
-            printf("starting jackd\n");
+            std::cout << "starting jack " << std::endl;
             execScript("start-jack.sh");
 
             std::string mother = getSystemFile(paths, "mother.scd");
@@ -280,7 +300,7 @@ void MainMenu::runPatch(const char* name, const char* arg) {
                     mother.c_str()
                    );
 
-            printf("starting Supercollider lang: %s \n", buf);
+            std::cout << "starting SuperCollider : " << buf << std::endl;
             system(buf);
 
         } else if (isShell) {
@@ -294,7 +314,7 @@ void MainMenu::runPatch(const char* name, const char* arg) {
             sprintf(buf, "( cd /tmp/patch ; ./run.sh %s & echo $! > /tmp/pids/patchsh.pid ) ",
                     args.c_str()
                    );
-            printf("starting shell : %s \n", buf);
+            std::cout << "starting shell : " << buf << std::endl;
             system(buf);
 
         }

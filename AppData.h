@@ -36,11 +36,6 @@ public:
     const std::string&   getSystemDir() { return system_path;}
     void  setSystemDir(const char*);
 
-    // media directory
-    const std::string&  getMediaDir() { return mediaDir;}
-    // data directory
-    const std::string&  getDataDir() { return dataDir;}
-
     // mother/mother.pd , scripts
     const std::string& getFirmwareDir() {return firmware_path; }
     void setFirmwareDir(const char*);
@@ -94,11 +89,6 @@ public:
 
 private:
     OledScreen oleds_[SCREEN_MAX];
-
-    void initMediaDir();
-    void initDataDir();
-    const std::string dataDir = "/tmp/media";
-    const std::string mediaDir = "/tmp/media";
 
     int patchScreenEncoderOverride;  // when 1, encoder input is ignored in menu scree, routed to patch
     int auxScreenEncoderOverride; // when 1, encoder input is routed to aux
