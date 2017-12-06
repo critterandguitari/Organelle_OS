@@ -6,27 +6,22 @@
 # SCRIPTS_DIR=$FW_DIR/scripts
 
 # quiting patches
-# attempt to do 'kindly first', then get more brutal 
-# we do not if its pd, or sc or run script , try each
+# 3 stages, inform by osc, then kill SIGTERM, then SIGKILL
+# currently legacy pd is included
 
-# quit Pd in 3 steps
 
-# give pd a chance to shut itself off
+# give patch an opportunity to quit/cleanup
 oscsend localhost 4000 /quitpd i 1
+oscsend localhost 4000 /quit i 1
 sleep .12
 
-# kill pd SIGTERM 
+#kill all with SIGTERM
 killall pd
+kill `cat /tmp/pids/*.pid`
 sleep .1
 
-# and kill SIGKILL 
+# and kill all with SIGKILL 
 killall -s 9 pd
-
-#kill all pids with SIGTERM
-kill `cat /tmp/pids/*.pid`
-
-
-#kill all pids with SIGKILL
 kill -9 `cat /tmp/pids/*.pid`
 
 

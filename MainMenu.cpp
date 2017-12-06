@@ -1,8 +1,10 @@
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
-#include <dirent.h>
 #include <string.h>
+
+#include <dirent.h>
 #include <sys/stat.h>
 
 #include <clocale>
@@ -11,6 +13,9 @@
 #include <vector>
 #include <cstdio>
 #include <iostream>
+
+#include <chrono>
+#include <thread>
 
 #include "MainMenu.h"
 
@@ -657,42 +662,67 @@ void MainMenu::buildMenu(void) {
 
         patchMenuOffset = numMenuEntries;
 
-        // set locale so sorting happ.ns in right order
-        // not sure this does anything
-        std::setlocale(LC_ALL, "en_US.UTF-8");
         n = scandir(app.getPatchDir().c_str(), &namelist, NULL, alphasort);
         if (n < 0)
             std::cerr << "scandir patchlist" << std::endl;
         else {
             for (i = 0; i < n; i++) {
-                if (namelist[i]->d_type == DT_DIR && strcmp (namelist[i]->d_name, "..") != 0 && strcmp (namelist[i]->d_name, ".") != 0) {
-                    std::string patchlocation = app.getPatchDir() + "/" + namelist[i]->d_name;
-                    std::string mainpd = patchlocation + "/main.pd";
-                    std::string scfile = patchlocation + "/main.scd";
-                    std::string shellfile = patchlocation + "/run.sh";
-                    if (     checkFileExists(mainpd)
-                             ||  checkFileExists(scfile)
-                             ||  checkFileExists(shellfile)
-                       ) {
-                        addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runPatch);
-                    } else {
-                        char dirpath[255];
-                        char name[22];
-                        int len = strlen(namelist[i]->d_name);
-                        strncpy(name, namelist[i]->d_name, 22);
-                        if (len < 22) memset(name + len, ' ', 22 - len);
-                        name[20] = '>';
-                        name[21] = 0;
+                char* fname = namelist[i]->d_name;
+                switch(namelist[i]->d_type) { 
+                case DT_DIR : {
+                    if (fname[0]!='.') {
+                        std::string patchlocation = app.getPatchDir() + "/" + fname;
+                        std::string mainpd = patchlocation + "/main.pd";
+                        std::string scfile = patchlocation + "/main.scd";
+                        std::string shellfile = patchlocation + "/run.sh";
+                        if (     checkFileExists(mainpd)
+                                 ||  checkFileExists(scfile)
+                                 ||  checkFileExists(shellfile)
+                           ) {
+                            addMenuItem(numMenuEntries++, fname , fname, &MainMenu::runPatch);
+                        } else {
+                            char dirpath[255];
+                            char name[22];
+                            int len = strlen(fname);
+                            strncpy(name, fname, 22);
+                            if (len < 22) memset(name + len, ' ', 22 - len);
+                            name[20] = '>';
+                            name[21] = 0;
 
-                        sprintf(dirpath, "%s/%s", app.getPatchDir().c_str(), namelist[i]->d_name);
-                        addMenuItem(numMenuEntries++, name , dirpath, &MainMenu::runCdPatchDirectory);
+                            sprintf(dirpath, "%s/%s", app.getPatchDir().c_str(), fname);
+                            addMenuItem(numMenuEntries++, name , dirpath, &MainMenu::runCdPatchDirectory);
+                        }
+                        numPatches++;
+                        // for the uncommon situation of having many system scripts
+                        if (numMenuEntries > MAX_MENU_ENTRIES - 10) {
+                            numMenuEntries = MAX_MENU_ENTRIES - 10;
+                        }
                     }
-                    numPatches++;
-                    // for the uncommon situation of having many system scripts
-                    if (numMenuEntries > MAX_MENU_ENTRIES - 10) {
-                        numMenuEntries = MAX_MENU_ENTRIES - 10;
+                    break;
+                } //DT_DIR
+                case DT_REG: {
+                    // zip file is for installation
+                    int len = strlen(fname);
+                    std::cout << fname << std::endl;
+                    if(len>4) {
+                        char ext[5];
+                        ext[0] = fname[len-4];
+                        ext[4] = 0;
+                        for(int i = 1; i<4;i++) {
+                            ext[i] = std::toupper(fname[len-4+i]);
+                        }
+                        if(strcmp(ext,".ZIP")==0) { 
+                            numPatches++;
+                            std::string itm = std::string("Install ") + fname;
+                            addMenuItem(numMenuEntries++, itm.c_str() , fname, &MainMenu::runInstaller);
+                        }
                     }
-                }
+
+                } //DT_REG
+                default: 
+                    break;
+
+                }// switch 
                 free(namelist[i]);
             }
             free(namelist);
@@ -765,6 +795,74 @@ void MainMenu::runCdSystemHome(const char* name, const char*) {
     buildMenu();
 }
 
+
+void MainMenu::runInstaller(const char*, const char* arg) {
+    char buf[128];
+    std::string zipfile = std::string(arg);
+    std::string filename = app.getPatchDir() + "/" + zipfile;
+    std::cout << "Installing : " << arg << std::endl;
+
+    // run script with patch dir as working dir
+    sprintf(buf, "%s/scripts/install_zip.sh %s", app.getFirmwareDir().c_str(), zipfile.c_str());
+    setEnv(app.getPatchDir());
+    int ret = system(buf);
+    ret =  WEXITSTATUS(ret);
+
+    if(ret < 128) {
+        // if successful remove zip file
+        sprintf(buf, "rm %s", filename.c_str());
+        std::cout << "install removing zip  : " << buf << std::endl;
+        system(buf);
+        buildMenu();
+    }
+
+    // 0 success, no action , 1-127 = success, > 127  = error
+
+    std::cout << "install returned: " << ret << std::endl;
+    switch(ret) {
+        case 0: {
+            // success - no action
+            std::cout << "install : success, no action" <<  std::endl;
+            break;
+        }
+        case 1 : {
+            // success - restart mother
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::cout << "install : success, restart mother" <<  std::endl;
+            execScript("restart-mother.sh &");
+            break;
+        }
+        case 2 : {
+            // success - reboot
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::cout << "install : success,reboot" <<  std::endl;
+            execScript("reboot.sh &");
+            break;
+        }
+        case 3 : {
+            // success - shutdown
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::cout << "install : success, shutdown" <<  std::endl;
+            execScript("shutdown.sh &");
+            break;
+        }
+        case 128 : {
+            std::cout << "install : failed to unzip " <<  std::endl;
+            // error - sha1 corrupt
+            break;
+        }
+        case 129 : {
+            std::cout << "install : failed sha1 error" <<  std::endl;
+            // error - sha1 corrupt
+            break;
+        }
+        default : {
+            std::cout << "install : failed other error" <<  std::endl;
+            // other errors...
+            break;
+        }
+    }
+}
 
 
 bool MainMenu::loadPatch(const char* patchName) {
