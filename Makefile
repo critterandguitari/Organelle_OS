@@ -48,6 +48,7 @@ deploy : main
 	mkdir -p /root/.ssh
 	cp -f host/root/.ssh/environment /root/.ssh/environment
 	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
+	cp -f host/lib/systemd/system/cherrypy.service /lib/systemd/system/cherrypy.service
 	mkdir -p /root/web
 	cp -fr host/root/web/* /root/web
 	mkdir -p /root/.config/SuperCollider
@@ -122,6 +123,8 @@ image : main
 	mkdir -p ${IMAGE_DIR}/system/etc/ssh 
 	cp -f host/etc/ssh/sshd_config $(IMAGE_DIR)/system/etc/ssh/sshd_config
 	cp -f host/etc/nsswitch.conf $(IMAGE_DIR)/system/etc/
+	mkdir -p ${IMAGE_DIR}/system/lib/systemd/system 
+	cp -f host/lib/systemd/system/cherrypy.service $(IMAGE_DIR)/system/lib/systemd/system
 	cp -fr host/extra $(IMAGE_DIR)/extra/
 	mkdir -p $(IMAGE_DIR)/.config/SuperCollider
 	cp -f host/root/.config/SuperCollider/* $(IMAGE_DIR)/.config/SuperCollider

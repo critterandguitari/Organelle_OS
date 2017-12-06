@@ -159,6 +159,11 @@ void MainMenu::runSaveNew(const char* name, const char* arg) {
     currentMenu = MenuMode::M_MAIN;
 }
 
+void MainMenu::runWifiSetup(const char* name, const char* arg) {
+    printf("Setting up WiFi... \n");
+    execScript("wifi_setup_run.sh &");
+    currentMenu = MenuMode::M_MAIN;
+}
 
 void MainMenu::runSystemCommand(const char* name, const char* arg) {
     char script[256];
@@ -525,6 +530,7 @@ void MainMenu::buildMenu(void) {
     }
     case MenuMode::M_SETTINGS: {
         addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
+        addMenuItem(numMenuEntries++, "WiFi Setup", "WiFi Setup", &MainMenu::runWifiSetup);
         addMenuItem(numMenuEntries++, "Info", "Info", &MainMenu::runInfo);
         if (favouriteMenu) {
             addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
@@ -544,7 +550,7 @@ void MainMenu::buildMenu(void) {
                     if (namelist[i]->d_type == DT_DIR &&
                             strcmp (namelist[i]->d_name, "..") != 0
                             && strcmp (namelist[i]->d_name, ".") != 0) {
-    
+
                         std::string patchlocation = app.getSystemDir() + "/" + namelist[i]->d_name;
                         std::string runsh = patchlocation + "/run.sh";
 

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
-<mime-type type="text/x-puredata-meta">
-  <!--Created automatically by update-mime-database. DO NOT EDIT!-->
-  <sub-class-of type="text/x-puredata"/>
-  <glob pattern="*-meta.pd"/>
-  <comment>Pure Data Meta Marker for Libraries</comment>
-</mime-type>
-</mime-info>
