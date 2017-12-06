@@ -135,11 +135,15 @@ enc = 1 = clockwise, 0 anti
 
 OSCdef( \OrganelleKeys,
 	{
+
 		arg msg, time, addr, recvPort;
-		if ( msg[1]>0,
-			{~notes.key_hit(msg[1],msg[2]);},
-			{~aux.key_hit(msg[1],msg[2]);}
-		);
+        // SC bug workaround 
+        s.makeBundle(0.003, {
+			if ( msg[1]>0,
+				{~notes.key_hit(msg[1],msg[2]);},
+				{~aux.key_hit(msg[1],msg[2]);}
+			);
+        });
 	},
 	"/key",
 	recvPort:4000
@@ -194,7 +198,7 @@ OSCdef( \OrganelleAudioLevel,
 		peakInR = (msg[5] * 11).asInteger;
 		peakOutL = (msg[7] * 11).asInteger;
 		peakOutR = (msg[9] * 11).asInteger;
-        
+
 		~motherHost.sendMsg("/oled/vumeter", peakInL,peakInR,peakOutL,peakOutR);
 	},
 	"/audioLevel"
@@ -206,6 +210,7 @@ s.boot;
 s.doWhenBooted {
 	(
         Routine( {
+        // SC 3.9 bug in boot completion 
         1.wait;
 		~mainOut = ~mainOutDef.add.play;
 		~mainPatch.load;
