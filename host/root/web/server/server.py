@@ -3,9 +3,14 @@ import imp
 import helpers
 import homepage
 import traceback
+import os
 
 APPS_PATH = '../apps/'
-APPS_PATH_USER = '/usbdrive/Web/'
+USER_PATH = os.getenv('USER_DIR','/usbdrive')
+APPS_PATH_USER = USER_PATH+'/Web/'
+
+print "USER_PATH:" +USER_PATH
+print "APPS_PATH_USER:" +APPS_PATH_USER
 
 # global config
 cherrypy.config.update({    'environment': 'production',

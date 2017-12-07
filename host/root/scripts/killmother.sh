@@ -13,6 +13,12 @@ $SCRIPTS_DIR/killpatch.sh
 oscsend localhost 4001 /quitmother i 1
 sleep .1
 
+
+#kill webserver if running
+kill  `cat /tmp/webserver.pid`
+sleep .1
+kill -9 `cat /tmp/webserver.pid`
+
 # kill SIGTERM 
 killall mother
 sleep .1
