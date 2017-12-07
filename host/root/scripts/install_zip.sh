@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #WORK IN PROGRESS - UNTESTED :) 
 
@@ -55,7 +55,8 @@ fi
 if [ -f $INSTALL_DIR/deploy.sh ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "running deploy"
-    $INSTALL_DIR/deploy.sh; ec=$?
+    cd $INSTALL_DIR
+    ./deploy.sh "$INSTALL_DIR" ; ec=$?
     if [ $ec -gt 127 ] 
     then
         oscsend localhost 4001 /enableauxsub i 0
@@ -66,11 +67,39 @@ then
     fi
 fi
 
-#no deploy, so assume success
+#success
+
+#remove zip file
+rm $1
+
 oscsend localhost 4001 /oled/aux/clear i 1
 oscsend localhost 4001 /oled/aux/line/1 s "Installation"
 oscsend localhost 4001 /oled/aux/line/2 s "Successful"
-oscsend localhost 4001 /oled/aux/line/5 s "Enjoy :)" 
+oscsend localhost 4001 /oled/aux/line/3 s "Enjoy :)" 
+case "$ec" in
+    0)
+        oscsend localhost 4001 /oled/aux/line/5 s "restarting mother" 
+        sleep 1
+        ~/scripts/restart-mother.sh
+    ;;
+    1)
+        oscsend localhost 4001 /oled/aux/line/5 s "restarting mother" 
+        sleep 1
+        ~/scripts/restart-mother.sh
+    ;;
+    2)
+        oscsend localhost 4001 /oled/aux/line/5 s "rebooting..."
+        sleep 1
+        ~/scripts/reboot.sh
+    ;;
+    3)
+        oscsend localhost 4001 /oled/aux/line/5 s "shutting down..."
+        sleep 1
+        ~/scripts/shutdown.sh
+    ;;
+esac
+
+#irrelevant we dont get here :) 
 oscsend localhost 4001 /enableauxsub i 0
 exit $ec
 
