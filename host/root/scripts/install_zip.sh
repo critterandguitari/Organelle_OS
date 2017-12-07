@@ -19,10 +19,12 @@ oscsend localhost 4001 /oled/aux/line/5 s "do not interrupt!"
 echo "installing : " $1 
 cd $PATCH_DIR 
 
+ZIPFILE=$1
+
 echo "unzip : " $1 
 oscsend localhost 4001 /oled/aux/line/4 s "unzipping"
 
-unzip -o $1 > /tmp/install_files.txt ; ec=$?;
+unzip -o $ZIPFILE > /tmp/install_files.txt ; ec=$?;
 if [ $ec -ne 0 ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "install FAILED"
@@ -70,7 +72,8 @@ fi
 #success
 
 #remove zip file
-rm $1
+cd $PATCH_DIR
+rm $ZIPFILE
 
 oscsend localhost 4001 /oled/aux/clear i 1
 oscsend localhost 4001 /oled/aux/line/1 s "Installation"
