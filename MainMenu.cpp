@@ -803,65 +803,10 @@ void MainMenu::runInstaller(const char*, const char* arg) {
     std::cout << "Installing : " << arg << std::endl;
 
     // run script with patch dir as working dir
-    sprintf(buf, "%s/scripts/install_zip.sh %s", app.getFirmwareDir().c_str(), zipfile.c_str());
+    sprintf(buf, "%s/scripts/install_zip.sh %s &", app.getFirmwareDir().c_str(), zipfile.c_str());
     setEnv(app.getPatchDir());
-    int ret = system(buf);
-    ret =  WEXITSTATUS(ret);
-
-    if(ret < 128) {
-        // if successful remove zip file
-        sprintf(buf, "rm %s", filename.c_str());
-        std::cout << "install removing zip  : " << buf << std::endl;
-        system(buf);
-        buildMenu();
-    }
-
-    // 0 success, no action , 1-127 = success, > 127  = error
-
-    std::cout << "install returned: " << ret << std::endl;
-    switch(ret) {
-        case 0: {
-            // success - no action
-            std::cout << "install : success, no action" <<  std::endl;
-            break;
-        }
-        case 1 : {
-            // success - restart mother
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            std::cout << "install : success, restart mother" <<  std::endl;
-            execScript("restart-mother.sh &");
-            break;
-        }
-        case 2 : {
-            // success - reboot
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            std::cout << "install : success,reboot" <<  std::endl;
-            execScript("reboot.sh &");
-            break;
-        }
-        case 3 : {
-            // success - shutdown
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            std::cout << "install : success, shutdown" <<  std::endl;
-            execScript("shutdown.sh &");
-            break;
-        }
-        case 128 : {
-            std::cout << "install : failed to unzip " <<  std::endl;
-            // error - sha1 corrupt
-            break;
-        }
-        case 129 : {
-            std::cout << "install : failed sha1 error" <<  std::endl;
-            // error - sha1 corrupt
-            break;
-        }
-        default : {
-            std::cout << "install : failed other error" <<  std::endl;
-            // other errors...
-            break;
-        }
-    }
+    // run async to mother, to allow oled updates
+    system(buf);
 }
 
 
