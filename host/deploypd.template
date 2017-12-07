@@ -5,17 +5,19 @@ export PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
 export FW_DIR=${FW_DIR:="/root"}
 export SCRIPTS_DIR=$FW_DIR/scripts
 
-IMAGE_DIR=${PATCH_DIR}/UpdateOS-XXXXXXXXXX
-cd ${IMAGE_DIR}
 
 echo "Updating OS to " `cat ${IMAGE_DIR}/root/version` `cat ${IMAGE_DIR}/root/buildtag`
 oscsend localhost 4001 /oled/line/2 s "Upgrading..."
 oscsend localhost 4001 /oled/line/3 s "Checking files"
 
-mv manifest.txt /tmp
-find . -type f -print0  | xargs -0 sha1sum > /tmp/manifest.new
+cd ${PATCH_DIR} 
+
+mv UpdateOS-XXXXXXXXXX/manifest.txt /tmp
+find UpdateOS-XXXXXXXXXX -type f -print0  | xargs -0 sha1sum > /tmp/manifest.new
 diff /tmp/manifest.txt /tmp/manifest.new; ec=$?; 
 
+IMAGE_DIR=${PATCH_DIR}/UpdateOS-XXXXXXXXXX
+cd ${IMAGE_DIR}
 #move manifest back, so can be attempted again !?
 mv /tmp/manifest.txt .
 
@@ -31,6 +33,13 @@ then
     exit 128
 fi 
 
+
+#switch to aux screen for deploy
+oscsend localhost 4001 /oled/setscreen i 1
+oscsend localhost 4001 /enableauxsub i 1
+oscsend localhost 4001 /oled/aux/clear i 1
+oscsend localhost 4001 /oled/aux/line/1 s "Installing"
+oscsend localhost 4001 /oled/aux/line/5 s "Do not interrupt!"
 ./deploy.sh UpdateOS-XXXXXXXXXX
 
 # just chill

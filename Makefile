@@ -133,8 +133,8 @@ image : main
 	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/deploy.template > $(IMAGE_DIR)/deploy.sh
 	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/deploypd.template > $(IMAGE_DIR)/deploypd.sh
 	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/main.pd.template > $(IMAGE_DIR)/main.pd
-    chmod +x $(IMAGE_DIR)/*.sh
-	(cd $(IMAGE_DIR) ; find $. -type f -print0  | xargs -0 sha1sum > /tmp/manifest.new)
+	chmod +x $(IMAGE_DIR)/*.sh
+	find $(IMAGE_DIR) -type f -print0  | xargs -0 sha1sum > /tmp/manifest.new
 	mv /tmp/manifest.new $(IMAGE_DIR)/manifest.txt
 	zip -r $(IMAGE_DIR).zip $(IMAGE_DIR)
 	rm -rf $(IMAGE_DIR)
