@@ -558,6 +558,7 @@ void MainMenu::buildMenu(void) {
         addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
         addMenuItem(numMenuEntries++, "WiFi Setup", "WiFi Setup", &MainMenu::runWifiSetup);
         addMenuItem(numMenuEntries++, "Info", "Info", &MainMenu::runInfo);
+        addMenuItem(numMenuEntries++, "Web Server", "/root/web/server", &MainMenu::runWebServer);
         if (favouriteMenu) {
             addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
         } else {
@@ -795,6 +796,10 @@ void MainMenu::runCdSystemHome(const char* name, const char*) {
     buildMenu();
 }
 
+void MainMenu::runWebServer(const char*, const char* arg) {
+    setEnv(app.getUserDir()+"/Web");
+    system("/root/web/server/run.sh");
+}
 
 void MainMenu::runInstaller(const char*, const char* arg) {
     char buf[128];
