@@ -63,7 +63,6 @@ private:
     void runDoNothing(const char* name,const char*);
 
     void runReload(const char* name,const char* arg);
-    void runInfo(const char* name,const char* arg);
     void runEject(const char* name,const char* arg);
     void runCdPatchDirectory(const char* name,const char*);
     void runCdPatchHome(const char* name,const char*);

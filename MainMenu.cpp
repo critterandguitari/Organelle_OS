@@ -146,14 +146,6 @@ void MainMenu::runShutdown(const char* name, const char* arg) {
     execScript("shutdown.sh &");
 }
 
-void MainMenu::runInfo(const char* name, const char* arg) {
-    std::cout << "Displaying system info... " << std::endl;
-    app.oled(AppData::AUX).clear();
-    app.oled(AppData::AUX).drawNotification("     System Info     ");
-    execScript("info.sh &");
-    currentMenu = MenuMode::M_MAIN;
-}
-
 void MainMenu::runEject(const char* name, const char* arg) {
     std::cout << "Ejecting USB drive... " << std::endl;
     execScript("eject.sh &");
@@ -579,7 +571,7 @@ void MainMenu::buildMenu(void) {
     case MenuMode::M_SETTINGS: {
         addMenuItem(numMenuEntries++, "MIDI Channel", "midi-config.sh", &MainMenu::runScriptCommand);
         addMenuItem(numMenuEntries++, "WiFi Setup", "wifi_setup.py", &MainMenu::runScriptPython);
-        addMenuItem(numMenuEntries++, "Info", "Info", &MainMenu::runInfo);
+        addMenuItem(numMenuEntries++, "Info", "info.sh", &MainMenu::runScriptCommand);
         if (favouriteMenu) {
             addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
         } else {
