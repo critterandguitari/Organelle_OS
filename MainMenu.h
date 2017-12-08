@@ -38,7 +38,10 @@ public:
 private:
     void drawPatchList(void);
     int  checkFileExists (const std::string& file);
-    int  execScript(const char*);
+    int  execShell(const std::string& cmd, const std::string& wd);
+    int  execScript(const std::string& script);
+    int  execPython(const std::string& pyscript, const std::string& wd);
+
     void setEnv(const std::string& workdir);
     bool isMotherPdCompatible(const std::string& motherpd);
 
@@ -60,6 +63,7 @@ private:
     void runSave(const char* name,const char* arg);
     void runSaveNew(const char* name,const char* arg);
     void runSystemCommand(const char* name,const char*);
+    void runSystemPython(const char* name,const char*);
     void runDoNothing(const char* name,const char*);
     void runCdPatchDirectory(const char* name,const char*);
     void runCdPatchHome(const char* name,const char*);

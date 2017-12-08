@@ -62,11 +62,10 @@ MainMenu::MainMenu() {
     menuTitle = MM_TITLE[currentMenu];
 }
 
-#define MOTHER_PD_VERSION "1.2"
+static const std::string MOTHER_PD_VERSION ="1.2";
 
 bool MainMenu::isMotherPdCompatible(const std::string& motherpd) {
-    char cmd[128];
-    sprintf(cmd, "check-mother-pd.sh \"%s\" %s", motherpd.c_str(), MOTHER_PD_VERSION);
+    std::string cmd = std::string ("check-mother-pd.sh \"") + motherpd + "\" " + MOTHER_PD_VERSION; 
     return ! execScript(cmd);
 }
 
@@ -172,12 +171,19 @@ void MainMenu::runWifiSetup(const char* name, const char* arg) {
 }
 
 void MainMenu::runSystemCommand(const char* name, const char* arg) {
-    char script[256];
     std::string location = app.getSystemDir() + "/" + std::string(arg);
-    sprintf(script, "\"%s/run.sh\" &", location.c_str());
-    std::cout << "running " << script << std::endl;
-    setEnv(location);
-    system(script);
+    std::string cmd = location + "/run.sh";
+    std::cout << "running shell :" << cmd << std::endl;
+    execShell(cmd, location);
+    currentMenu = MenuMode::M_MAIN;
+}
+
+
+void MainMenu::runSystemPython(const char* name, const char* arg) {
+    std::string location = app.getSystemDir() + "/" + std::string(arg);
+    std::string cmd = location + "/main.py";
+    std::cout << "running python:" << cmd << std::endl;
+    execPython(cmd, location);
     currentMenu = MenuMode::M_MAIN;
 }
 
@@ -193,14 +199,17 @@ void MainMenu::runPatch(const char* name, const char* arg) {
     std::string patchlocation = app.getPatchDir() + "/" + arg;
     std::string pdfile = patchlocation + "/main.pd";
     std::string scfile = patchlocation + "/main.scd";
+    std::string pyfile = patchlocation + "/main.py";
     std::string shellfile = patchlocation + "/run.sh";
     std::cout << "Checking for patch Files  : " << patchlocation << std::endl;
 
+    // note this is the order of precedence
     bool isPD = checkFileExists(pdfile);
     bool isSC = checkFileExists(scfile);
+    bool isPy = checkFileExists(pyfile);
     bool isShell = checkFileExists(shellfile);
 
-    if (isPD || isSC || isShell) {
+    if (isPD || isSC || isPy ||isShell) {
         std::vector<std::string> paths;
         paths.push_back(patchlocation);
         paths.push_back(app.getSystemDir());
@@ -307,8 +316,29 @@ void MainMenu::runPatch(const char* name, const char* arg) {
                    );
 
             std::cout << "starting SuperCollider : " << buf << std::endl;
-            system(buf);
+            execShell(buf, app.getPatchDir());
+        } else if (isPy) {
+            // std::string mother = getSystemFile(paths, "mother.py");
+            // if (mother.length() == 0) {
+            //     mother = app.getFirmwareDir() + "/mother.py";
+            // }
 
+            // whilst we dont have a mother.py, lets just start the main patch file
+            std::string mother = "main.py";
+
+            std::string optsfile = getSystemFile(paths, "py-opts.txt");
+            std::string opts;
+            if (optsfile.length() > 0) {
+                opts = getCmdOptions(optsfile);
+            }
+
+            std::string args = opts;
+            sprintf(buf, "( cd /tmp/patch ; python2 %s \"%s\" & echo $! > /tmp/pids/patchpy.pid ) ",
+                    args.c_str(),
+                    mother.c_str()
+                   );
+            std::cout << "starting python2 : " << buf << std::endl;
+            execShell(buf, app.getPatchDir());
         } else if (isShell) {
             std::string optsfile = getSystemFile(paths, "run-opts.txt");
             std::string opts;
@@ -321,8 +351,7 @@ void MainMenu::runPatch(const char* name, const char* arg) {
                     args.c_str()
                    );
             std::cout << "starting shell : " << buf << std::endl;
-            system(buf);
-
+            execShell(buf, app.getPatchDir());
         }
 
         // update stuff
@@ -579,9 +608,16 @@ void MainMenu::buildMenu(void) {
 
                         std::string patchlocation = app.getSystemDir() + "/" + namelist[i]->d_name;
                         std::string runsh = patchlocation + "/run.sh";
+                        std::string mainpy = patchlocation + "/main.py";
 
                         if (checkFileExists(runsh)) {
                             addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runSystemCommand);
+                            // for the uncommon situation of having many system scripts
+                            if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
+                                numMenuEntries = MAX_MENU_ENTRIES - 100;
+                            }
+                        } else if (checkFileExists(mainpy)) {
+                            addMenuItem(numMenuEntries++, namelist[i]->d_name , namelist[i]->d_name, &MainMenu::runSystemPython);
                             // for the uncommon situation of having many system scripts
                             if (numMenuEntries > MAX_MENU_ENTRIES - 100) {
                                 numMenuEntries = MAX_MENU_ENTRIES - 100;
@@ -674,9 +710,11 @@ void MainMenu::buildMenu(void) {
                         std::string patchlocation = app.getPatchDir() + "/" + fname;
                         std::string mainpd = patchlocation + "/main.pd";
                         std::string scfile = patchlocation + "/main.scd";
+                        std::string pyfile = patchlocation + "/main.py";
                         std::string shellfile = patchlocation + "/run.sh";
                         if (     checkFileExists(mainpd)
                                  ||  checkFileExists(scfile)
+                                 ||  checkFileExists(pyfile)
                                  ||  checkFileExists(shellfile)
                            ) {
                             addMenuItem(numMenuEntries++, fname , fname, &MainMenu::runPatch);
@@ -822,12 +860,23 @@ void MainMenu::setEnv(const std::string& location) {
 }
 
 
-int MainMenu::execScript(const char* cmd) {
-    char buf[128];
-    sprintf(buf, "%s/scripts/%s", app.getFirmwareDir().c_str(), cmd);
-    setEnv(app.getUserDir());
-    return system(buf);
+int  MainMenu::execPython(const std::string& pyscript, const std::string& wd) {
+    std::string cmd = "python2 " + pyscript;
+    return execShell(cmd,wd);
 }
+
+
+int  MainMenu::execShell(const std::string& cmd, const std::string& wd) {
+    setEnv(wd);
+    return system(cmd.c_str());
+}
+
+
+int  MainMenu::execScript(const std::string& script) {
+    std::string cmd  = app.getFirmwareDir() + "/" + script;
+    return execShell(app.getUserDir(),cmd);
+}
+
 
 std::string  MainMenu::getCmdOptions(const std::string& file) {
     std::string opts;
