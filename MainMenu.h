@@ -23,7 +23,7 @@ public:
     void encoderDown(void);
     void programChange(int pgm);
 
-    void buildMenu(void);
+    void buildMenu(int = -1);
     bool loadPatch(const char* patchname);
     void runShutdown(const char* name,const char* arg);
 

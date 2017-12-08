@@ -2,7 +2,7 @@
 
 #in case the deploy scripts need these
 export USER_DIR=${USER_DIR:="/usbdrive"}
-export PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
+export PATCH_DIR=${PATCH_DIR:="$USER_DIR/Patches"}
 export FW_DIR=${FW_DIR:="/root"}
 export SCRIPTS_DIR=$FW_DIR/scripts
 
@@ -17,12 +17,12 @@ oscsend localhost 4001 /oled/aux/line/5 s "Do not interrupt!"
 echo "installing : " $1 
 cd $PATCH_DIR 
 
-ZIPFILE=$1
+ZIPFILE="$1"
 
-echo "unzip : " $1 
+echo "unzip : " $ZIPFIlE 
 oscsend localhost 4001 /oled/aux/line/4 s "unzipping"
 
-unzip -o $ZIPFILE > /tmp/install_files.txt ; ec=$?;
+unzip -o "$ZIPFILE" -x "__MACOSX/*" > /tmp/install_files.txt ; ec=$?;
 if [ $ec -ne 0 ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "Install FAILED"
@@ -32,18 +32,18 @@ then
 fi
 
 
-INSTALL_DIR=`cat /tmp/install_files.txt | head -2 | tail -1 | sed 's/.* \(.*\)\/.*/\1/'`
+INSTALL_DIR=`cat /tmp/install_files.txt | head -2 | tail -1 | sed 's/.*ting: \(.*\)\/.*/\1/'`
 echo "installed dir : " $INSTALL_DIR
 
 ec=0
 
-if [ -f $INSTALL_DIR/manifest.txt ]
+if [ -f "$INSTALL_DIR/manifest.txt" ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "Checking manifest"
-    mv $INSTALL_DIR/manifest.txt /tmp
-    find $INSTALL_DIR -type f -print0  | xargs -0 sha1sum > /tmp/manifest.new
+    mv "$INSTALL_DIR/manifest.txt" /tmp
+    find "$INSTALL_DIR" -type f -print0  | xargs -0 sha1sum > /tmp/manifest.new
     diff /tmp/manifest.txt /tmp/manifest.new; ec=$?; 
-    mv /tmp/manifest.txt $INSTALL_DIR
+    mv /tmp/manifest.txt "$INSTALL_DIR"
     if [ $ec -ne 0 ] 
     then
         oscsend localhost 4001 /oled/aux/line/4 s "Install FAILED"
@@ -53,10 +53,10 @@ then
     fi 
 fi
 
-if [ -f $INSTALL_DIR/deploy.sh ]
+if [ -f "$INSTALL_DIR/deploy.sh" ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "Running deploy"
-    cd $INSTALL_DIR
+    cd "$INSTALL_DIR"
     ./deploy.sh "$INSTALL_DIR" ; ec=$?
     if [ $ec -gt 127 ] 
     then
@@ -72,7 +72,7 @@ fi
 
 #remove zip file
 cd $PATCH_DIR
-rm $ZIPFILE
+rm "$ZIPFILE"
 
 oscsend localhost 4001 /oled/aux/clear i 1
 oscsend localhost 4001 /oled/aux/line/1 s "Installation"
