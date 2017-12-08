@@ -165,14 +165,15 @@ void MainMenu::runSaveNew(const char* name, const char* arg) {
 }
 
 void MainMenu::runWifiSetup(const char* name, const char* arg) {
-    printf("Setting up WiFi... \n");
-    execScript("wifi_setup_run.sh &");
+    std::cout << "Setting up WiFi... " << std::endl;
+    std::string cmd  = app.getFirmwareDir() + "/scripts/wifi_setup.py &";
+    execPython(cmd,app.getUserDir());
     currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runSystemCommand(const char* name, const char* arg) {
     std::string location = app.getSystemDir() + "/" + std::string(arg);
-    std::string cmd = location + "/run.sh";
+    std::string cmd = std::string("\"") + location + "/run.sh\" & ";
     std::cout << "running shell :" << cmd << std::endl;
     execShell(cmd, location);
     currentMenu = MenuMode::M_MAIN;
@@ -181,7 +182,7 @@ void MainMenu::runSystemCommand(const char* name, const char* arg) {
 
 void MainMenu::runSystemPython(const char* name, const char* arg) {
     std::string location = app.getSystemDir() + "/" + std::string(arg);
-    std::string cmd = location + "/main.py";
+    std::string cmd = std::string("\"") + location + "/main.py\" &";
     std::cout << "running python:" << cmd << std::endl;
     execPython(cmd, location);
     currentMenu = MenuMode::M_MAIN;

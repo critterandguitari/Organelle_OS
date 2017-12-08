@@ -10,7 +10,9 @@ redraw_flag = False  # to break waiting for input for a screen update
 
 # OSC and UI primitives 
 def start_app ():
+    liblo.send(osc_target, '/oled/setscreen', 1)
     liblo.send(osc_target, '/enableauxsub', 1)
+    clear_screen()
 
 def end_app ():
     liblo.send(osc_target, '/gohome', 1)

@@ -5,7 +5,7 @@ import time
 import threading
 
 # usb or sd card
-user_dir = sys.argv[1] 
+user_dir = os.getenv("USER_DIR", "/usbdrive")
 
 # imports
 current_dir = os.path.dirname(os.path.abspath(__file__))

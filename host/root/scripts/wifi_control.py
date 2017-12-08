@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-log_file = "/usbdrive/wifi_log.txt"
+log_file = os.getenv("USER_DIR", "/usbdrive") + "/wifi_log.txt"
 
 # states
 NOT_CONNECTED = 0
