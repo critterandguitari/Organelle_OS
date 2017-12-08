@@ -126,9 +126,8 @@ def non():
 def error_wifi_file() :
     og.clear_screen()
     og.println(0, "Error with wifi.txt")
-    og.println(1, "Please check file")
-    og.println(2, "is on your USB drive")
-    og.println(3, "and in the correct")
+    og.println(2, "Please check file")
+    og.println(3, "is in the correct")
     og.println(4, "format.")
     og.flip()
     og.enc_input()
@@ -141,26 +140,33 @@ menu.header='Not Connected'
 # start it up
 og.start_app()
 
+# check for wifi file, create one if not found
+wifi_file = user_dir + "/wifi.txt"
+if os.path.exists(wifi_file):
+    f = open(user_dir + "/wifi.txt", "r")
+else :
+    print "wifi file not found, creating"
+    f = open(user_dir + "/wifi.txt", "w")
+    f.write("Network Name\n")
+    f.write("password\n")
+    f.close()
+    f = open(user_dir + "/wifi.txt", "r")
+
 try :
-    f = open(user_dir + "/wifi.txt")
-    try :
-        networks = f.readlines()
-        networks = [x.strip() for x in networks] 
-        ssids = networks[0::2]
-        pws = networks[1::2]
-        for i in range(len(ssids)) :
-            ssid = ssids[i]
-            pw = pws[i]
-            net = WifiNet()
-            net.ssid = ssid
-            net.pw = pw
-            menu.items.append([' - ' + ssid, net.connect, {'type':'net', 'ssid':ssid}]) # stash some extra info with these net entries
-    except : 
-        print "bad wifi file" 
-        raise
-except :
+    networks = f.readlines()
+    networks = [x.strip() for x in networks] 
+    ssids = networks[0::2]
+    pws = networks[1::2]
+    for i in range(len(ssids)) :
+        ssid = ssids[i]
+        pw = pws[i]
+        net = WifiNet()
+        net.ssid = ssid
+        net.pw = pw
+        menu.items.append([' - ' + ssid, net.connect, {'type':'net', 'ssid':ssid}]) # stash some extra info with these net entries
+except : 
     error_wifi_file()
-    print "no wifi file"
+    print "bad wifi file" 
 
 menu.items.append(['Start Web Server', non, {'type':'web_server_control'}])
 menu.items.append(['Turn Wifi Off', disconnect])
