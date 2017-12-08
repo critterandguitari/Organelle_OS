@@ -36,16 +36,19 @@ class WifiNet :
         og.redraw_flag = True
 
 def disconnect():
+    print "wifi disconnect all"
     wifi.disconnect_all()
     update_menu()
     og.redraw_flag = True
 
 def start_web():
+    print "start web"
     wifi.start_web_server()
     update_menu()
     og.redraw_flag = True
 
 def stop_web():
+    print "stop web"
     wifi.stop_web_server()
     update_menu()
     og.redraw_flag = True
@@ -160,9 +163,9 @@ except :
     print "no wifi file"
 
 menu.items.append(['Start Web Server', non, {'type':'web_server_control'}])
-menu.items.append(['Disconnect', disconnect])
+menu.items.append(['Turn Wifi Off', disconnect])
 menu.items.append(['< Home', quit])
-menu.selection = 1
+menu.selection = 0
 
 # bg thread
 menu_updater = threading.Thread(target=check_status)

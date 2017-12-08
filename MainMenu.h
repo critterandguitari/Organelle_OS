@@ -67,7 +67,6 @@ private:
     void runCdSystemHome(const char* name,const char*);
     void runWifiSetup(const char* name,const char*);
     void runInstaller(const char* name,const char*);
-    void runWebServer(const char* name,const char*);
 
     void runFavourite(const char* name,const char*);
     void runToggleFavourites(const char* name,const char*);

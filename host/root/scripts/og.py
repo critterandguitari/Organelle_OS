@@ -102,7 +102,8 @@ class Menu :
         println(0, self.header)
 
         # menu entries for the rest
-        for i in range(0, 4) :
+        sz = min(len(self.items),4)
+        for i in range(0, sz) :
             println(i+1, self.items[i + self.menu_offset][0])
         invert_line(self.cursor_offset + 1)
         
@@ -112,7 +113,6 @@ class Menu :
         self.back_flag = True
  
     def enter(self) :
-        self.selection = 0
         self.perform()
 
     def enc_up(self) :
