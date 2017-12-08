@@ -15,6 +15,10 @@ MIDIDEV="$(aplaymidi -l | awk '{if (NR==2) print $2}')"
 
 VERSION="$(cat $FW_DIR/version) $(cat $FW_DIR/buildtag)"
 
+oscsend localhost 4001 /oled/setscreen i 1
+oscsend localhost 4001 /oled/gClear ii 1 1
+oscsend localhost 4001 /oled/gPrintln iiiiis  1 2 0 8 1 "     System Info"
+oscsend localhost 4001 /oled/gFlip i 1
 oscsend localhost 4001 /oled/aux/line/1 s "CPU: ..."
 oscsend localhost 4001 /oled/aux/line/2 s "MIDI: $MIDIDEV"
 oscsend localhost 4001 /oled/aux/line/3 s "Version: $VERSION"
@@ -22,7 +26,6 @@ oscsend localhost 4001 /oled/aux/line/4 s "Patch: $PATCH_DIR"
 oscsend localhost 4001 /oled/aux/line/5 s "User: $USER_DIR"
 
 # set to aux screen, signals screen update
-oscsend localhost 4001 /oled/setscreen i 1
 
 # takes a sec for the cpu
 CPU="$(echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')])"
