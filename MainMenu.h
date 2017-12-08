@@ -56,20 +56,19 @@ private:
 
 
     void runPatch(const char* name,const char*);
-    void runReload(const char* name,const char* arg);
-    void runInfo(const char* name,const char* arg);
-    void runEject(const char* name,const char* arg);
-    void runMidiChannel(const char* name,const char* arg);
-    void runSave(const char* name,const char* arg);
-    void runSaveNew(const char* name,const char* arg);
+    void runScriptCommand(const char* name,const char* arg);
+    void runScriptPython(const char* name,const char* arg);
     void runSystemCommand(const char* name,const char*);
     void runSystemPython(const char* name,const char*);
     void runDoNothing(const char* name,const char*);
+
+    void runReload(const char* name,const char* arg);
+    void runInfo(const char* name,const char* arg);
+    void runEject(const char* name,const char* arg);
     void runCdPatchDirectory(const char* name,const char*);
     void runCdPatchHome(const char* name,const char*);
     void runCdSystemDirectory(const char* name,const char*);
     void runCdSystemHome(const char* name,const char*);
-    void runWifiSetup(const char* name,const char*);
     void runInstaller(const char* name,const char*);
 
     void runFavourite(const char* name,const char*);

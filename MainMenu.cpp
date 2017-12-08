@@ -126,6 +126,21 @@ void MainMenu::runReload(const char* name, const char* arg) {
     buildMenu();
 }
 
+void MainMenu::runScriptCommand(const char* name,const char* arg) {
+    std::string cmd = std::string(arg) + " &";
+    std::cout << "running : " << cmd;
+    execScript(cmd);
+    currentMenu = MenuMode::M_MAIN;
+}
+
+void MainMenu::runScriptPython(const char* name,const char* arg) {
+    std::string cmd = app.getFirmwareDir() + "/scripts/" + arg + " &";
+    std::cout << "running : " << cmd;
+    execPython(cmd,app.getUserDir());
+    currentMenu = MenuMode::M_MAIN;
+}
+
+
 void MainMenu::runShutdown(const char* name, const char* arg) {
     std::cout << "Shutting down..." << std::endl;
     execScript("shutdown.sh &");
@@ -147,29 +162,6 @@ void MainMenu::runEject(const char* name, const char* arg) {
     currentMenu = MenuMode::M_MAIN;
 }
 
-void MainMenu::runMidiChannel(const char* name, const char* arg) {
-    std::cout << "Selecting MIDI ch...  " << std::endl;
-    execScript("midi-config.sh &");
-    currentMenu = MenuMode::M_MAIN;
-}
-void MainMenu::runSave(const char* name, const char* arg) {
-    std::cout << "Saving...  " << std::endl;
-    execScript("save-patch.sh &");
-    currentMenu = MenuMode::M_MAIN;
-}
-
-void MainMenu::runSaveNew(const char* name, const char* arg) {
-    std::cout << "Saving new... ..  " << std::endl;
-    execScript("save-new-patch.sh &");
-    currentMenu = MenuMode::M_MAIN;
-}
-
-void MainMenu::runWifiSetup(const char* name, const char* arg) {
-    std::cout << "Setting up WiFi... " << std::endl;
-    std::string cmd  = app.getFirmwareDir() + "/scripts/wifi_setup.py &";
-    execPython(cmd,app.getUserDir());
-    currentMenu = MenuMode::M_MAIN;
-}
 
 void MainMenu::runSystemCommand(const char* name, const char* arg) {
     std::string location = app.getSystemDir() + "/" + std::string(arg);
@@ -579,14 +571,14 @@ void MainMenu::buildMenu(void) {
     case MenuMode::M_STORAGE: {
         addMenuItem(numMenuEntries++, "Eject", "Eject", &MainMenu::runEject);
         addMenuItem(numMenuEntries++, "Reload", "Reload", &MainMenu::runReload);
-        addMenuItem(numMenuEntries++, "Save", "Save", &MainMenu::runSave);
-        addMenuItem(numMenuEntries++, "Save New", "Save New", &MainMenu::runSaveNew);
+        addMenuItem(numMenuEntries++, "Save", "save-patch.sh", &MainMenu::runScriptCommand);
+        addMenuItem(numMenuEntries++, "Save New", "save-new-patch.sh", &MainMenu::runScriptCommand);
         addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
         break;
     }
     case MenuMode::M_SETTINGS: {
-        addMenuItem(numMenuEntries++, "MIDI Channel", "MIDI Channel", &MainMenu::runMidiChannel);
-        addMenuItem(numMenuEntries++, "WiFi Setup", "WiFi Setup", &MainMenu::runWifiSetup);
+        addMenuItem(numMenuEntries++, "MIDI Channel", "midi-config.sh", &MainMenu::runScriptCommand);
+        addMenuItem(numMenuEntries++, "WiFi Setup", "wifi_setup.py", &MainMenu::runScriptPython);
         addMenuItem(numMenuEntries++, "Info", "Info", &MainMenu::runInfo);
         if (favouriteMenu) {
             addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
