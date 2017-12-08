@@ -59,7 +59,7 @@ static const char* MM_TITLE[MainMenu::MenuMode::M_MAX_ENTRIES] = {
 MainMenu::MainMenu() {
     numPatches = 0;
     numMenuEntries = 0;
-    menuOffset = 9;
+    menuOffset = 0;
     cursorOffset = 1;
     favouriteMenu = false;
     actionTrigger = false;
@@ -523,7 +523,7 @@ void MainMenu::addMenuItem(int i, const char* name, const char* arg, void (MainM
     menuItems[i].func = func;
 }
 
-void MainMenu::buildMenu(void) {
+void MainMenu::buildMenu(signed mm_pos) {
 
     char buf[256];
 
@@ -551,7 +551,6 @@ void MainMenu::buildMenu(void) {
     //  Preset menu offset = same
 
     systemMenuOffset = 0;
-    systemUserMenuOffset = 0;
     patchMenuOffset = 0;
     presetMenuOffset = 0;
     numSystemItems = 0;
@@ -644,9 +643,6 @@ void MainMenu::buildMenu(void) {
         addMenuItem(numMenuEntries++, "Extra               >", MM_STR[MenuMode::M_EXTRA], &MainMenu::runCdMenu);
     }
     }
-
-    systemUserMenuOffset = numMenuEntries; // the starting point of user system entries
-
 
     if (favouriteMenu) {
         addMenuItem(numMenuEntries++, "---- FAVOURITES -----", "", &MainMenu::runDoNothing);
@@ -774,7 +770,14 @@ void MainMenu::buildMenu(void) {
         }
     }
 
-    menuOffset = patchMenuOffset - 1;
+    switch(mm_pos) {
+        case -1 :  menuOffset = patchMenuOffset - 1 ;break; 
+        case MenuMode::M_SETTINGS: menuOffset = 1; break;
+        case MenuMode::M_EXTRA: menuOffset = 1; break;
+        case MenuMode::M_MAIN: menuOffset = 1; break;
+        case MenuMode::M_STORAGE: menuOffset = 1; break;
+        default:  menuOffset = patchMenuOffset - 1 ;break; 
+    }
     cursorOffset = 1;
     drawPatchList();
 }
@@ -795,7 +798,7 @@ void MainMenu::runCdMenu(const char* name, const char*mode) {
         currentMenu = MenuMode::M_MAIN;
     }
     menuTitle = MM_TITLE[currentMenu];
-    buildMenu();
+    buildMenu(currentMenu);
 }
 
 void MainMenu::runCdPatchDirectory(const char* name, const char* arg) {
@@ -814,13 +817,13 @@ void MainMenu::runCdPatchHome(const char* name, const char*) {
 void MainMenu::runCdSystemDirectory(const char* name, const char* arg) {
     std::cout << "Changing System directory... " << arg << std::endl;
     app.setSystemDir(arg);
-    buildMenu();
+    buildMenu(MenuMode::M_EXTRA);
 }
 
 void MainMenu::runCdSystemHome(const char* name, const char*) {
     std::cout << "Resetting to system home" << std::endl;
     app.setSystemDir(NULL);
-    buildMenu();
+    buildMenu(MenuMode::M_EXTRA);
 }
 
 void MainMenu::runInstaller(const char*, const char* arg) {
