@@ -37,6 +37,11 @@ std::string getSystemFile(  const std::vector<std::string>& paths,
 }
 
 
+std::string escapePath(std::string path) {
+    return std::string("\"") + path + "\"";
+}
+
+
 
 static const char* MM_STR[MainMenu::MenuMode::M_MAX_ENTRIES] = {
     "MAIN",
@@ -820,12 +825,12 @@ void MainMenu::runCdSystemHome(const char* name, const char*) {
 
 void MainMenu::runInstaller(const char*, const char* arg) {
     char buf[128];
-    std::string zipfile = std::string(arg);
+    std::string zipfile = escapePath(std::string(arg));
     std::string filename = app.getPatchDir() + "/" + zipfile;
-    std::cout << "Installing : " << arg << std::endl;
 
     // run script with patch dir as working dir
     sprintf(buf, "%s/scripts/install_zip.sh %s &", app.getFirmwareDir().c_str(), zipfile.c_str());
+    std::cout << "Installing : " << zipfile << std::endl;
     setEnv(app.getPatchDir());
     // run async to mother, to allow oled updates
     system(buf);
