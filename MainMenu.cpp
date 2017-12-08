@@ -128,14 +128,14 @@ void MainMenu::runReload(const char* name, const char* arg) {
 
 void MainMenu::runScriptCommand(const char* name,const char* arg) {
     std::string cmd = std::string(arg) + " &";
-    std::cout << "running : " << cmd;
+    std::cout << "running : " << cmd << std::endl;
     execScript(cmd);
     currentMenu = MenuMode::M_MAIN;
 }
 
 void MainMenu::runScriptPython(const char* name,const char* arg) {
     std::string cmd = app.getFirmwareDir() + "/scripts/" + arg + " &";
-    std::cout << "running : " << cmd;
+    std::cout << "running : " << cmd << std::endl;
     execPython(cmd,app.getUserDir());
     currentMenu = MenuMode::M_MAIN;
 }
@@ -866,8 +866,8 @@ int  MainMenu::execShell(const std::string& cmd, const std::string& wd) {
 
 
 int  MainMenu::execScript(const std::string& script) {
-    std::string cmd  = app.getFirmwareDir() + "/" + script;
-    return execShell(app.getUserDir(),cmd);
+    std::string cmd  = app.getFirmwareDir() + "/scripts/" + script;
+    return execShell(cmd,app.getUserDir());
 }
 
 
