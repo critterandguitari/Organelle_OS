@@ -12,23 +12,8 @@ $SCRIPTS_DIR/mount.sh
 
 mkdir -p /tmp/pids
 
-if grep -qs "/usbdrive" /proc/mounts 
-then
-    echo using usbdrive for user dir
-    export USER_DIR=/usbdrive
-else 
-    echo no usbdrive found, try sdcard
-    if grep -qs "/sdcard" /proc/mounts 
-    then 
-        echo using sdcard for user dir
-        export USER_DIR=/sdcard
-    else
-        echo no sdcard found, use usbdrive
-        # not practical, as its not mounted, but we have no choice
-        export USER_DIR=/usbdrive
-    fi
-fi
-
+export USER_DIR=`$SCRIPTS_DIR/get-user-dir.sh`
+echo using USER_DIR: $USER_DIR
 
 M_DIR=/root
 FW_DIR=/root
