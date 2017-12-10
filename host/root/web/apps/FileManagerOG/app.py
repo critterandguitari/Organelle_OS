@@ -69,13 +69,13 @@ class Root():
         print "saved file, size: " + str(size)
         # check if it was a zip, unzip and delete orig if so. then reload patch list
         p, ext = os.path.splitext(filepath)
-        if ext == ".zip" :
-            print "that was a zip, gonna unzip"
-            zip_path = filepath
-            zip_parent_folder =os.path.dirname(zip_path)
-            os.system("unzip -o \""+zip_path+"\" -d \""+zip_parent_folder+"\" -x '__MACOSX/*'")
-            os.remove(zip_path)
-            os.system("/root/scripts/reload.sh")
+#        if ext == ".zip" :
+#            print "that was a zip, gonna unzip"
+#            zip_path = filepath
+#            zip_parent_folder =os.path.dirname(zip_path)
+#            os.system("unzip -o \""+zip_path+"\" -d \""+zip_parent_folder+"\" -x '__MACOSX/*'")
+#            os.remove(zip_path)
+#            os.system("/root/scripts/reload.sh")
         
         cherrypy.response.headers['Content-Type'] = "application/json"
         return '{"files":[{"name":"x","size":'+str(size)+',"url":"na","thumbnailUrl":"na","deleteUrl":"na","deleteType":"DELETE"}]}'
