@@ -150,5 +150,47 @@ class Menu :
             if (redraw_flag) :
                 self.draw()
 
+class InfoList :
+    items = None
+    menu_offset = 0
+    header = ''
+
+    def draw(self) :
+        clear_screen()
+
+        # header first line
+        println(0, self.header)
+
+        # menu entries for the rest
+        sz = min(len(self.items),4)
+        for i in range(0, sz) :
+            println(i+1, self.items[i + self.menu_offset])
+        
+        flip()
+
+    def enc_up(self) :
+        if not (self.menu_offset >= (len(self.items) - 4)) : self.menu_offset +=1
+
+    def enc_down(self) :
+        if not (self.menu_offset < 1) : self.menu_offset -= 1
+
+    def perform(self) :
+        self.back_flag = False
+        self.draw()
+        while True :
+            enc_input()
+            if (enc_turn_flag) :
+                i = enc_turn
+                if i == 0 :
+                    self.enc_down()
+                if i == 1 :
+                    self.enc_up()
+                self.draw()
+            if (enc_but_flag) :
+                if (enc_but == 1) :
+                    break
+            if (redraw_flag) :
+                self.draw()
+
 
 
