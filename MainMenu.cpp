@@ -218,13 +218,13 @@ void MainMenu::runPatch(const char* name, const char* arg) {
         sprintf(buf2, "mkdir -p /tmp/curpatchname/\"%s\"", arg);
         system(buf2);
 
-        // setup /tmp/patch/media and /tmp/patch/data
+        // setup /tmp/media and /tmp/data
         std::vector<std::string> userPaths;
         userPaths.push_back(app.getUserDir());
         std::string mediaPath = getSystemFile(userPaths,"media");
         // setup media path
         if(mediaPath.length()>0) {
-            std::string lncmd = std::string("ln -s ") + mediaPath + " /tmp/patch/media";
+            std::string lncmd = std::string("ln -s ") + mediaPath + " /tmp/media";
             std::cout << "linking : " << lncmd << std::endl;
             system(lncmd.c_str());
         }
@@ -232,7 +232,7 @@ void MainMenu::runPatch(const char* name, const char* arg) {
         // setup data path
         std::string dataPath = getSystemFile(userPaths,"data");
         if(dataPath.length()>0) {
-            std::string lncmd = std::string("ln -s ") + dataPath + " /tmp/patch/data";
+            std::string lncmd = std::string("ln -s ") + dataPath + " /tmp/data";
             std::cout << "linking : " << lncmd << std::endl;
             system(lncmd.c_str());
         }

@@ -41,8 +41,10 @@ if [ -f "$INSTALL_DIR/manifest.txt" ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "Checking manifest"
     mv "$INSTALL_DIR/manifest.txt" /tmp
-    find "$INSTALL_DIR" -type f -print0  | xargs -0 sha1sum > /tmp/manifest.new
-    diff /tmp/manifest.txt /tmp/manifest.new; ec=$?; 
+    find "$INSTALL_DIR" -type f -print0  | xargs -0 sha1sum > /tmp/sha1sum.txt
+    sort /tmp/manifest.txt > /tmp/manifest.orig
+    sort /tmp/sha1sum.txt  > /tmp/manifest.new
+    diff /tmp/manifest.orig /tmp/manifest.new; ec=$?; 
     mv /tmp/manifest.txt "$INSTALL_DIR"
     if [ $ec -ne 0 ] 
     then
