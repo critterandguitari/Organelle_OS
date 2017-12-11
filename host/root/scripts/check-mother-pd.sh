@@ -16,10 +16,9 @@ VER=` awk '\
 
 if [ "$VER" == "$2" ]
 then 
-    echo mother is required version
     exit 0
 fi
-    echo mother.pd not required version
+    echo mother.pd not required version, require "$2" got "$VER"
 exit -1
 
 
