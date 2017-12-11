@@ -106,6 +106,7 @@ deployToUSB : main
 
 image : main
 	cp main host/root/mother
+	rm -rf $(IMAGE_DIR)
 	@echo creating image $(IMAGE_VERSION) in $(IMAGE_DIR)
 	mkdir -p $(IMAGE_DIR)/root
 	cp -f host/root/mother.pd $(IMAGE_DIR)/root
