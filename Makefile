@@ -56,55 +56,6 @@ deploy : main
 	cp -f host/root/.config/SuperCollider/* /root/.config/SuperCollider
 	sync
 
-deployToSD : main
-	cp main host/root/mother
-	echo "Updating OS to $(IMAGE_VERSION)"
-	host/root/scripts/remount-rw.sh
-	mkdir -p /sdcard/Firmware/scripts
-	cp -f host/root/mother.pd /sdcard/Firmware
-	cp -f host/root/mother.scd /sdcard/Firmware
-	cp -f host/root/mother /sdcard/Firmware
-	cp -f host/root/scripts/* /sdcard/Firmware/scripts
-	cp -f host/root/version /sdcard/Firmware
-	cp -f host/root/buildtag /sdcard/Firmware
-	cp -f host/root/.bash_profile /root
-	cp -f host/root/.jwmrc /root
-	cp -f host/root/.pdsettings /root
-	mkdir -p /root/.ssh
-	cp -f host/root/.ssh/environment /root/.ssh/environment
-	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
-	mkdir -p /root/web
-	cp -fr host/root/web/* /root/web
-	mkdir -p /root/.config/SuperCollider
-	cp -f host/root/.config/SuperCollider/* /root/.config/SuperCollider
-	sync 
-
-deployToUSB : main
-	cp main host/root/mother
-	echo "Updating OS to $(IMAGE_VERSION)"
-	/host/root/scripts/remount-rw.sh
-	mkdir -p /usbdrive/Firmware/scripts
-	cp -f host/root/mother.pd /usbdrive/Firmware
-	cp -f host/root/mother.scd /usbdrive/Firmware
-	cp -f host/root/mother /usbdrive/Firmware
-	cp -f host/root/scripts/* /usbdrive/Firmware/scripts
-	cp -f host/root/version /usbdrive/Firmware
-	cp -f host/root/buildtag /usbdrive/Firmware
-	cp -f host/root/.bash_profile /root
-	cp -f host/root/.jwmrc /root
-	cp -f host/root/.pdsettings /root
-	mkdir -p /root/.ssh
-	cp -f host/root/.ssh/environment /root/.ssh/environment
-	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
-	mkdir -p /root/web
-	cp -fr host/root/web/* /root/web
-	mkdir -p /root/.config/SuperCollider
-	cp -f host/root/.config/SuperCollider/* /root/.config/SuperCollider
-	sync 
-
-
-
-
 image : main
 	cp main host/root/mother
 	rm -rf $(IMAGE_DIR)
