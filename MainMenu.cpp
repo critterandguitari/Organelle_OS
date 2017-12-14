@@ -725,7 +725,7 @@ void MainMenu::buildMenu(signed mm_pos) {
                     break;
                 } //DT_DIR
                 case DT_REG: {
-                    // zip file is for installation
+                    // zip or zop file is for installation
                     int len = strlen(fname);
                     std::cout << fname << std::endl;
                     if(len>4) {
@@ -735,7 +735,8 @@ void MainMenu::buildMenu(signed mm_pos) {
                         for(int i = 1; i<4;i++) {
                             ext[i] = std::toupper(fname[len-4+i]);
                         }
-                        if(strcmp(ext,".ZIP")==0) { 
+                        if(strcmp(ext,".ZIP")==0
+                        || strcmp(ext,".ZOP")==0) { 
                             numPatches++;
                             std::string itm = std::string("Install ") + fname;
                             addMenuItem(numMenuEntries++, itm.c_str() , fname, &MainMenu::runInstaller);
@@ -828,12 +829,12 @@ void MainMenu::runCdSystemHome(const char* name, const char*) {
 
 void MainMenu::runInstaller(const char*, const char* arg) {
     char buf[128];
-    std::string zipfile = escapePath(std::string(arg));
-    std::string filename = app.getPatchDir() + "/" + zipfile;
+    std::string installfile = escapePath(std::string(arg));
+    std::string filename = app.getPatchDir() + "/" + installfile;
 
     // run script with patch dir as working dir
-    sprintf(buf, "%s/scripts/install_zip.sh %s &", app.getFirmwareDir().c_str(), zipfile.c_str());
-    std::cout << "Installing : " << zipfile << std::endl;
+    sprintf(buf, "%s/scripts/install_package.sh %s &", app.getFirmwareDir().c_str(), installfile.c_str());
+    std::cout << "Installing : " << installfile << std::endl;
     setEnv(app.getPatchDir());
     // run async to mother, to allow oled updates
     system(buf);

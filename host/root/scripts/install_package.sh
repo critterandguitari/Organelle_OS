@@ -15,14 +15,14 @@ oscsend localhost 4001 /oled/aux/line/2 s "$1"
 oscsend localhost 4001 /oled/aux/line/5 s "Do not interrupt!"
 
 echo "installing : " $1 
-cd $PATCH_DIR 
+cd "$PATCH_DIR"
 
-ZIPFILE="$1"
+INSTALL_FILE="$1"
 
-echo "unzip : " $ZIPFIlE 
+echo "unzip :  $ZIPFIlE "
 oscsend localhost 4001 /oled/aux/line/4 s "unzipping"
 
-unzip -o "$ZIPFILE" -x "__MACOSX/*" > /tmp/install_files.txt ; ec=$?;
+unzip -o "$INSTALL_FILE" -x "__MACOSX/*" "._*" > /tmp/install_files.txt ; ec=$?;
 if [ $ec -ne 0 ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "Install FAILED"
@@ -33,7 +33,7 @@ fi
 
 
 INSTALL_DIR=`cat /tmp/install_files.txt | head -2 | tail -1 | sed 's/.*ting: \(.*\)\/.*/\1/'`
-echo "installed dir : " $INSTALL_DIR
+echo "installed dir :  $INSTALL_DIR"
 
 ec=0
 
@@ -41,7 +41,7 @@ if [ -f "$INSTALL_DIR/manifest.txt" ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "Checking manifest"
     mv "$INSTALL_DIR/manifest.txt" /tmp
-    find "$INSTALL_DIR" -type f -print0  | xargs -0 sha1sum > /tmp/sha1sum.txt
+    find "$INSTALL_DIR" -type f ! -name "._*" -print0  | xargs -0 sha1sum > /tmp/sha1sum.txt
     sort /tmp/manifest.txt > /tmp/manifest.orig
     sort /tmp/sha1sum.txt  > /tmp/manifest.new
     diff /tmp/manifest.orig /tmp/manifest.new; ec=$?; 
@@ -73,8 +73,8 @@ fi
 #success
 
 #remove zip file
-cd $PATCH_DIR
-rm "$ZIPFILE"
+cd "$PATCH_DIR"
+rm "$INSTALL_FILE"
 
 oscsend localhost 4001 /oled/aux/clear i 1
 oscsend localhost 4001 /oled/aux/line/1 s "Installation"
