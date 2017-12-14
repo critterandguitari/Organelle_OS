@@ -1,5 +1,5 @@
 #!/bin/sh
-echo create install zip for $1
+echo create install package for $1
 
 INSTALL_DIR=$1
 
@@ -15,7 +15,7 @@ then
 fi
 rm -rf __MACOSX
 
-find "$INSTALL_DIR" -type f -print0  | xargs -0 sha1sum > /tmp/manifest.new
+find "$INSTALL_DIR" -type f ! -name "._*" -print0  | xargs -0 sha1sum > /tmp/manifest.new
 mv /tmp/manifest.new "$INSTALL_DIR/manifest.txt"
 
-zip -r "$INSTALL_DIR.zip" "$INSTALL_DIR"/*
+zip -r "$INSTALL_DIR.zop" "$INSTALL_DIR"/*
