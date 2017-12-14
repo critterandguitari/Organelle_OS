@@ -6,12 +6,14 @@ import threading
 import subprocess
 import socket
 
+print "Starting INFO script"
 
 # usb or sd card
 user_dir = os.getenv("USER_DIR", "/usbdrive")
 patch_dir = os.getenv("PATCH_DIR", "/usbdrive/Patches")
 fw_dir = os.getenv("FW_DIR", "/root")
 
+print "loading og module"
 # imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
 og = imp.load_source('og', current_dir + '/og.py')
@@ -28,9 +30,14 @@ def check_status():
     global info
     while True:
         info.items[0] = "CPU: " + str(100 - int(run_cmd("vmstat 1 2|tail -1|awk '{print $15}'"))) + " %"
+        info.items[3] = "IP: " + socket.gethostbyname(socket.gethostname())
         og.redraw_flag = True
 
 info = og.InfoList()
+
+print "start app"
+# start it up
+og.start_app()
 
 # get info
 cpu = "CPU: ..."
@@ -61,9 +68,6 @@ version,
 ]
 
 info.header='INFO press to exit.'
-
-# start it up
-og.start_app()
 
 # bg thread
 menu_updater = threading.Thread(target=check_status)

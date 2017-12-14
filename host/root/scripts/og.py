@@ -1,6 +1,7 @@
 import liblo
 import time 
 import sys
+import os
 
 enc_turn = 0
 enc_but = 0
@@ -8,11 +9,18 @@ enc_turn_flag = False
 enc_but_flag = False
 redraw_flag = False  # to break waiting for input for a screen update
 
+# sometimes it takes a second to aquire the OSC port
+# this provides a loading screen
+def loading_screen ():
+    os.system('oscsend localhost 4001 /oled/gClear ii 1 1')
+    os.system('oscsend localhost 4001 /oled/aux/line/3 s "loading..."')
+    os.system('oscsend localhost 4001 /enableauxsub i 1')
+    os.system('oscsend localhost 4001 /oled/setscreen i 1')
+
 # OSC and UI primitives 
 def start_app ():
-    liblo.send(osc_target, '/oled/setscreen', 1)
-    liblo.send(osc_target, '/enableauxsub', 1)
-    clear_screen()
+    loading_screen()
+    init_osc()
 
 def end_app ():
     liblo.send(osc_target, '/gohome', 1)
@@ -30,13 +38,18 @@ def clear_screen() :
 def flip() :
     liblo.send(osc_target, '/oled/gFlip', 1)
 
-osc_target = liblo.Address(4001)
+def init_osc() :
+    global server, osc_target
+    osc_target = liblo.Address(4001)
 
-try:
-    server = liblo.Server(4002)
-except liblo.ServerError, err:
-    print str(err)
-    sys.exit()
+    try:
+        server = liblo.Server(4002)
+        server.add_method("/encoder/turn", 'i', enc_turn)
+        server.add_method("/encoder/button", 'i', enc_press)
+
+    except liblo.ServerError, err:
+        print str(err)
+        sys.exit()
 
 def enc_turn(path, args) :
     global enc_turn_flag, enc_turn
@@ -47,9 +60,6 @@ def enc_press(path, args) :
     global enc_but_flag, enc_but
     enc_but_flag = True
     enc_but = args[0]
-
-server.add_method("/encoder/turn", 'i', enc_turn)
-server.add_method("/encoder/button", 'i', enc_press)
 
 # wait for input, or for redraw flag to be set
 def enc_input():
