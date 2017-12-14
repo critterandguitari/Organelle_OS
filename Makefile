@@ -40,6 +40,7 @@ deploy : main
 	cp -f host/root/mother.scd /root
 	cp -f host/root/mother /root
 	cp -f host/root/scripts/* /root/scripts
+	cp -f host/root/externals/* /root/externals
 	cp -f host/root/version /root
 	cp -f host/root/buildtag /root
 	cp -f host/root/.bash_profile /root
@@ -119,6 +120,8 @@ image : main
 	cp -f host/root/.pdsettings $(IMAGE_DIR)/root
 	mkdir -p $(IMAGE_DIR)/scripts
 	cp -f host/root/scripts/* $(IMAGE_DIR)/scripts
+	mkdir -p $(IMAGE_DIR)/externals
+	cp -f host/root/scripts/* $(IMAGE_DIR)/externals
 	mkdir -p $(IMAGE_DIR)/web
 	cp -fr host/root/web/* $(IMAGE_DIR)/web
 	mkdir -p ${IMAGE_DIR}/.ssh
