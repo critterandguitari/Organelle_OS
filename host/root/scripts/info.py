@@ -46,8 +46,9 @@ midi_dev = "MIDI Dev: " + run_cmd("aplaymidi -l | awk '{if (NR==2) print $2}'")
 version = run_cmd("cat " + fw_dir + "/version")
 build_tag = run_cmd("cat " + fw_dir + "/buildtag")
 version = "Version: " + version + build_tag
-patch_dir = "  " + patch_dir
+patch_dir = "  " + patch_dir.split(user_dir + "/", 1).pop()
 user_dir = "  " + user_dir
+patch = "  " + run_cmd("ls /tmp/curpatchname")
 ip_address = "IP: " + socket.gethostbyname(socket.gethostname())
 host_name = "  " + run_cmd("ps aux | grep 'avahi.*running' | awk 'NR==1{print $13}' | sed 's/\[//' | sed 's/]//'")
 
@@ -60,6 +61,8 @@ midi_dev,
 ip_address, 
 "Host Name:",
 host_name,
+"Patch: ",
+patch,
 "Patch Folder:", 
 patch_dir, 
 "User Root:", 

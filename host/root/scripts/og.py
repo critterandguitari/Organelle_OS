@@ -29,7 +29,15 @@ def end_app ():
 def invert_line(num) :
     liblo.send(osc_target, '/oled/gInvertArea', 1, 0, num*11+1, 127, 11)
 
+def truncate_mid(s, n):
+    if len(s) <= n:
+        return s
+    n_2 = int(n) / 2 - 3
+    n_1 = n - n_2 - 3
+    return '{0}...{1}'.format(s[:n_1], s[-n_2:])
+
 def println(num, s) :
+    s = truncate_mid(s, 20)
     liblo.send(osc_target, '/oled/gPrintln', 1, 2, num*11 + 2, 8, 1, s)
 
 def clear_screen() :
