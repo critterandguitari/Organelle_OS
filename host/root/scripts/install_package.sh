@@ -32,7 +32,7 @@ then
 fi
 
 
-INSTALL_DIR=`cat /tmp/install_files.txt | head -2 | tail -1 | sed 's/.*ting: \(.*\)\/.*/\1/'`
+INSTALL_DIR=`cat /tmp/install_files.txt | head -2 | tail -1 | sed 's/.*ting: \([^\/]*\).*/\1/'`
 echo "installed dir :  $INSTALL_DIR"
 
 ec=0
