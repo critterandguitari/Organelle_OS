@@ -67,6 +67,7 @@ int execScript(const char* cmd) {
 void setScreen(OSCMessage &msg);
 void vuMeter(OSCMessage &msg);
 void setLED(OSCMessage &msg);
+void flashLED(OSCMessage &msg);
 void screenShot(OSCMessage &msg);
 void enablePatchSubMenu(OSCMessage &msg);
 void enableAuxSubMenu(OSCMessage &msg);
@@ -131,6 +132,7 @@ void knobsInput(OSCMessage &msg);
 void updateScreenPage(uint8_t page, OledScreen &screen);
 void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg);
 void sendGetKnobs(void);
+void sendLed(unsigned c);
 void patchLoaded(bool);
 /* end helpers */
 
@@ -235,6 +237,7 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/ready", sendReady, 0)
                     || msgIn.dispatch("/shutdown", sendShutdown, 0)
                     || msgIn.dispatch("/led", setLED, 0)
+                    || msgIn.dispatch("/led/flash", flashLED, 0)
                     || msgIn.dispatch("/oled/setscreen", setScreen, 0)
                     || msgIn.dispatch("/reload", reload, 0)
                     || msgIn.dispatch("/quitmother", quitMother, 0)
@@ -384,6 +387,12 @@ int main(int argc, char* argv[]) {
         if (knobPollTimer.getElapsed() > 40.f) {
             knobPollTimer.reset();
             sendGetKnobs();
+            
+            // service led flasher
+            if(app.ledFlashCounter) {
+                app.ledFlashCounter--;
+                if (!app.ledFlashCounter) sendLed(app.ledColor);
+            }
         }
 
         // check exit flag
@@ -609,8 +618,18 @@ void quitMother(OSCMessage &msg) {
 }
 
 void setLED(OSCMessage &msg) {
-    msg.send(dump);
-    slip.sendMessage(dump.buffer, dump.length, serial);
+    if (msg.isInt(0)) {
+        app.ledColor = msg.getInt(0);
+        msg.send(dump);
+        slip.sendMessage(dump.buffer, dump.length, serial);
+    }
+}
+
+void flashLED(OSCMessage &msg) {
+    if (msg.isInt(0)){
+        app.ledFlashCounter = msg.getInt(0);
+        sendLed(7);
+    }
 }
 
 void vuMeter(OSCMessage &msg) {
@@ -918,6 +937,13 @@ void encoderButton(OSCMessage &msg) {
 /* end OSC messages received from MCU */
 
 /* helpers */
+void sendLed(unsigned c) {
+    OSCMessage msg("/led");
+    msg.add(c);
+    msg.send(dump);
+    slip.sendMessage(dump.buffer, dump.length, serial);
+}
+
 void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg) {
 
     char str[256];

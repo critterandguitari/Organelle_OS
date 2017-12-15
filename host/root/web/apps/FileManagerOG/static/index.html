@@ -50,7 +50,7 @@
         margin-bottom: 1em;
         white-space: nowrap;
     }
-    #home-but{
+    #top-buts{
         float:right;
         font-size: 1.5em;
         padding-top: .3em;
@@ -317,10 +317,12 @@
                 <label class="btn btn-default btn-file">Upload<input id="fileupload" type="file" name="files[]" value="Upload" style="display: none;" multiple></label>
                 <button id="new-folder-but" type="button" class="btn btn-default">New Folder</button>
                 &nbsp; 
-                &nbsp; 
-                <a id="home-but" href="/">
-                    <span class="glyphicon glyphicon-home"></span>
-                </a>
+                &nbsp;
+                <span id="top-buts"> 
+                    <a id="resync-but" href="#"><span class="glyphicon glyphicon-refresh"></span></a>
+                    <a id="flash-but" href="#"><span class="glyphicon glyphicon-flash"></span></a>
+                    <a id="home-but" href="/"><span class="glyphicon glyphicon-home"></span></a>
+                </span>
             </div>
             <br />
             <ul class="breadcrumb" id="fsbreadcrumb"></ul>

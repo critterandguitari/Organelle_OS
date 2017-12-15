@@ -167,6 +167,26 @@ $(function () {
 	detachPlayer();
 
     // button actions
+    $("#resync-but").click(function(){
+        $.get(appBaseURL+'/resync')
+        .done(function (d) {
+            console.log('resync done');
+        })
+        .fail(function () {
+            console.log('problem with resync');
+        });
+    });
+
+    $("#flash-but").click(function(){
+        $.get(appBaseURL+'/flash')
+        .done(function (d) {
+            console.log('flashed');
+        })
+        .fail(function () {
+            console.log('problem with flash');
+        });
+    });
+
     $('#fileupload').fileupload({
 		// DISABLE drag and drop uploading
        	dropZone: null,  

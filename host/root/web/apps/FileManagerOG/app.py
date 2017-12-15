@@ -35,6 +35,16 @@ class Root():
         print "cool"
     tester.exposed = True
 
+    def flash(self):
+        os.system("oscsend localhost 4001 /led/flash i 4")
+        return "done"
+    flash.exposed = True
+
+    def resync(self):
+        os.system("oscsend localhost 4001 /reload i 1")
+        return "done"
+    resync.exposed = True
+
     def media(self, fpath, cb):
         cherrypy.response.headers['Cache-Control'] = "no-cache, no-store, must-revalidate"
         cherrypy.response.headers['Pragma'] = "no-cache"

@@ -67,6 +67,8 @@ AppData::AppData(){
     auxScreenEncoderOverride = 0;
     midiChannel = 1;
     useAlsa = false;
+    ledFlashCounter = 0;
+    ledColor = 0;
     alsaConfig = DEFAULT_ALSA_CONFIG;
     setPatchDir(NULL);
     setFirmwareDir(NULL);
