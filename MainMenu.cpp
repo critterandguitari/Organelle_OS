@@ -765,9 +765,9 @@ void MainMenu::buildMenu(signed mm_pos) {
         // notify if no patches found
         if (!numPatches) {
             addMenuItem(numMenuEntries++, "No patches found!", "", &MainMenu::runDoNothing);
-            addMenuItem(numMenuEntries++, "Insert USB drive ", "", &MainMenu::runDoNothing);
-            addMenuItem(numMenuEntries++, "with Patches folder.", "", &MainMenu::runDoNothing);
-            addMenuItem(numMenuEntries++, "Then select Reload.", "", &MainMenu::runDoNothing);
+            addMenuItem(numMenuEntries++, "", "", &MainMenu::runDoNothing);
+            addMenuItem(numMenuEntries++, "", "", &MainMenu::runDoNothing);
+            addMenuItem(numMenuEntries++, "", "", &MainMenu::runDoNothing);
         }
     }
 
