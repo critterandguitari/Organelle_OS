@@ -9,7 +9,11 @@ SCRIPTS_DIR=$FW_DIR/scripts
 oscsend localhost 4001 /shutdown i 1
 $SCRIPTS_DIR/killpatch.sh
 $SCRIPTS_DIR/killmother.sh
-killall wpa_supplicant
-killall dhcpcd
+
+# shutdown wifi
+wpa_cli -i wlan0 terminate
+dhcpcd -b -x wlan0 
+/root/scripts/create_ap --stop wlan0 
+
 shutdown -h now
 #echo "shutting down"
