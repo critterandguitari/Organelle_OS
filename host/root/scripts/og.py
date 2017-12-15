@@ -23,7 +23,9 @@ def start_app ():
     init_osc()
 
 def end_app ():
-    liblo.send(osc_target, '/gohome', 1)
+    # send this as system call just in case something happend to our liblo sender
+    os.system('oscsend localhost 4001 /gohome i 1')
+    os.system('oscsend localhost 4001 /enableauxsub i 0')
     exit()
 
 def invert_line(num) :
