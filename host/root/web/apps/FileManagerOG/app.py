@@ -67,16 +67,7 @@ class Root():
                 size += len(data)
                 newfile.write(data)
         print "saved file, size: " + str(size)
-        # check if it was a zip, unzip and delete orig if so. then reload patch list
         p, ext = os.path.splitext(filepath)
-#        if ext == ".zip" :
-#            print "that was a zip, gonna unzip"
-#            zip_path = filepath
-#            zip_parent_folder =os.path.dirname(zip_path)
-#            os.system("unzip -o \""+zip_path+"\" -d \""+zip_parent_folder+"\" -x '__MACOSX/*'")
-#            os.remove(zip_path)
-#            os.system("/root/scripts/reload.sh")
-        
         cherrypy.response.headers['Content-Type'] = "application/json"
         return '{"files":[{"name":"x","size":'+str(size)+',"url":"na","thumbnailUrl":"na","deleteUrl":"na","deleteType":"DELETE"}]}'
         
@@ -87,8 +78,6 @@ class Root():
         ret = ''
         if 'operation' in data :
             cherrypy.response.headers['Content-Type'] = "application/json"
-            if data['operation'] == 'set_base_dir' :
-                return file_operations.set_base_dir(data['path'])
             if data['operation'] == 'get_node' :
                 return file_operations.get_node(data['path'])
             if data['operation'] == 'create_node' :

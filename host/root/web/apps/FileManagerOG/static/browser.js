@@ -5,6 +5,12 @@ var workingDir = '/usbdrive/';
 var baseDirLabel = 'USB Drive';
 var clipboard = {};
 
+function alertDialog(msg){
+    $('#info-modal').modal({backdrop: false});
+    $('#info-modal-msg').empty();   
+    $('#info-modal-msg').append('<p>'+msg+'</p>');   
+}
+
 // TODO  really anytime the table view changes we want to first call detachPlayer.  
 // is there an event we can use rather than having to explictly call it everytime?
 function refreshWorkingDir(){
@@ -16,8 +22,16 @@ function refreshWorkingDir(){
     })
     .fail(function () {
         console.log('problem refreshing');
+        // if that was an attempt to load non existent sdcard folder set base back to usbdrive
+        if (workingDir == '/sdcard/') {
+            alertDialog('SD Card storage not available on this Organelle.');
+            workingDir = '/usbdrive/';
+            baseDirLabel = 'USB Drive';
+        }
+        else {
+            alertDialog('Error loading file or folder.');
+        }
     });
-    if (!clipboard.hasOwnProperty('nodes')) $("#ff-actions").slideUp();
 }
 
 function getWorkingDir() {
@@ -196,13 +210,6 @@ $(function () {
         baseDirLabel = 'SD Card';
         workingDir = '/sdcard/';
         refreshWorkingDir();
-    });
-
-    // any time the table is clicked on, check number selected and display 
-    // ff actions if > 0
-    $("#files-table").click(function(){
-        var total=$("#files-table").find('input:checked').length;
-        if (total > 0) $("#ff-actions").slideDown();
     });
 
     $("#new-folder-but").click(function(){

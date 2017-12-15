@@ -23,10 +23,6 @@ def check_and_inc_name(path) :
     return newpath
 
 #TODO don't return ok if error what the hell
-def set_base_dir(path) :
-    global BASE_DIR
-    BASE_DIR = path
-
 def rename(old, new):
     src = BASE_DIR + old 
     dst = os.path.dirname(src) + '/' + new
