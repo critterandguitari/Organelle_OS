@@ -6,6 +6,10 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 config = { '/': 
         {
         },
+		'/favicon.ico': {
+			'tools.staticfile.on': True,
+			'tools.staticfile.filename': current_dir + '/static/fav.png'
+		},
         '/static/bootstrap.min.css': {
             'tools.staticfile.on': True,
             'tools.staticfile.filename': current_dir + '/static/bootstrap.min.css'
@@ -30,7 +34,9 @@ class Root(object):
         return """
 <html>
 <head>
+<title>Organelle Home</title>
 <link rel="stylesheet" href="/static/bootstrap.min.css">
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 </head>
 <body>
 

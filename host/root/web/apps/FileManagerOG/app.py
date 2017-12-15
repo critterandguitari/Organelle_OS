@@ -26,7 +26,7 @@ config = { '/':
         }
 }
 base = '/files'
-name = 'File Manager'
+name = 'Patch Manager'
 
 class Root():
 
