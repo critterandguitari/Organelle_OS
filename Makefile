@@ -72,7 +72,7 @@ image : main
 	mkdir -p $(IMAGE_DIR)/scripts
 	cp -f host/root/scripts/* $(IMAGE_DIR)/scripts
 	mkdir -p $(IMAGE_DIR)/externals
-	cp -f host/root/scripts/* $(IMAGE_DIR)/externals
+	cp -f host/root/externals/* $(IMAGE_DIR)/externals
 	mkdir -p $(IMAGE_DIR)/web
 	cp -fr host/root/web/* $(IMAGE_DIR)/web
 	mkdir -p ${IMAGE_DIR}/.ssh
