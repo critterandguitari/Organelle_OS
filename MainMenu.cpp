@@ -224,6 +224,7 @@ void MainMenu::runPatch(const char* name, const char* arg) {
         std::string mediaPath = getSystemFile(userPaths,"media");
         // setup media path
         if(mediaPath.length()>0) {
+            system("rm /tmp/media");
             std::string lncmd = std::string("ln -s ") + mediaPath + " /tmp/media";
             std::cout << "linking : " << lncmd << std::endl;
             system(lncmd.c_str());
