@@ -48,6 +48,10 @@ then
     mv /tmp/manifest.txt "$INSTALL_DIR"
     if [ $ec -ne 0 ] 
     then
+        export LOGFILE=${USER_DIR}/install_log.txt
+        echo "Install failed for $INSTALL_FILE" > $LOGFILE
+        echo "file diff incorrect" >> $LOGFILE
+        diff /tmp/manifest.orig /tmp/manifest.new >> $LOGFILE
         oscsend localhost 4001 /oled/aux/line/4 s "Install FAILED"
         oscsend localhost 4001 /oled/aux/line/5 s "Files corrupt"
         oscsend localhost 4001 /enableauxsub i 0
