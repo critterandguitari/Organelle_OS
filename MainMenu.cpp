@@ -691,9 +691,9 @@ void MainMenu::buildMenu(signed mm_pos) {
         else {
             for (i = 0; i < n; i++) {
                 char* fname = namelist[i]->d_name;
-                switch(namelist[i]->d_type) { 
-                case DT_DIR : {
-                    if (fname[0]!='.') {
+                if (fname[0]!='.') {
+                    switch(namelist[i]->d_type) { 
+                    case DT_DIR : {
                         std::string patchlocation = app.getPatchDir() + "/" + fname;
                         std::string mainpd = patchlocation + "/main.pd";
                         std::string scfile = patchlocation + "/main.scd";
@@ -722,33 +722,33 @@ void MainMenu::buildMenu(signed mm_pos) {
                         if (numMenuEntries > MAX_MENU_ENTRIES - 10) {
                             numMenuEntries = MAX_MENU_ENTRIES - 10;
                         }
-                    }
-                    break;
-                } //DT_DIR
-                case DT_REG: {
-                    // zip or zop file is for installation
-                    int len = strlen(fname);
-                    std::cout << fname << std::endl;
-                    if(len>4) {
-                        char ext[5];
-                        ext[0] = fname[len-4];
-                        ext[4] = 0;
-                        for(int i = 1; i<4;i++) {
-                            ext[i] = std::toupper(fname[len-4+i]);
+                        break;
+                    } //DT_DIR
+                    case DT_REG: {
+                        // zip or zop file is for installation
+                        int len = strlen(fname);
+                        std::cout << fname << std::endl;
+                        if(len>4) {
+                            char ext[5];
+                            ext[0] = fname[len-4];
+                            ext[4] = 0;
+                            for(int i = 1; i<4;i++) {
+                                ext[i] = std::toupper(fname[len-4+i]);
+                            }
+                            if(strcmp(ext,".ZIP")==0
+                            || strcmp(ext,".ZOP")==0) { 
+                                numPatches++;
+                                std::string itm = std::string("Install ") + fname;
+                                addMenuItem(numMenuEntries++, itm.c_str() , fname, &MainMenu::runInstaller);
+                            }
                         }
-                        if(strcmp(ext,".ZIP")==0
-                        || strcmp(ext,".ZOP")==0) { 
-                            numPatches++;
-                            std::string itm = std::string("Install ") + fname;
-                            addMenuItem(numMenuEntries++, itm.c_str() , fname, &MainMenu::runInstaller);
-                        }
-                    }
+                        break;
+                    } //DT_REG
+                    default: 
+                        break;
 
-                } //DT_REG
-                default: 
-                    break;
-
-                }// switch 
+                    }// switch 
+                }
                 free(namelist[i]);
             }
             free(namelist);
