@@ -13,7 +13,7 @@ oscsend localhost 4001 /oled/line/3 s "Checking files"
 cd ${PATCH_DIR} 
 
 mv UpdateOS-XXXXXXXXXX/manifest.txt /tmp
-find UpdateOS-XXXXXXXXXX -type f ! -name "._*" -print0  | xargs -0 sha1sum > /tmp/sha1sum.txt
+find UpdateOS-XXXXXXXXXX -type f ! -name "._*" ! -name ".DS_Store" -print0  | xargs -0 sha1sum > /tmp/sha1sum.txt
 sort /tmp/manifest.txt > /tmp/manifest.orig
 sort /tmp/sha1sum.txt  > /tmp/manifest.new
 diff /tmp/manifest.orig /tmp/manifest.new; ec=$?;
