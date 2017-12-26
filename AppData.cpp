@@ -18,8 +18,6 @@ const char* USB_FW="/usbdrive/Firmware";
 const char* SD_FW="/sdcard/Firmware";
 const char* DEFAULT_FW="/root";
 
-const char* DEFAULT_ALSA_CONFIG="28:0 128:0 128:1 28:0";
-
 const char* getDefaultPatchDir() {
     struct stat st;
     if(stat(USB_PATCHES, &st)==0) {
@@ -57,7 +55,6 @@ const char* getDefaultFirwareDir() {
     return DEFAULT_FW;
 }
 
-
 AppData::AppData(){
     patchIsRunning =false;
     patchIsLoading =false;
@@ -65,15 +62,11 @@ AppData::AppData(){
     currentScreen = MENU;
     patchScreenEncoderOverride = 0;
     auxScreenEncoderOverride = 0;
-    midiChannel = 1;
-    useAlsa = false;
     ledFlashCounter = 0;
     ledColor = 0;
-    alsaConfig = DEFAULT_ALSA_CONFIG;
     setPatchDir(NULL);
     setFirmwareDir(NULL);
     setUserDir(NULL);
-    readMidiConfig();
 }
 
 bool AppData::isPatchHome() {
@@ -118,32 +111,4 @@ void AppData::setFirmwareDir(const char* path) {
         firmware_path=path;
     }
 }
-
-void AppData::readMidiConfig() {
-    std::ifstream infile(std::string(user_path+"/MIDI-Config.txt").c_str());
-    std::string line;
-    while (std::getline(infile, line))
-    {
-        if(line.length()>0 ) {
-            int sep = line.find(" ");
-            if(sep!=std::string::npos && sep > 0 && line.length() - sep > 2) {
-                std::string param = line.substr(0,sep);
-                std::string arg = line.substr(sep + 1, line.length() - sep - 2); // ignore semi colon
-                if(param == "channel") {
-                    midiChannel = atoi(arg.c_str());
-                    printf("using midi channel %d \n", midiChannel);
-                } else if (param == "usealsa") {
-                    useAlsa = atoi(arg.c_str());
-                    printf("useAlsa %d \n", useAlsa);
-                } else if (param == "alsaconfig") {
-                    alsaConfig = arg;
-                    printf("alsa config  %s \n", alsaConfig.c_str());
-                }
-            }
-        }
-    }
-    infile.close();
-
-}
-
 

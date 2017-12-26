@@ -43,12 +43,6 @@ public:
     const char* getCurrentPatch() { return currentPatch;}
     const char* getCurrentPatchPath() { return currentPatchPath;}
 
-    void readMidiConfig();
-
-    int getMidiChannel() { return midiChannel;}
-    bool isAlsa() { return useAlsa;}
-    std::string getAlsaConfig() { return alsaConfig;}
-
     bool isPatchRunning() { return patchIsRunning;}
     void setPatchRunning( bool b) {
         patchIsRunning = b;
@@ -101,9 +95,6 @@ private:
     std::string user_path;
     std::string system_path;
     std::string firmware_path;
-    int midiChannel;
-    bool useAlsa;
-    std::string alsaConfig;
 };
 
 

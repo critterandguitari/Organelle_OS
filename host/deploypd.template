@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# USER_DIR=${USER_DIR:="/usbdrive"}
+export USER_DIR=${USER_DIR:="/usbdrive"}
 export PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
 export FW_DIR=${FW_DIR:="/root"}
 export SCRIPTS_DIR=$FW_DIR/scripts
@@ -13,7 +13,7 @@ oscsend localhost 4001 /oled/line/3 s "Checking files"
 cd ${PATCH_DIR} 
 
 mv UpdateOS-XXXXXXXXXX/manifest.txt /tmp
-find UpdateOS-XXXXXXXXXX -type f ! -name "._*" -print0  | xargs -0 sha1sum > /tmp/sha1sum.txt
+find UpdateOS-XXXXXXXXXX -type f ! -name "._*" ! -name ".DS_Store" -print0  | xargs -0 sha1sum > /tmp/sha1sum.txt
 sort /tmp/manifest.txt > /tmp/manifest.orig
 sort /tmp/sha1sum.txt  > /tmp/manifest.new
 diff /tmp/manifest.orig /tmp/manifest.new; ec=$?;
@@ -26,6 +26,10 @@ mv /tmp/manifest.txt .
 if [ $ec -ne 0 ] 
 then
     #tell user its all wrong ;) 
+    export LOGFILE=${USER_DIR}/upgrade_log.txt
+    echo "Upgrade failed for UpdateOS-XXXXXXXXXX" > $LOGFILE
+    echo "file diff incorrect" >> $LOGFILE
+    diff /tmp/manifest.orig /tmp/manifest.new >> $LOGFILE
     oscsend localhost 4001 /oled/line/2 s "Upgrade failed: files"
     oscsend localhost 4001 /oled/line/3 s "Try downloading and"
     oscsend localhost 4001 /oled/line/4 s "running this patch"

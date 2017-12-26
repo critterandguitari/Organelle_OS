@@ -22,7 +22,7 @@ INSTALL_FILE="$1"
 echo "unzip :  $ZIPFIlE "
 oscsend localhost 4001 /oled/aux/line/4 s "unzipping"
 
-unzip -o "$INSTALL_FILE" -x "__MACOSX/*" "._*" > /tmp/install_files.txt ; ec=$?;
+unzip -o "$INSTALL_FILE" -x "__MACOSX/*" "._*" ".DS_Store"> /tmp/install_files.txt ; ec=$?;
 if [ $ec -ne 0 ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "Install FAILED"
@@ -41,13 +41,17 @@ if [ -f "$INSTALL_DIR/manifest.txt" ]
 then
     oscsend localhost 4001 /oled/aux/line/4 s "Checking manifest"
     mv "$INSTALL_DIR/manifest.txt" /tmp
-    find "$INSTALL_DIR" -type f ! -name "._*" -print0  | xargs -0 sha1sum > /tmp/sha1sum.txt
+    find "$INSTALL_DIR" -type f ! -name "._*" ! -name ".DS_Store" -print0  | xargs -0 sha1sum > /tmp/sha1sum.txt
     sort /tmp/manifest.txt > /tmp/manifest.orig
     sort /tmp/sha1sum.txt  > /tmp/manifest.new
     diff /tmp/manifest.orig /tmp/manifest.new; ec=$?; 
     mv /tmp/manifest.txt "$INSTALL_DIR"
     if [ $ec -ne 0 ] 
     then
+        export LOGFILE=${USER_DIR}/install_log.txt
+        echo "Install failed for $INSTALL_FILE" > $LOGFILE
+        echo "file diff incorrect" >> $LOGFILE
+        diff /tmp/manifest.orig /tmp/manifest.new >> $LOGFILE
         oscsend localhost 4001 /oled/aux/line/4 s "Install FAILED"
         oscsend localhost 4001 /oled/aux/line/5 s "Files corrupt"
         oscsend localhost 4001 /enableauxsub i 0
