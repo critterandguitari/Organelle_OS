@@ -201,7 +201,7 @@ def save():
     f.write("# midiDevice," + str(midiDevice) + "\n")
     f.write("# MIDI PARAMETERS:END\n")
     # write script to be executed
-    f.write("oscsend localhost 4000 /midich i " + str(midiIn) + "\n")
+    f.write("oscsend localhost 4000 /midiInCh i " + str(midiIn) + "\n")
     f.write("oscsend localhost 4000 /midiOutCh i " + str(midiOut) + "\n")
     f.write("oscsend localhost 4000 /midiInGate i " + str(midiInGate) + "\n")
     f.write("oscsend localhost 4000 /midiOutGate i " + str(midiOutGate) + "\n")
