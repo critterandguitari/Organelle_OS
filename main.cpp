@@ -707,6 +707,7 @@ void patchConfig(void) {
     paths.push_back(app.getPatchDir());
     paths.push_back(app.getSystemDir());
     paths.push_back(app.getUserDir());
+    paths.push_back(app.getFirmwareDir()+"/scripts");
 
     //patch is loaded, tell patch some config details
     app.setPatchLoading(false);

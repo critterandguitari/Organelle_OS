@@ -573,7 +573,7 @@ void MainMenu::buildMenu(signed mm_pos) {
         break;
     }
     case MenuMode::M_SETTINGS: {
-        addMenuItem(numMenuEntries++, "MIDI Channel", "midi-config.sh", &MainMenu::runScriptCommand);
+        addMenuItem(numMenuEntries++, "MIDI Setup", "midi_setup.py", &MainMenu::runScriptPython);
         addMenuItem(numMenuEntries++, "WiFi Setup", "wifi_setup.py", &MainMenu::runScriptPython);
         addMenuItem(numMenuEntries++, "Info", "info.py", &MainMenu::runScriptPython);
         if (favouriteMenu) {
