@@ -269,8 +269,7 @@ void MainMenu::runPatch(const char* name, const char* arg) {
                 args += " -nogui -audiobuf 4";
             }
 
-
-            if (app.isAlsa()) args += " -alsamidi";
+            args += " -alsamidi";
 
             args += std::string(" -path ") + app.getUserDir() + "/PdExtraLibs";
 

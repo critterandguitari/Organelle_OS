@@ -718,26 +718,11 @@ void patchConfig(void) {
     {
         printf("using config %s\n", postPatch.c_str());
         system(postPatch.c_str());
-    } else {
-        // legacy
-        // send patch midi channel to use
-     
-        // if using alsa, connect alsa device to PD virtual device
-        if (app.isAlsa()) {
-            std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
-            execScript(cmd.c_str());
-        } 
-            OSCMessage msgOut("/midich");
-        msgOut.add(app.getMidiChannel());
-        msgOut.send(dump);
-        udpSock.writeBuffer(dump.buffer, dump.length);
-    }
-
+    } 
 }
 
 
 void midiConfig(OSCMessage &msg) {
-    app.readMidiConfig();
     patchConfig();
 }
 
