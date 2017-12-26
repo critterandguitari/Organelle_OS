@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sched.h>
+#include <sys/stat.h>
 
 #include "OSC/OSCMessage.h"
 #include "OSC/SimpleWriter.h"
@@ -58,7 +59,20 @@ int execScript(const char* cmd) {
 }
 
 
+std::string getMainSystemFile(  const std::vector<std::string>& paths,
+                            const std::string& filename) {
+// look for file in set of paths, in preference order
+    struct stat st;
+    for (std::string path : paths) {
+        std::string fp = path + "/" + filename;
+        if (stat(fp.c_str(), &st) == 0) {
+            return fp;
+        }
+    }
 
+    // none found return empty string
+    return "";
+}
 
 /** OSC messages received internally (from PD or other program) **/
 
@@ -688,49 +702,61 @@ void loadPatch(OSCMessage &msg) {
     }
 }
 
-void midiConfig(OSCMessage &msg) {
-    app.readMidiConfig();
-    OSCMessage msgOut("/midich");
-    msgOut.add(app.getMidiChannel());
-    msgOut.send(dump);
-    udpSock.writeBuffer(dump.buffer, dump.length);
-}
+void patchConfig(void) {
+    std::vector<std::string> paths;
+    paths.push_back(app.getPatchDir());
+    paths.push_back(app.getSystemDir());
+    paths.push_back(app.getUserDir());
 
-void patchLoaded(bool b) {
     //patch is loaded, tell patch some config details
     app.setPatchLoading(false);
     app.setPatchRunning(true);
-    printf("patch loaded, send config");
+    printf("send patch config\n");
 
+    std::string postPatch = getMainSystemFile(paths,"patch_loaded.sh");
+    if(postPatch.length()>0) 
     {
+        printf("using config %s\n", postPatch.c_str());
+        system(postPatch.c_str());
+    } else {
+        // legacy
         // send patch midi channel to use
-        OSCMessage msgOut("/midich");
+     
+        // if using alsa, connect alsa device to PD virtual device
+        if (app.isAlsa()) {
+            std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
+            execScript(cmd.c_str());
+        } 
+            OSCMessage msgOut("/midich");
         msgOut.add(app.getMidiChannel());
         msgOut.send(dump);
         udpSock.writeBuffer(dump.buffer, dump.length);
     }
 
-    // if using alsa, connect alsa device to PD virtual device
-    if (app.isAlsa()) {
-        std::string cmd = "alsaconnect.sh " + app.getAlsaConfig() + " & ";
-        execScript(cmd.c_str());
-    }
+}
 
-    {
-        // send current knob positions
-        OSCMessage msgOut("/knobs");
-        for(unsigned i = 0; i < MAX_KNOBS;i++) {
-            msgOut.add(knobs_[i]);
-        }
-        msgOut.send(dump);
-        udpSock.writeBuffer(dump.buffer, dump.length);        
+
+void midiConfig(OSCMessage &msg) {
+    app.readMidiConfig();
+    patchConfig();
+}
+
+void patchLoaded(bool b) {
+    printf("patch loaded\n");
+    patchConfig();
+
+    // send current knob positions
+    OSCMessage msgOut("/knobs");
+    for(unsigned i = 0; i < MAX_KNOBS;i++) {
+        msgOut.add(knobs_[i]);
     }
+    msgOut.send(dump);
+    udpSock.writeBuffer(dump.buffer, dump.length);        
 }
 
 void patchLoaded(OSCMessage &msg) {
     patchLoaded(true);
 }
-
 
 void invertScreenLine(OSCMessage &msg) {
     if (msg.isInt(0)) {
