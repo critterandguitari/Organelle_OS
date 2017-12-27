@@ -1,8 +1,18 @@
 import os
+import subprocess
 import imp
 import sys
 import time
 import threading
+
+#vars
+midiIn = 0
+midiOut = 1
+midiInGate = 1
+midiOutGate = 1
+midiDeviceIdx = 0
+midiDevices = [ ]
+midiDevice = '28:0'
 
 # usb or sd card
 user_dir = os.getenv("USER_DIR", "/usbdrive")
@@ -17,6 +27,16 @@ banner = og.Alert()
 
 # lock for updating menu
 menu_lock = threading.Lock()
+
+
+def run_cmd(cmd) :
+    ret = False
+    try:
+        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+    except: 
+        pass
+    return ret
+
 
 def quit():
     og.end_app()
@@ -44,11 +64,23 @@ menu.header='MIDI Setup'
 # start it up
 og.start_app()
 
-midiIn = 0
-midiOut = 1
-midiInGate = 1
-midiOutGate = 1
+def getStrVal(key, dval) :
+    s = run_cmd("grep '# " + key +",' < "+user_dir+"/patch_loaded.sh| awk -F, ' { print $2 }'").strip()
+    if(len(s)>0) :
+        return s
+    return dval
 
+def getIntVal(key, dval) :
+    s = run_cmd("grep '# " + key +",' < "+user_dir+"/patch_loaded.sh| awk -F, ' { print $2 }'").strip()
+    if(len(s)>0) :
+        return int(s)
+    return dval
+
+midiIn=getIntVal('midiIn',0)
+midiOut=getIntVal('midiOut',1)
+midiInGate=getIntVal('midiInGate',1)
+midiOutGate=getIntVal('midiOutGate',1)
+midiDevice=getStrVal('midiDevice',"28:0")
 
 def midiInGateSelect():
         global midiInGate
@@ -149,21 +181,24 @@ def midiOutSelect():
                 menu.items[menu.selection][0] = 'Midi Out Ch.: ' + (str(midiOut))
                 break
 
-midiDeviceIdx = 0
-midiDevices = [ ]
-midiDevice = '28:0'
 
 def midiDeviceSelect():
     global midiDevice,midiDeviceIdx,midiDevices
-    # devices = MIDIDEV="$(aplaymidi -l)"
-    devices =  (" Port    Client name                      Port name\n"
-                " 28:0    Virus TI                         Virus TI MIDI\n"
-                " 28:1    Virus TI                         Virus TI Synth")
-
-    midiDevices = devices.split("\n");
+    devices = run_cmd("aplaymidi -l")
+    
+    #remove empty lines, and header
+    midiDevices = [ x for x in devices.split("\n") if not len(x)==0]
     if len(midiDevices)>0 : midiDevices.pop(0);
+
     og.clear_screen()
     og.println(1,"Midi Device")
+    midiDeviceIdx=0
+    for x in midiDevices:
+        if midiDevice==midiDevices[midiDeviceIdx][1:8].strip(): break
+        midiDeviceIdx+=1
+
+    if midiDeviceIdx>=len(midiDevices): midiDeviceIdx=0
+
     device = midiDevices[midiDeviceIdx][42:].strip()  if len(midiDevices)>0 else "None"
     og.println(2,device)
     og.flip()

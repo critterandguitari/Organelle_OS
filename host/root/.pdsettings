@@ -21,4 +21,4 @@ standardpath: 1
 verbose: 0
 nloadlib: 0
 defeatrt: 0
-flags: 
+flags: -alsamidi
