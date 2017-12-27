@@ -1,4 +1,5 @@
 audioapi: 1
+midiapi: 1
 noaudioin: False
 audioindev1: 0 2
 audioindevname1: On-board Codec (hardware)
@@ -11,10 +12,10 @@ callback: 0
 blocksize: 64
 nomidiin: False
 midiindev1: 0
-midiindevname1: /dev/midi3
+midiindevname1: ALSA MIDI device #1
 nomidiout: False
 midioutdev1: 0
-midioutdevname1: /dev/midi3
+midioutdevname1: ALSA MIDI device #1
 path1: /root/externals
 npath: 1
 standardpath: 1
