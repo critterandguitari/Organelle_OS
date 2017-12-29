@@ -3,6 +3,7 @@ import imp
 import sys
 import time
 import threading
+import socket
 
 # usb or sd card
 user_dir = os.getenv("USER_DIR", "/usbdrive")
@@ -60,7 +61,7 @@ def update_menu():
     try :
         # update wifi network labels
         if (wifi.state == wifi.CONNECTING) : 
-            menu.header = 'Connecting'+dots[wifi.connecting_timer % 4]
+            menu.header = 'Connecting' + dots[wifi.connecting_timer % 4]
             update_net_status_label('.')
         elif (wifi.state == wifi.CONNECTED) : 
             menu.header = 'Connected ' + wifi.current_net
@@ -81,6 +82,13 @@ def update_menu():
         else :
             update_web_server_menu_entry(False)
     
+        # update ip address entry
+        if (wifi.state == wifi.CONNECTED) :
+            ip_address = socket.gethostbyname(socket.gethostname())
+            update_ip_address_entry(ip_address)
+        else :
+            update_ip_address_entry(False)
+
     finally :
         menu_lock.release()
 
@@ -109,6 +117,18 @@ def update_web_server_menu_entry(stat):
             if (menu.items[i][2]['type'] == 'web_server_control') :
                 menu.items[i][0] = label
                 menu.items[i][1] = action
+        except :
+            pass
+
+def update_ip_address_entry(stat):
+    if (stat) :
+        label = 'IP: ' + stat
+    else :
+        label = 'IP: (None)'
+    for i in range(len(menu.items)) :
+        try :
+            if (menu.items[i][2]['type'] == 'ip_address') :
+                menu.items[i][0] = label
         except :
             pass
 
@@ -168,8 +188,9 @@ except :
     error_wifi_file()
     print "bad wifi file" 
 
+menu.items.append(['IP: ', non, {'type':'ip_address'}])
 menu.items.append(['Start Web Server', non, {'type':'web_server_control'}])
-menu.items.append(['Turn Wifi Off', disconnect])
+menu.items.append(['Turn WiFi Off', disconnect])
 menu.items.append(['< Home', quit])
 menu.selection = 0
 
