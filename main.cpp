@@ -704,7 +704,7 @@ void loadPatch(OSCMessage &msg) {
 
 void patchConfig(void) {
     std::vector<std::string> paths;
-    paths.push_back(app.getPatchDir());
+    paths.push_back("/tmp/patch");
     paths.push_back(app.getSystemDir());
     paths.push_back(app.getUserDir());
     paths.push_back(app.getFirmwareDir()+"/scripts");
