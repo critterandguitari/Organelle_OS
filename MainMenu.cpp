@@ -480,6 +480,7 @@ void MainMenu::nextProgram() {
     printf("received next programChange\n");
     bool exists = false;
     bool found = false;
+    bool next = false;
     char favfile[256];
     sprintf(favfile, "%s/Favourites.txt", app.getUserDir().c_str());
     std::ifstream infile(favfile);
@@ -493,15 +494,21 @@ void MainMenu::nextProgram() {
             if (sep != std::string::npos && sep > 0 && line.length() - sep > 2) {
                 std::string path = line.substr(0, sep);
                 std::string patch = line.substr(sep + 1, line.length());
-                if(idx==0) {
+                if(next || idx==0) {
                     foundPath = path;
                     foundPatch = patch;
                 }
-
-                found = (path == app.getPatchDir() && patch == app.getCurrentPatch());
-                if(found) printf("Found existing patch: %d, %s %s\n", idx, path.c_str(), patch.c_str());
+                if(next) {
+                    //printf("next patch: %d, %s %s\n", idx, path.c_str(), patch.c_str());
+                    found = true;
+                } else {
+                    next = (path == app.getPatchDir() && patch == app.getCurrentPatch());
+                    //if(next) printf("Found existing patch: %d, %s %s\n", idx, path.c_str(), patch.c_str());
+                }
             }
         }
+        exists = std::getline(infile, line).good();
+        idx++;
     }
 
     if(foundPatch.length()>0) {

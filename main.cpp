@@ -221,6 +221,8 @@ int main(int argc, char* argv[]) {
         usleep(20000); // wait 20 ms
     }
 
+    OSCMessage dummy("/pedalConfig");
+    pedalConfig(dummy);
     quit = 0;
 
     // full udp -> serial -> serial -> udp
