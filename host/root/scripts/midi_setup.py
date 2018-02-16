@@ -250,10 +250,9 @@ def save():
     og.clear_screen()
     og.println(1,"Midi configuration")
     og.println(2,"SAVED")
-    og.println(4,"press encoder...")
     og.flip()
     os.system('oscsend localhost 4001 /midiConfig i 1')
-    og.wait_for_press();
+    time.sleep(0.5)
     pass
 
 
