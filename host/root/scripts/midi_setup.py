@@ -193,8 +193,10 @@ def midiDeviceSelect():
     og.clear_screen()
     og.println(1,"Midi Device")
     midiDeviceIdx=0
+    print(midiDevices)
     for x in midiDevices:
-        if midiDevice==midiDevices[midiDeviceIdx][1:8].strip(): break
+        #print(midiDevices[midiDeviceIdx][9:42].strip() + midiDevices[midiDeviceIdx][4:8].strip())
+        if midiDevice == (midiDevices[midiDeviceIdx][9:42].strip() + ":" + midiDevices[midiDeviceIdx][4:8].strip()) : break
         midiDeviceIdx+=1
 
     if midiDeviceIdx>=len(midiDevices): midiDeviceIdx=0
@@ -217,7 +219,7 @@ def midiDeviceSelect():
             og.flip()
         elif (og.enc_but_flag and og.enc_but==1):
             if(len(midiDevices)==0): midiDevice = "28:0"
-            else: midiDevice = midiDevices[midiDeviceIdx][1:8].strip() 
+            else: midiDevice = midiDevices[midiDeviceIdx][9:42].strip() + ":" + midiDevices[midiDeviceIdx][4:8].strip()
             print midiDevice
             menu.items[menu.selection][0] = 'Midi Device: ' + midiDevice
             break
@@ -240,10 +242,10 @@ def save():
     f.write("oscsend localhost 4000 /midiOutCh i " + str(midiOut) + "\n")
     f.write("oscsend localhost 4000 /midiInGate i " + str(midiInGate) + "\n")
     f.write("oscsend localhost 4000 /midiOutGate i " + str(midiOutGate) + "\n")
-    f.write("aconnect -x \n")
-    f.write("aconnect " + str(midiDevice) + " 128:0 \n")
-    f.write("aconnect 128:1 " + str(midiDevice) + "\n")
+    f.write("aconnect \"" + str(midiDevice) + "\" \"Pure Data:0\"\n")
+    f.write("aconnect \"Pure Data:1\" \"" + str(midiDevice) + "\"\n")
     f.close()
+    os.system("aconnect -x")
     os.system("chmod +x "+user_dir+"/patch_loaded.sh")
     og.clear_screen()
     og.println(1,"Midi configuration")
