@@ -170,9 +170,9 @@ def save():
     f.write("# switchMode," + str(switchMode) + "\n")
     f.write("# PEDAL PARAMETERS:END\n")
     # write script to be executed
-    f.write("oscsend localhost 4001 /exprMin i " + str(exprMin) + "\n")
-    f.write("oscsend localhost 4001 /exprMax i " + str(exprMax) + "\n")
-    f.write("oscsend localhost 4001 /switchMode i " + str(switchMode) + "\n")
+    f.write("oscsend localhost 4001 /pedal/exprMin i " + str(exprMin) + "\n")
+    f.write("oscsend localhost 4001 /pedal/exprMax " + str(exprMax) + "\n")
+    f.write("oscsend localhost 4001 /pedal/switchMode i " + str(switchMode) + "\n")
     f.close()
     os.system("chmod +x "+user_dir+"/pedal_cfg.sh")
     os.system(user_dir+"/pedal_cfg.sh")

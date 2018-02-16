@@ -22,6 +22,7 @@ public:
     void encoderUp(void);
     void encoderDown(void);
     void programChange(int pgm);
+    void nextProgram();
 
     void buildMenu(int = -1);
     bool loadPatch(const char* patchname);
