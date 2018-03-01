@@ -24,6 +24,7 @@ public:
     void programChange(int pgm);
 
     void buildMenu(int = -1);
+    void reload();
     bool loadPatch(const char* patchname);
     void runShutdown(const char* name,const char* arg);
 

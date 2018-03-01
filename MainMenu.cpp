@@ -122,6 +122,10 @@ void MainMenu::runDoNothing(const char* name, const char* ) {
 }
 
 void MainMenu::runReload(const char* name, const char* arg) {
+    reload();
+}
+
+void MainMenu::reload(void) {
     std::cout <<"Reloading... \n" << std::endl;
     execScript("mount.sh");
     // set patch and user dir to defaults
