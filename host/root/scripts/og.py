@@ -50,8 +50,9 @@ def flip() :
 
 def init_osc() :
     global server, osc_target
+    print "config osc target"
     osc_target = liblo.Address(4001)
-
+    print "config osc server"
     try:
         server = liblo.Server(4002)
         server.add_method("/encoder/turn", 'i', enc_turn)
@@ -60,6 +61,7 @@ def init_osc() :
     except liblo.ServerError, err:
         print str(err)
         sys.exit()
+    print "done config server"
 
 def enc_turn(path, args) :
     global enc_turn_flag, enc_turn

@@ -20,6 +20,7 @@ cp -f ${IMAGE_DIR}/root/version /root
 cp -f ${IMAGE_DIR}/root/buildtag /root
 cp -f ${IMAGE_DIR}/scripts/* /root/scripts
 cp -f ${IMAGE_DIR}/externals/* /root/externals
+cp -f ${IMAGE_DIR}/Desktop/* /root/Desktop
 mkdir -p /root/web
 rm -fr /root/web/*  #remove old stuff in web
 cp -fr ${IMAGE_DIR}/web/* /root/web
