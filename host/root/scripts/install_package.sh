@@ -19,8 +19,6 @@ cd "$PATCH_DIR"
 
 INSTALL_FILE="$1"
 
-echo "unzip :  $ZIPFIlE "
-oscsend localhost 4001 /oled/aux/line/4 s "unzipping"
 
 rm ._*.z?p
 
@@ -38,6 +36,7 @@ fi
 
 rm -rf $INSTALL_DIR
 
+oscsend localhost 4001 /oled/aux/line/4 s "unzipping"
 unzip -o "$INSTALL_FILE" -x "__MACOSX/*" "._*" ".DS_Store"> /tmp/install_files.txt ; ec=$?;
 if [ $ec -ne 0 ]
 then
