@@ -187,7 +187,7 @@ def save():
 
 
 menu.items.append(['Expr Min : ' + str(exprMin) , ExprMinSelect])
-menu.items.append(['Expr Min : ' + str(exprMax) , ExprMaxSelect])
+menu.items.append(['Expr Max : ' + str(exprMax) , ExprMaxSelect])
 menu.items.append(['Switch : ' + switchType(switchMode) , SwitchModeSelect])
 menu.items.append(['Save', save])
 menu.items.append(['< Home', quit])
