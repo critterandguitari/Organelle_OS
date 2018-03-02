@@ -16,9 +16,22 @@
 
 static const unsigned int MAX_KNOBS = 6;
 static int16_t knobs_[MAX_KNOBS];
+static const int8_t EXPR_KNOB = 5;
 int       previousScreen = -1;
 int       encoderDownTime = -1;
 const int SHUTDOWN_TIME = 4;
+
+
+static int16_t pedalExprMin_ = 0;
+static int16_t pedalExprMax_ = 1023;
+enum PedalSwitchModes {
+    PSM_PATCH = 0,
+    PSM_FAVOURITES,
+    PSM_MAX
+};
+static PedalSwitchModes pedalSwitchMode_ = PSM_PATCH;
+int footswitchPos = 1; //normally closed
+
 
 // for communicating with OSC over serial with MCU
 Serial serial;
@@ -128,18 +141,25 @@ void auxScreenClear(OSCMessage &msg);
 // system message
 void loadPatch(OSCMessage &msg);
 void midiConfig(OSCMessage &msg);
+void pedalConfig(OSCMessage &msg);
 void patchLoaded(OSCMessage &msg);
 void reload(OSCMessage &msg);
 void sendReady(OSCMessage &msg);
 void sendShutdown(OSCMessage &msg);
 void quitMother(OSCMessage &msg);
 void programChange(OSCMessage &msg);
+
+void pedalExprMin(OSCMessage &msg);
+void pedalExprMax(OSCMessage &msg);
+void pedalSwitchMode(OSCMessage &msg);
+
 /* end internal OSC messages received */
 
 /* OSC messages received from MCU (we only use ecncoder input, and smooth knobs,  key messages get passed righ to PD or other program */
 void encoderInput(OSCMessage &msg);
 void encoderButton(OSCMessage &msg);
 void knobsInput(OSCMessage &msg);
+void footswitchInput(OSCMessage &msg);
 /* end OSC messages received from MCU */
 
 /* helpers */
@@ -201,6 +221,8 @@ int main(int argc, char* argv[]) {
         usleep(20000); // wait 20 ms
     }
 
+    OSCMessage dummy("/pedalConfig");
+    pedalConfig(dummy);
     quit = 0;
 
     // full udp -> serial -> serial -> udp
@@ -263,6 +285,12 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/loadPatch", loadPatch, 0)
                     || msgIn.dispatch("/midiConfig", midiConfig, 0)
                     || msgIn.dispatch("/patchLoaded", patchLoaded, 0)
+                    || msgIn.dispatch("/pedalConfig", pedalConfig, 0)
+
+                    || msgIn.dispatch("/pedal/exprMin", pedalExprMin, 0)
+                    || msgIn.dispatch("/pedal/exprMax", pedalExprMax, 0)
+                    || msgIn.dispatch("/pedal/switchMode", pedalSwitchMode, 0)
+
                     ;
                 if (!processed) {
                     char buf[128];
@@ -282,15 +310,21 @@ int main(int argc, char* argv[]) {
             // check if we need to do something with this message
             msgIn.empty();
             msgIn.fill(slip.decodedBuf, slip.decodedLength);
-            bool knobs = msgIn.dispatch("/knobs", knobsInput, 0);
 
-            if(!knobs) {
+
+            bool processed = false;
+
+            processed =     msgIn.dispatch("/knobs", knobsInput, 0)
+                        ||  msgIn.dispatch("/fs", footswitchInput, 0)
+                        ;
+
+            if(!processed) {
                 udpSock.writeBuffer(slip.decodedBuf, slip.decodedLength);
             }
 
-            bool processed = 
-                msgIn.dispatch("/enc", encoderInput, 0)
-            ||  msgIn.dispatch("/encbut", encoderButton, 0);
+            processed =     msgIn.dispatch("/enc", encoderInput, 0)
+                        ||  msgIn.dispatch("/encbut", encoderButton, 0)
+                        ;
 
             msgIn.empty();
         }
@@ -722,6 +756,42 @@ void patchConfig(void) {
     } 
 }
 
+void pedalConfig(OSCMessage &msg) {
+    std::vector<std::string> paths;
+    paths.push_back("/tmp/patch");
+    paths.push_back(app.getSystemDir());
+    paths.push_back(app.getUserDir());
+    paths.push_back(app.getFirmwareDir()+"/scripts");
+
+    std::string pedalConfig = getMainSystemFile(paths,"pedal_cfg.sh");
+    if(pedalConfig.length()>0) 
+    {
+        printf("using pedal config %s\n", pedalConfig.c_str());
+        system(pedalConfig.c_str());
+    } 
+}
+
+
+void pedalExprMin(OSCMessage &msg) {
+    if (msg.isInt(0)) {
+        pedalExprMin_ = std::max(std::min(msg.getInt(0),1023),0);
+    }
+}
+
+void pedalExprMax(OSCMessage &msg) {
+    if (msg.isInt(0)) {
+        pedalExprMax_ = std::max(std::min(msg.getInt(0),1023),0);
+    }
+}
+
+void pedalSwitchMode(OSCMessage &msg) {
+    if (msg.isInt(0)) {
+        int value = msg.getInt(0);
+        if(value >= 0 && value < PSM_MAX) {
+            pedalSwitchMode_ = static_cast<PedalSwitchModes>(value);
+        }
+    }
+}
 
 void midiConfig(OSCMessage &msg) {
     patchConfig();
@@ -729,6 +799,8 @@ void midiConfig(OSCMessage &msg) {
 
 void patchLoaded(bool b) {
     printf("patch loaded\n");
+    OSCMessage dummy("/pedalConfig");
+    pedalConfig(dummy);
     patchConfig();
 
     // send current knob positions
@@ -846,10 +918,20 @@ void encoderInput(OSCMessage &msg) {
 
 void knobsInput(OSCMessage &msg) {
     bool changed = false;
+    bool exprScaling = (pedalExprMin_!=0 || pedalExprMax_!=1023);
     // knob 1-4 + volume + expr , all 0-1023
     for(unsigned i = 0; i < MAX_KNOBS;i++) {
         if(msg.isInt(i)) {
-            int16_t v = msg.getInt(i);
+            int v = msg.getInt(i);
+
+            if(i==EXPR_KNOB && exprScaling) {
+                v = ( pedalExprMin_ <= pedalExprMax_ 
+                    ?  ((int32_t) ( v - pedalExprMin_ ) * 1023)  / (pedalExprMax_ - pedalExprMin_)
+                    :  ((int32_t) ( pedalExprMin_ - v ) * 1023)  / (pedalExprMin_ - pedalExprMax_)
+                    );
+                v = std::max(std::min(v,1023),0);
+            }
+
             if(v==0 || v==1023) {
                 // allow extremes
                 changed |= v != knobs_[i];
@@ -874,6 +956,31 @@ void knobsInput(OSCMessage &msg) {
         udpSock.writeBuffer(dump.buffer, dump.length);        
     }
 }
+
+void footswitchInput(OSCMessage &msg) {
+    switch(pedalSwitchMode_) {
+        case PSM_FAVOURITES : {
+            int pos = msg.getInt(0);
+
+            // normally closed (1)
+            // so if pos was open , and now closed we switch
+            // i.e. do on lifting pedal
+            if( footswitchPos == 0 && pos == 1) {
+                menu.nextProgram();
+            }
+
+            footswitchPos = pos; 
+            break;
+        }
+        case PSM_PATCH:
+        default :  {
+            msg.send(dump);
+            udpSock.writeBuffer(dump.buffer, dump.length);      
+            break;  
+        }
+    }  //switch
+}
+
 
 // this is when the encoder gets pressed
 // in menu screen, execute the menu entry
@@ -946,6 +1053,8 @@ void encoderButton(OSCMessage &msg) {
         }
     }
 }
+
+
 /* end OSC messages received from MCU */
 
 /* helpers */
@@ -1020,6 +1129,11 @@ void updateScreenPage(uint8_t page, OledScreen &screen) {
     slip.sendMessage(dump.buffer, dump.length, serial);
     oledMsg.empty();
 }
+
+
+
+
+
 /* end helpers */
 
 

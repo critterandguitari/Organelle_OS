@@ -9,6 +9,5 @@ oscsend localhost 4000 /midiInCh i 0
 oscsend localhost 4000 /midiOutCh i 1
 oscsend localhost 4000 /midiInGate i 1
 oscsend localhost 4000 /midiOutGate i 1
-aconnect -x 
-aconnect 28:0 128:0 
-aconnect 128:1 28:0
+aconnect "28:0" "Pure Data:0"
+aconnect "Pure Data:1" "28:0"

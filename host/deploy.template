@@ -52,6 +52,8 @@ cp -f ${IMAGE_DIR}/.ssh/environment /root/.ssh/environment
 cp -f ${IMAGE_DIR}/system/etc/ssh/sshd_config /etc/ssh/sshd_config
 cp -f ${IMAGE_DIR}/system/lib/systemd/system/cherrypy.service /lib/systemd/system/cherrypy.service
 
+cp -f ${IMAGE_DIR}/system/etc/udev/rules.d/70-wifi-powersave.rules /etc/udev/rules.d/70-wifi-powersave.rules
+
 # config for avahi
 cp -f ${IMAGE_DIR}/system/etc/nsswitch.conf /etc/nsswitch.conf
 

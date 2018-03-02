@@ -451,7 +451,7 @@ void MainMenu::runDelFromFavourite(const char*, const char*) {
 
 void MainMenu::programChange(int pgm) {
     if (pgm < 0) { return;}
-    printf("recieved pgmchange %d\n", pgm);
+    printf("received pgmchange %d\n", pgm);
     bool exists = false;
     char favfile[256];
     sprintf(favfile, "%s/Favourites.txt", app.getUserDir().c_str());
@@ -478,6 +478,54 @@ void MainMenu::programChange(int pgm) {
         }
     }
     infile.close();
+}
+
+void MainMenu::nextProgram() {
+    printf("received next programChange\n");
+    bool exists = false;
+    bool found = false;
+    bool next = false;
+    char favfile[256];
+    sprintf(favfile, "%s/Favourites.txt", app.getUserDir().c_str());
+    std::ifstream infile(favfile);
+    std::string line;
+    std::string foundPath, foundPatch;
+    int idx = 0;
+    exists = std::getline(infile, line).good();
+    while(exists && !found) {
+        if (line.length() > 0 ) {
+            int sep = line.find(":");
+            if (sep != std::string::npos && sep > 0 && line.length() - sep > 2) {
+                std::string path = line.substr(0, sep);
+                std::string patch = line.substr(sep + 1, line.length());
+                if(next || idx==0) {
+                    foundPath = path;
+                    foundPatch = patch;
+                }
+                if(next) {
+                    //printf("next patch: %d, %s %s\n", idx, path.c_str(), patch.c_str());
+                    found = true;
+                } else {
+                    next = (path == app.getPatchDir() && patch == app.getCurrentPatch());
+                    //if(next) printf("Found existing patch: %d, %s %s\n", idx, path.c_str(), patch.c_str());
+                }
+            }
+        }
+        exists = std::getline(infile, line).good();
+        idx++;
+    }
+
+    if(foundPatch.length()>0) {
+        printf("(next) Program Change: %s %s\n", foundPath.c_str(), foundPatch.c_str());
+        favouriteMenu = true;
+        app.setPatchDir(foundPath.c_str());
+        buildMenu();
+        runFavourite(foundPatch.c_str(), foundPath.c_str());
+    }
+
+
+    infile.close();
+
 }
 
 void MainMenu::drawPatchList(void) {
@@ -577,6 +625,7 @@ void MainMenu::buildMenu(signed mm_pos) {
     case MenuMode::M_SETTINGS: {
         addMenuItem(numMenuEntries++, "MIDI Setup", "midi_setup.py", &MainMenu::runScriptPython);
         addMenuItem(numMenuEntries++, "WiFi Setup", "wifi_setup.py", &MainMenu::runScriptPython);
+        addMenuItem(numMenuEntries++, "Pedal Setup", "pedal_setup.py", &MainMenu::runScriptPython);
         addMenuItem(numMenuEntries++, "Info", "info.py", &MainMenu::runScriptPython);
         if (favouriteMenu) {
             addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);
