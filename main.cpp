@@ -704,7 +704,7 @@ void setScreen(OSCMessage &msg) {
 
 void reload(OSCMessage &msg) {
     printf("received reload msg\n");
-    menu.buildMenu();
+    menu.reload();
 }
 
 void sendReady(OSCMessage &msg) {

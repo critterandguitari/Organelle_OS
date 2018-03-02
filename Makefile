@@ -53,6 +53,7 @@ deploy : main
 	cp -f host/lib/systemd/system/cherrypy.service /lib/systemd/system/cherrypy.service
 	mkdir -p /root/web
 	cp -fr host/root/web/* /root/web
+	cp -fr host/root/Desktop/* /root/Desktop
 	mkdir -p /root/.config/SuperCollider
 	cp -f host/root/.config/SuperCollider/* /root/.config/SuperCollider
 	sync
@@ -76,6 +77,8 @@ image : main
 	cp -f host/root/externals/* $(IMAGE_DIR)/externals
 	mkdir -p $(IMAGE_DIR)/web
 	cp -fr host/root/web/* $(IMAGE_DIR)/web
+	mkdir -p $(IMAGE_DIR)/Desktop
+	cp -fr host/root/Desktop/* $(IMAGE_DIR)/Desktop
 	mkdir -p ${IMAGE_DIR}/.ssh
 	cp -f host/root/.ssh/environment $(IMAGE_DIR)/.ssh/environment
 	mkdir -p ${IMAGE_DIR}/system/etc/ssh 

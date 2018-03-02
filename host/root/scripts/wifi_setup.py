@@ -158,12 +158,13 @@ try :
     ssids = networks[0::2]
     pws = networks[1::2]
     for i in range(len(ssids)) :
-        ssid = ssids[i]
-        pw = pws[i]
-        net = WifiNet()
-        net.ssid = ssid
-        net.pw = pw
-        menu.items.append([' - ' + ssid, net.connect, {'type':'net', 'ssid':ssid}]) # stash some extra info with these net entries
+        if (ssids[i] != '') :
+            ssid = ssids[i]
+            pw = pws[i]
+            net = WifiNet()
+            net.ssid = ssid
+            net.pw = pw
+            menu.items.append([' - ' + ssid, net.connect, {'type':'net', 'ssid':ssid}]) # stash some extra info with these net entries
 except : 
     error_wifi_file()
     print "bad wifi file" 
