@@ -64,7 +64,7 @@ def start_ap_server():
 def stop_ap_server():
     global ap_state
     run_cmd('systemctl stop createap')
-    ap_state = AO_STOPPED
+    ap_state = AP_STOPPED
 
 
 # true or false connected with ip address

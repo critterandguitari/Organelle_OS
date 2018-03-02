@@ -51,6 +51,7 @@ deploy : main
 	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
 	cp -f host/etc/udev/rules.d/70-wifi-powersave.rules /etc/udev/rules.d/70-wifi-powersave.rules
 	cp -f host/lib/systemd/system/cherrypy.service /lib/systemd/system/cherrypy.service
+	cp -f host/lib/systemd/system/createap.service /lib/systemd/system/createap.service
 	mkdir -p /root/web
 	cp -fr host/root/web/* /root/web
 	cp -fr host/root/Desktop/* /root/Desktop

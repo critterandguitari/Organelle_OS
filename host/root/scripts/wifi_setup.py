@@ -95,6 +95,11 @@ def update_menu():
         else :
             update_web_server_menu_entry(False)
     
+        # update webserver menu entry
+        if (wifi.ap_state == wifi.AP_RUNNING) :
+            update_ap_menu_entry(True)
+        else :
+            update_ap_menu_entry(False)
     finally :
         menu_lock.release()
 
