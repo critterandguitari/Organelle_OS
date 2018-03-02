@@ -24,6 +24,20 @@ oscsend localhost 4001 /oled/aux/line/4 s "unzipping"
 
 rm ._*.z?p
 
+
+INSTALL_DIR=`unzip -l "$INSTALL_FILE" -x "__MACOSX/*" "._*" ".DS_Store" | head -4 |tail -1 | cut -b 31- |cut -d '/' -f 1`
+
+echo "install dir :  $INSTALL_DIR"
+if [ "$INSTALL_DIR" == "" ] 
+then
+    oscsend localhost 4001 /oled/aux/line/4 s "Install FAILED"
+    oscsend localhost 4001 /oled/aux/line/5 s "unable no files"
+    oscsend localhost 4001 /enableauxsub i 0
+    exit 130
+fi
+
+rm -rf $INSTALL_DIR
+
 unzip -o "$INSTALL_FILE" -x "__MACOSX/*" "._*" ".DS_Store"> /tmp/install_files.txt ; ec=$?;
 if [ $ec -ne 0 ]
 then
@@ -34,8 +48,6 @@ then
 fi
 
 
-INSTALL_DIR=`cat /tmp/install_files.txt | head -2 | tail -1 | sed 's/.*ting: \([^\/]*\).*/\1/'`
-echo "install dir :  $INSTALL_DIR"
 
 ec=0
 
