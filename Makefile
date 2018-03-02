@@ -51,6 +51,7 @@ deploy : main
 	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
 	cp -f host/etc/udev/rules.d/70-wifi-powersave.rules /etc/udev/rules.d/70-wifi-powersave.rules
 	cp -f host/lib/systemd/system/cherrypy.service /lib/systemd/system/cherrypy.service
+	cp -f host/lib/systemd/system/createap.service /lib/systemd/system/createap.service
 	mkdir -p /root/web
 	cp -fr host/root/web/* /root/web
 	cp -fr host/root/Desktop/* /root/Desktop
@@ -88,6 +89,7 @@ image : main
 	cp -f host/etc/nsswitch.conf $(IMAGE_DIR)/system/etc/
 	mkdir -p ${IMAGE_DIR}/system/lib/systemd/system 
 	cp -f host/lib/systemd/system/cherrypy.service $(IMAGE_DIR)/system/lib/systemd/system
+	cp -f host/lib/systemd/system/createap.service $(IMAGE_DIR)/system/lib/systemd/system
 	cp -fr host/extra $(IMAGE_DIR)/extra/
 	mkdir -p $(IMAGE_DIR)/.config/SuperCollider
 	cp -f host/root/.config/SuperCollider/* $(IMAGE_DIR)/.config/SuperCollider

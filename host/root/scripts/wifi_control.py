@@ -14,6 +14,12 @@ CONNECTION_ERROR = 4
 state = NOT_CONNECTED
 connecting_timer = 0
 
+# AP 
+AP_STOPPED = 0
+AP_RUNNING = 1
+ap_state = AP_STOPPED 
+
+
 # webserver
 WEB_SERVER_STOPPED = 0
 WEB_SERVER_RUNNING = 1
@@ -48,6 +54,18 @@ def stop_web_server():
     global web_server_state
     run_cmd('systemctl stop cherrypy')
     web_server_state = WEB_SERVER_STOPPED
+
+
+def start_ap_server():
+    global ap_state
+    run_cmd('systemctl start createap')
+    ap_state = AP_RUNNING
+
+def stop_ap_server():
+    global ap_state
+    run_cmd('systemctl stop createap')
+    ap_state = AP_STOPPED
+
 
 # true or false connected with ip address
 # updates ip and current network when connected
@@ -103,6 +121,11 @@ def update_state() :
     # web server states
     if (run_cmd_check('systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
     else : web_server_state = WEB_SERVER_STOPPED
+
+    # ap statu=e
+    if (run_cmd_check('systemctl status createap')) : ap_state =  AP_RUNNING
+    else : ap_state = AP_STOPPED
+
 
 # shut everything off
 def disconnect_all() :
