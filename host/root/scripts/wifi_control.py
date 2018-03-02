@@ -70,7 +70,13 @@ def stop_ap_server():
 # true or false connected with ip address
 # updates ip and current network when connected
 def wifi_connected():
+    global ap_state,ip_address, current_net
     ret = False
+    if ap_state == AP_RUNNING :
+        ip_address = "192.168.12.1"
+        current_net = "Organelle"
+        return True
+
     try :
         wifi_info = run_cmd('wpa_cli -i wlan0 status').splitlines()
         if (any("ip_address" in s for s in wifi_info)):
@@ -90,7 +96,7 @@ def update_network_info(info):
 
 # get initial connection state and ip and ssid
 def initialize_state():
-    global state, web_server_state
+    global state, web_server_state, ap_state
     
     # wifi state on startup
     if wifi_connected() : 
@@ -101,9 +107,13 @@ def initialize_state():
     if (run_cmd_check('systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
     else : web_server_state = WEB_SERVER_STOPPED
 
+    # ap state on startup
+    if (run_cmd_check('systemctl status createap')) : ap_state = AP_RUNNING
+    else : ap_state = AP_STOPPED
+
 # assume this is called 1 / sec from the bg thread
 def update_state() :
-    global state, connecting_timer, web_server_state
+    global state, connecting_timer, web_server_state, ap_state
 
     # wifi states
     if (state == NOT_CONNECTED):
