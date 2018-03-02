@@ -88,6 +88,7 @@ image : main
 	cp -f host/etc/nsswitch.conf $(IMAGE_DIR)/system/etc/
 	mkdir -p ${IMAGE_DIR}/system/lib/systemd/system 
 	cp -f host/lib/systemd/system/cherrypy.service $(IMAGE_DIR)/system/lib/systemd/system
+	cp -f host/lib/systemd/system/createap.service $(IMAGE_DIR)/system/lib/systemd/system
 	cp -fr host/extra $(IMAGE_DIR)/extra/
 	mkdir -p $(IMAGE_DIR)/.config/SuperCollider
 	cp -f host/root/.config/SuperCollider/* $(IMAGE_DIR)/.config/SuperCollider

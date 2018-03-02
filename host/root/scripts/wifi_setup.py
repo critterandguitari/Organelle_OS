@@ -53,6 +53,20 @@ def stop_web():
     update_menu()
     og.redraw_flag = True
 
+
+
+def start_ap():
+    print "start ap"
+    wifi.start_ap_server()
+    update_menu()
+    og.redraw_flag = True
+
+def stop_ap():
+    print "stop ap"
+    wifi.stop_ap_server()
+    update_menu()
+    og.redraw_flag = True
+
 # update menu based on connection status
 def update_menu():
     dots = ['.','..','...','....']
@@ -112,6 +126,22 @@ def update_web_server_menu_entry(stat):
         except :
             pass
 
+def update_ap_menu_entry(stat):
+    if (stat) :
+        label = 'Stop AP'
+        action = stop_ap
+    else :
+        label = 'Start AP'
+        action = start_ap
+    for i in range(len(menu.items)) :
+        try :
+            if (menu.items[i][2]['type'] == 'ap_control') :
+                menu.items[i][0] = label
+                menu.items[i][1] = action
+        except :
+            pass
+
+
 # bg connection checker
 def check_status():
     while True:
@@ -170,6 +200,7 @@ except :
     print "bad wifi file" 
 
 menu.items.append(['Start Web Server', non, {'type':'web_server_control'}])
+menu.items.append(['Start AP', non, {'type':'ap_control'}])
 menu.items.append(['Turn Wifi Off', disconnect])
 menu.items.append(['< Home', quit])
 menu.selection = 0
