@@ -73,15 +73,14 @@ oscsend localhost 4001 /oled/aux/line/3 s " "
 cd ${PATCH_DIR}
 rm -rf ${IMAGE_DIR}
 
+#remove zip file
+# rm "$INSTALL_FILE"
+rm "$IMAGE_DIR".zip
+
 sync
 
 echo "root:organelle" | chpasswd
 
-#remove zip file
-cd "$PATCH_DIR"
-rm "$INSTALL_FILE"
-
-# sync
 sync 
 
 # we cannot return to install package as it may have changed
