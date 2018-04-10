@@ -17,7 +17,7 @@ oscsend localhost 4001 /oled/aux/line/5 s "Do not interrupt!"
 echo "installing : " $1 
 cd "$PATCH_DIR"
 
-INSTALL_FILE="$1"
+export INSTALL_FILE="$1"
 
 
 rm ._*.z?p
