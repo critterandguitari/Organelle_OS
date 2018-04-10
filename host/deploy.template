@@ -59,9 +59,7 @@ cp -f ${IMAGE_DIR}/system/etc/udev/rules.d/70-wifi-powersave.rules /etc/udev/rul
 cp -f ${IMAGE_DIR}/system/etc/nsswitch.conf /etc/nsswitch.conf
 
 # enable avahi
-systemctl start avahi-daemon
 systemctl enable avahi-daemon
-systemctl daemon-reload
 
 # config for supercollider
 mkdir -p /root/.config/SuperCollider
