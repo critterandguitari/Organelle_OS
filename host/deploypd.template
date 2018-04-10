@@ -48,8 +48,4 @@ oscsend localhost 4001 /oled/aux/line/1 s "Installing"
 oscsend localhost 4001 /oled/aux/line/5 s "Do not interrupt!"
 ./deploy.sh UpdateOS-XXXXXXXXXX
 
-# just chill
-sleep 1
-
-#shutdown
-$SCRIPTS_DIR/shutdown.sh
+# deploy.sh will shutdown
