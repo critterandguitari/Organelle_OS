@@ -17,8 +17,11 @@ objects =  \
 	OSC/OSCTiming.o \
 	OSC/SimpleWriter.o 
 
-main : $(objects)
-	g++ -o main $(objects)
+default :
+	@echo "platform not specified"
+
+organelle : $(objects)
+	g++ -o fw_dir/mother $(objects)
 
 .PHONY : clean
 
@@ -26,37 +29,19 @@ clean :
 	rm main $(objects)
 
 
-IMAGE_BUILD_VERSION = $(shell cat host/root/version)
-IMAGE_BUILD_TAG = $(shell cat host/root/buildtag)
+IMAGE_BUILD_VERSION = $(shell cat fw_dir/version)
+IMAGE_BUILD_TAG = $(shell cat fw_dir/buildtag)
 IMAGE_VERSION = $(IMAGE_BUILD_VERSION)$(IMAGE_BUILD_TAG)
 IMAGE_DIR = UpdateOS-$(IMAGE_VERSION)
 
 
-deploy : main
-	cp main host/root/mother
+organelle_deploy : organelle
 	echo "Updating OS to $(IMAGE_VERSION)"
-	host/root/scripts/remount-rw.sh
-	cp -f host/root/mother.pd /root
-	cp -f host/root/mother.scd /root
-	cp -f host/root/mother /root
-	cp -f host/root/scripts/* /root/scripts
-	cp -f host/root/externals/* /root/externals
-	cp -f host/root/version /root
-	cp -f host/root/buildtag /root
-	cp -f host/root/.bash_profile /root
-	cp -f host/root/.jwmrc /root
-	cp -f host/root/.pdsettings /root
-	mkdir -p /root/.ssh
-	cp -f host/root/.ssh/environment /root/.ssh/environment
-	cp -f host/etc/ssh/sshd_config /etc/ssh/sshd_config
-	cp -f host/etc/udev/rules.d/70-wifi-powersave.rules /etc/udev/rules.d/70-wifi-powersave.rules
-	cp -f host/lib/systemd/system/cherrypy.service /lib/systemd/system/cherrypy.service
-	cp -f host/lib/systemd/system/createap.service /lib/systemd/system/createap.service
-	mkdir -p /root/web
-	cp -fr host/root/web/* /root/web
-	cp -fr host/root/Desktop/* /root/Desktop
-	mkdir -p /root/.config/SuperCollider
-	cp -f host/root/.config/SuperCollider/* /root/.config/SuperCollider
+	fw_dir/scripts/remount-rw.sh
+	# copy fw files to /root
+	cp -fr fw_dir/* /root/
+	# copy system files 
+	cp -fr platforms/organelle/rootfs/* /
 	sync
 
 image : main
