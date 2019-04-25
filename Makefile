@@ -20,8 +20,8 @@ objects =  \
 default :
 	@echo "platform not specified"
 
-organelle : $(objects)
-	g++ -o fw_dir/mother $(objects)
+organelle : $(objects) hw_interfaces/SerialMCU.o
+	g++ -o fw_dir/mother $(objects) hw_interfaces/SerialMCU.o
 
 .PHONY : clean
 
@@ -109,3 +109,5 @@ OSCMessage.o: OSC/OSCMessage.cpp OSC/OSCMessage.h OSC/OSCData.h \
   OSC/OSCTiming.h OSC/SimpleWriter.h OSC/OSCMatch.h
 OSCTiming.o: OSC/OSCTiming.cpp OSC/OSCTiming.h
 SimpleWriter.o: OSC/SimpleWriter.cpp OSC/SimpleWriter.h
+SerialMCU.o: hardwares/SerialMCU.cpp hardwares/SerialMCU.h \
+ hardwares/../OledScreen.h
