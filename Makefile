@@ -15,13 +15,17 @@ objects =  \
 	OSC/OSCMatch.o \
 	OSC/OSCMessage.o \
 	OSC/OSCTiming.o \
-	OSC/SimpleWriter.o 
+	OSC/SimpleWriter.o
 
 default :
 	@echo "platform not specified"
 
 organelle : $(objects) hw_interfaces/SerialMCU.o
 	g++ -o fw_dir/mother $(objects) hw_interfaces/SerialMCU.o
+
+organelle_m : CXXFLAGS += -DCM3GPIO_HW
+organelle_m : $(objects) hw_interfaces/CM3GPIO.o
+	g++ -l wiringPi -o fw_dir/mother $(objects) hw_interfaces/CM3GPIO.o
 
 .PHONY : clean
 

@@ -6,7 +6,6 @@
 
 #include "OSC/OSCMessage.h"
 #include "OSC/SimpleWriter.h"
-#include "hw_interfaces/SerialMCU.h"
 #include "Serial.h"
 #include "UdpSocket.h"
 #include "SLIPEncodedSerial.h"
@@ -14,6 +13,14 @@
 #include "MainMenu.h"
 #include "Timer.h"
 #include "AppData.h"
+
+// include hardware interface
+// default to organelle original
+#ifdef CM3GPIO_HW
+#include "hw_interfaces/CM3GPIO.h"
+#else
+#include "hw_interfaces/SerialMCU.h"
+#endif
 
 static const unsigned int MAX_KNOBS = 6;
 static int16_t knobs_[MAX_KNOBS];
@@ -36,7 +43,12 @@ int footswitchPos = 1; //normally closed
 SimpleWriter oscBuf;
 
 // hardware interface controls
+// default to organelle original
+#ifdef CM3GPIO_HW
+CM3GPIO controls;
+#else
 SerialMCU controls;
+#endif
 
 /*
 sockets for communicating OSC with other programs we need 3:

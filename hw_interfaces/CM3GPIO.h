@@ -1,5 +1,5 @@
-#ifndef SERIALMCU_H
-#define SERIALMCU_H
+#ifndef CM3GPIO_H
+#define CM3GPIO_H
 
 
 #include <stdint.h> 
@@ -9,10 +9,10 @@
 #include "../SLIPEncodedSerial.h"
 #include "../Serial.h"
 
-class SerialMCU
+class CM3GPIO
 {
     public:
-        SerialMCU();
+        CM3GPIO();
         void init();
         void poll();
         void pollKnobs();
@@ -35,17 +35,6 @@ class SerialMCU
         uint32_t keyFlag;
 
     private:        
-        // handlers for the inputs
-        void knobsInput(OSCMessage &msg);
-        void footswitchInput(OSCMessage &msg);
-        void encoderInput(OSCMessage &msg);
-        void encoderButtonInput(OSCMessage &msg);
-        void keysInput(OSCMessage &msg);
-
-        void updateScreenPage(uint8_t page, OledScreen &screen);
-        SLIPEncodedSerial slip;
-        Serial serial;
-        SimpleWriter oscBuf;
 };
 
 
