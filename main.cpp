@@ -267,8 +267,12 @@ int main(int argc, char* argv[]) {
 
         controls.clearFlags();     
 
-        // sleep for .5ms
+        // slow it down for cm3 cause all the bit banging starts to eat CPU
+#ifdef CM3GPIO_HW
+        usleep(2000);
+#else
         usleep(750);
+#endif
 
         if (app.currentScreen == AppData::AUX) {
             // we can do a whole screen,  but not faster than 20fps
