@@ -35,7 +35,7 @@ int footswitchPos = 1; //normally closed
 // buffer for sending OSC messages 
 SimpleWriter oscBuf;
 
-// hardware interface
+// hardware interface controls
 SerialMCU controls;
 
 /*
@@ -51,39 +51,10 @@ UdpSocket udpSockAux(4003);
 // global app states, flags, screens, etc...
 AppData app;
 
-// main menu
 MainMenu menu;
 
 // exit flag
 int quit = 0;
-
-void setEnv() {
-    setenv("PATCH_DIR", app.getPatchDir().c_str(), 1);
-    setenv("FW_DIR", app.getFirmwareDir().c_str(), 1);
-    setenv("USER_DIR", app.getUserDir().c_str(), 1);
-}
-
-int execScript(const char* cmd) {
-    char buf[128];
-    sprintf(buf, "%s/scripts/%s", app.getFirmwareDir().c_str(), cmd);
-    setEnv();
-    return system(buf);
-}
-
-std::string getMainSystemFile(  const std::vector<std::string>& paths,
-                            const std::string& filename) {
-// look for file in set of paths, in preference order
-    struct stat st;
-    for (std::string path : paths) {
-        std::string fp = path + "/" + filename;
-        if (stat(fp.c_str(), &st) == 0) {
-            return fp;
-        }
-    }
-
-    // none found return empty string
-    return "";
-}
 
 /** OSC messages received internally (from PD or other program) **/
 
@@ -147,7 +118,7 @@ void pedalExprMax(OSCMessage &msg);
 void pedalSwitchMode(OSCMessage &msg);
 /* end internal OSC messages received */
 
-/* hardware input events */
+/* hardware input event handlers */
 void encoderInput(void);
 void encoderButton(void);
 void knobsInput(void);
@@ -157,6 +128,10 @@ void footswitchInput(void);
 /* helpers */
 void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg);
 void patchLoaded(bool);
+void setEnv();
+int execScript(const char* cmd);
+std::string getMainSystemFile(  const std::vector<std::string>& paths,
+                            const std::string& filename);
 
 int main(int argc, char* argv[]) {
     printf("build date " __DATE__ "   " __TIME__ "/n");
@@ -996,6 +971,33 @@ void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg) {
     //    printf("%s\n", screenLine);
 }
 
+void setEnv() {
+    setenv("PATCH_DIR", app.getPatchDir().c_str(), 1);
+    setenv("FW_DIR", app.getFirmwareDir().c_str(), 1);
+    setenv("USER_DIR", app.getUserDir().c_str(), 1);
+}
+
+int execScript(const char* cmd) {
+    char buf[128];
+    sprintf(buf, "%s/scripts/%s", app.getFirmwareDir().c_str(), cmd);
+    setEnv();
+    return system(buf);
+}
+
+std::string getMainSystemFile(  const std::vector<std::string>& paths,
+                            const std::string& filename) {
+// look for file in set of paths, in preference order
+    struct stat st;
+    for (std::string path : paths) {
+        std::string fp = path + "/" + filename;
+        if (stat(fp.c_str(), &st) == 0) {
+            return fp;
+        }
+    }
+
+    // none found return empty string
+    return "";
+}
 /* end helpers */
 
 

@@ -22,13 +22,6 @@ class SerialMCU
         void setLED(unsigned c);
         void updateScreenPage(uint8_t page, OledScreen &screen);
         void clearFlags();
-        
-        // OSC callbacks for inputs
-        void knobsInput(OSCMessage &msg);
-        void footswitchInput(OSCMessage &msg);
-        void encoderInput(OSCMessage &msg);
-        void encoderButtonInput(OSCMessage &msg);
-        void keysInput(OSCMessage &msg);
 
         uint32_t encBut;
         uint32_t encButFlag;
@@ -41,6 +34,14 @@ class SerialMCU
         uint32_t keyStates;
         uint32_t keyStatesLast;
         uint32_t keyFlag;
+
+    private:        
+        // handlers for the inputs
+        void knobsInput(OSCMessage &msg);
+        void footswitchInput(OSCMessage &msg);
+        void encoderInput(OSCMessage &msg);
+        void encoderButtonInput(OSCMessage &msg);
+        void keysInput(OSCMessage &msg);
 
         SLIPEncodedSerial slip;
         Serial serial;
