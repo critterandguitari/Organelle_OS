@@ -22,7 +22,6 @@ int       previousScreen = -1;
 int       encoderDownTime = -1;
 const int SHUTDOWN_TIME = 4;
 
-
 static int16_t pedalExprMin_ = 0;
 static int16_t pedalExprMax_ = 1023;
 enum PedalSwitchModes {
@@ -64,14 +63,12 @@ void setEnv() {
     setenv("USER_DIR", app.getUserDir().c_str(), 1);
 }
 
-
 int execScript(const char* cmd) {
     char buf[128];
     sprintf(buf, "%s/scripts/%s", app.getFirmwareDir().c_str(), cmd);
     setEnv();
     return system(buf);
 }
-
 
 std::string getMainSystemFile(  const std::vector<std::string>& paths,
                             const std::string& filename) {
@@ -90,7 +87,6 @@ std::string getMainSystemFile(  const std::vector<std::string>& paths,
 
 /** OSC messages received internally (from PD or other program) **/
 
-
 // ui messages
 void setScreen(OSCMessage &msg);
 void vuMeter(OSCMessage &msg);
@@ -100,7 +96,6 @@ void screenShot(OSCMessage &msg);
 void enablePatchSubMenu(OSCMessage &msg);
 void enableAuxSubMenu(OSCMessage &msg);
 void goHome(OSCMessage &msg);
-
 
 // new style graphics messages
 void gShowInfoBar(OSCMessage &msg); // turns the vu meter on / off
@@ -118,9 +113,7 @@ void gPrintln(OSCMessage &msg);
 void gWaveform(OSCMessage &msg);
 void gFlip(OSCMessage &msg);
 
-
 // older legacy messages for screen
-
 // messages for patch screen
 void setPatchScreenLine1(OSCMessage &msg);
 void setPatchScreenLine2(OSCMessage &msg);
@@ -138,7 +131,6 @@ void setAuxScreenLine5(OSCMessage &msg);
 void invertAuxScreenLine(OSCMessage &msg);
 void auxScreenClear(OSCMessage &msg);
 
-
 // system message
 void loadPatch(OSCMessage &msg);
 void midiConfig(OSCMessage &msg);
@@ -153,25 +145,23 @@ void sendReady(OSCMessage &msg);
 void pedalExprMin(OSCMessage &msg);
 void pedalExprMax(OSCMessage &msg);
 void pedalSwitchMode(OSCMessage &msg);
-
 /* end internal OSC messages received */
 
 /* hardware input events */
 void encoderInput(void);
 void encoderButton(void);
 void knobsInput(void);
+void keysInput(void);
 void footswitchInput(void);
 
 /* helpers */
 void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg);
 void patchLoaded(bool);
-/* end helpers */
 
 int main(int argc, char* argv[]) {
     printf("build date " __DATE__ "   " __TIME__ "/n");
     uint32_t seconds = 0;
     char udpPacketIn[256];
-    //uint8_t osc_packet_in[256];
     uint8_t i = 0;
     int len = 0;
     int page = 0;
@@ -188,18 +178,6 @@ int main(int argc, char* argv[]) {
     app.oled(AppData::AUX).showInfoBar = false;
     app.oled(AppData::PATCH).showInfoBar = true;
 
-    // set locale so sorting happens in right order
-    //std::setlocale(LC_ALL, "en_US.UTF-8");
-
-    // for setting real time scheduling
-    /*struct sched_param par;
-
-    par.sched_priority = 10;
-    printf("settin priority to: %d\n", 10);
-    if (sched_setscheduler(0,SCHED_FIFO,&par) < 0){
-        printf("failed to set rt scheduling\n");
-    }*/
-
     udpSock.setDestination(4000, "localhost");
     udpSockAux.setDestination(4002, "localhost"); // for sending encoder to aux program
     OSCMessage msgIn;
@@ -212,9 +190,8 @@ int main(int argc, char* argv[]) {
     pedalConfig(dummy);
     quit = 0;
 
-    // full udp -> serial -> serial -> udp
     for (;;) {
-        // receive udp, send to serial
+        // receive udp osc messages
         len = udpSock.readBuffer(udpPacketIn, 256, 0);
         if (len > 0) {
             msgIn.empty();
@@ -222,9 +199,9 @@ int main(int argc, char* argv[]) {
                 msgIn.fill(udpPacketIn[i]);
             }
             if (!msgIn.hasError()) {
-                    //char buf[128];
-                    //msgIn.getAddress(buf,0,128);
-                    //printf("osc message received %s %i\n",buf,msgIn.size());
+                //char buf[128];
+                //msgIn.getAddress(buf,0,128);
+                //printf("osc message received %s %i\n",buf,msgIn.size());
                 // or'ing will do lazy eval, i.e. as soon as one succeeds it will stop
                 bool processed =
                     msgIn.dispatch("/oled/vumeter", vuMeter, 0)
@@ -291,37 +268,17 @@ int main(int argc, char* argv[]) {
             msgIn.empty();
         }
 
+        // check for events from hardware controls
         controls.poll();
 
-        if (controls.encButFlag) {
-            encoderButton();
-        }
-        if (controls.encTurnFlag) {
-            encoderInput();
-        }
+        // handle events
+        if (controls.encButFlag) encoderButton();
+        if (controls.encTurnFlag) encoderInput();
+        if (controls.knobFlag) knobsInput();
+        if (controls.keyFlag) keysInput();
+        if (controls.footswitchFlag) footswitchInput();
 
-        if (controls.knobFlag) {
-            knobsInput();
-        }
-        
-        // TODO make separate funciton to check key event
-        // cause this is remapping all the keys which we don't need to do if 
-        // a key event didn't happen
-        if (controls.keyStates != controls.keyStatesLast) {
-            for (int i = 0; i < 25; i++){
-                if(((controls.keyStates >> i) & 1) != ((controls.keyStatesLast >> i) & 1)){
-                    OSCMessage msgOut("/key");
-                    msgOut.add(i);
-                    msgOut.add(((controls.keyStates >> i) & 1) * 100);
-                    msgOut.send(oscBuf);
-                    udpSock.writeBuffer(oscBuf.buffer, oscBuf.length);        
-                }
-            }
-            controls.keyStatesLast = controls.keyStates;
-        }
-       
-        controls.clearFlags();
-     
+        controls.clearFlags();     
 
         // sleep for .5ms
         usleep(750);
@@ -910,10 +867,23 @@ void knobsInput() {
     }
 }
 
+void keysInput(void) {
+    for (int i = 0; i < 25; i++){
+        if(((controls.keyStates >> i) & 1) != ((controls.keyStatesLast >> i) & 1)){
+            OSCMessage msgOut("/key");
+            msgOut.add(i);
+            msgOut.add(((controls.keyStates >> i) & 1) * 100);
+            msgOut.send(oscBuf);
+            udpSock.writeBuffer(oscBuf.buffer, oscBuf.length);        
+        }
+    }
+    controls.keyStatesLast = controls.keyStates;
+}
+
 void footswitchInput(void) {
-/*    switch(pedalSwitchMode_) {
+    switch(pedalSwitchMode_) {
         case PSM_FAVOURITES : {
-            int pos = msg.getInt(0);
+            int pos = controls.footswitch;
 
             // normally closed (1)
             // so if pos was open , and now closed we switch
@@ -925,16 +895,16 @@ void footswitchInput(void) {
             footswitchPos = pos; 
             break;
         }
-        case PSM_PATCH:
+        case PSM_PATCH: 
         default :  {
-            msg.send(oscBuf);
+            OSCMessage msgOut("/fs");
+            msgOut.add(controls.footswitch);
+            msgOut.send(oscBuf);
             udpSock.writeBuffer(oscBuf.buffer, oscBuf.length);      
             break;  
         }
-    }  //switch\
-*/
+    }  //switch
 }
-
 
 // this is when the encoder gets pressed
 // in menu screen, execute the menu entry

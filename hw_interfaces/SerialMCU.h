@@ -36,9 +36,11 @@ class SerialMCU
         uint32_t encTurnFlag;
         uint32_t knobFlag;
         uint32_t adcs[8];
-
+        uint32_t footswitch;
+        uint32_t footswitchFlag;
         uint32_t keyStates;
         uint32_t keyStatesLast;
+        uint32_t keyFlag;
 
         SLIPEncodedSerial slip;
         Serial serial;

@@ -16,7 +16,6 @@ void SerialMCU::init(){
         usleep(20000); // wait 20 ms
     }
 
-
     // keys
     keyStatesLast = 0;
     clearFlags();
@@ -26,8 +25,9 @@ void SerialMCU::clearFlags() {
     encButFlag = 0;
     encTurnFlag = 0;
     knobFlag = 0;
+    keyFlag = 0;
+    footswitchFlag = 0;
 }
-
 
 void SerialMCU::poll(){
     OSCMessage msgIn;
@@ -38,17 +38,12 @@ void SerialMCU::poll(){
         msgIn.empty();
         msgIn.fill(slip.decodedBuf, slip.decodedLength);
 
+        if (msgIn.fullMatch("/key", 0)) keysInput(msgIn);
+        if (msgIn.fullMatch("/fs", 0)) footswitchInput(msgIn);
+        if (msgIn.fullMatch("/enc", 0)) encoderInput(msgIn);
+        if (msgIn.fullMatch("/encbut", 0)) encoderButtonInput(msgIn);
+        if (msgIn.fullMatch("/knobs", 0)) knobsInput(msgIn);
 
-        bool processed = false;
-
-        /*processed =     msgIn.dispatch("/knobs", knobsInput, 0)
-                    ||  msgIn.dispatch("/fs", footswitchInput, 0)
-                    ||  msgIn.dispatch("/enc", encoderInput, 0)
-                    ||  msgIn.dispatch("/encbut", encoderButtonInput, 0)
-                    ||  msgIn.dispatch("/key", keysInput, 0)
-                    ;*/
-
-        msgIn.empty();
     }
 }
 
@@ -119,7 +114,13 @@ void SerialMCU::setLED(unsigned c) {
     slip.sendMessage(oscBuf.buffer, oscBuf.length, serial);
 }
 
-void SerialMCU::footswitchInput(OSCMessage &msg){}
+void SerialMCU::footswitchInput(OSCMessage &msg){
+     if (msg.isInt(0)) {
+       // printf("fs %d \n", msg.getInt(0));
+        footswitch = msg.getInt(0);
+        footswitchFlag = 1;
+    }
+}
 
 void SerialMCU::encoderInput(OSCMessage &msg){
     if (msg.isInt(0)) {
@@ -151,6 +152,7 @@ void SerialMCU::keysInput(OSCMessage &msg){
         //printf("%d %d \n", msg.getInt(0), msg.getInt(1));   
         if (msg.getInt(1)) keyStates |= (1 << msg.getInt(0));
         else keyStates &= ~(1 << msg.getInt(0));
+        keyFlag = 1;
     }
 }
 
