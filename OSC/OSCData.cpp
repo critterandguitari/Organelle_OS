@@ -171,7 +171,7 @@ int32_t OSCData::getInt(){
     if (type == 'i'){
         return data.i;
     } else {
-        return NULL;
+        return (int32_t)NULL;
     }
 }
 osctime_t OSCData::getTime(){
@@ -186,7 +186,7 @@ float OSCData::getFloat(){
     if (type == 'f'){
         return data.f;
     } else {
-        return NULL;
+        return (float)NULL;
     }
 }
 
@@ -194,7 +194,7 @@ double OSCData::getDouble(){
     if (type == 'd'){
         return data.d;
     } else {
-        return NULL;
+        return (double)NULL;
     }
 }
 bool OSCData::getBoolean(){
@@ -204,7 +204,7 @@ bool OSCData::getBoolean(){
         return false;
     }
     else
-        return NULL;
+        return (bool)NULL;
 }
 
 int OSCData::getString(char * strBuffer, int length){
@@ -212,7 +212,7 @@ int OSCData::getString(char * strBuffer, int length){
         strncpy(strBuffer, data.s, bytes);
         return bytes;
     } else {
-        return NULL;
+        return 0;
     }
 }
 
@@ -221,6 +221,6 @@ int OSCData::getBlob(uint8_t * blobBuffer, int length){
         memcpy(blobBuffer, data.b, bytes);
         return bytes;
     } else {
-        return NULL;
+        return 0;
     }
 }

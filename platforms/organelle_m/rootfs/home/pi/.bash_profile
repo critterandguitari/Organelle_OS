@@ -12,7 +12,6 @@ ps cax | grep mother > /dev/null
 if [ $? -eq 0 ]; then
     echo "Welcome to Organelle."
 else
-    $FW_DIR/scripts/setup.sh > /dev/null 2>&1
     $FW_DIR/scripts/start-mother.sh > /dev/null 2>&1
     $FW_DIR/scripts/welcome.sh
 fi
