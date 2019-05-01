@@ -16,7 +16,7 @@ class SerialMCU
         void init();
         void poll();
         void pollKnobs();
-        void updateOLED(OledScreen s);
+        void updateOLED(OledScreen &s);
         void ping();
         void shutdown();
         void setLED(unsigned c);

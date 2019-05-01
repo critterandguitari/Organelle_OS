@@ -1,8 +1,14 @@
 #ifndef CM3GPIO_H
 #define CM3GPIO_H
 
-
-#include <stdint.h> 
+#include <wiringPi.h>
+#include <wiringPiSPI.h>
+#include <wiringShift.h>
+#include <stdio.h>  
+#include <stdlib.h>  
+#include <stdint.h>
+#include <string.h>
+#include <time.h>
 #include "../OledScreen.h"
 #include "../OSC/OSCMessage.h"
 #include "../OSC/SimpleWriter.h"
@@ -16,7 +22,7 @@ class CM3GPIO
         void init();
         void poll();
         void pollKnobs();
-        void updateOLED(OledScreen s);
+        void updateOLED(OledScreen &s);
         void ping();
         void shutdown();
         void setLED(unsigned c);
@@ -33,8 +39,18 @@ class CM3GPIO
         uint32_t keyStates;
         uint32_t keyStatesLast;
         uint32_t keyFlag;
+        
+        uint32_t pwrStatus;
 
     private:        
+        uint32_t shiftRegRead();
+        void getEncoder();
+        void getKeys();
+        uint32_t adcRead(uint8_t adcnum);
+        void displayPinValues();
+        
+        uint32_t pinValues;
+        uint32_t pinValuesLast;
 };
 
 

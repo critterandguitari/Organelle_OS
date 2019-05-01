@@ -54,7 +54,7 @@ void SerialMCU::pollKnobs(){
     slip.sendMessage(oscBuf.buffer, oscBuf.length, serial);
 }
 
-void SerialMCU::updateOLED(OledScreen s){
+void SerialMCU::updateOLED(OledScreen &s){
     updateScreenPage(0, s);
     updateScreenPage(1, s);
     updateScreenPage(2, s);

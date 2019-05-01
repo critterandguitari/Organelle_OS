@@ -1,12 +1,12 @@
-#N canvas 801 165 891 543 10;
+#N canvas 804 156 891 543 10;
 #X obj 76 75 loadbang;
 #X obj 358 162 r knob1;
 #X obj 358 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 9212 1;
+-1 -1 3141 1;
 #X obj 421 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 5251 1;
+-1 -1 12700 1;
 #X obj 482 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 4643 1;
+-1 -1 7920 1;
 #X obj 544 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 0 1;
 #X obj 421 162 r knob2;
@@ -47,7 +47,7 @@
 run through a compressor to provide some headroom if things get too
 loud. Also sends values to the Organelle's OLED VU meter.;
 #X obj 742 360 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 4643 1;
+-1 -1 6791 1;
 #X obj 742 326 r vol;
 #X obj 74 431 timer;
 #X floatatom 74 453 5 0 0 0 - - -, f 5;
@@ -114,7 +114,7 @@ loud. Also sends values to the Organelle's OLED VU meter.;
 #X connect 40 0 41 0;
 #X connect 41 0 4 3;
 #X restore 76 202 pd audioIO;
-#N canvas 85 315 1265 661 messageIO 0;
+#N canvas 88 306 1265 661 messageIO 0;
 #X msg 568 179 port 4000;
 #X obj 244 251 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
@@ -125,7 +125,7 @@ loud. Also sends values to the Organelle's OLED VU meter.;
 #X obj 244 215 udpsend;
 #X obj 244 151 r oscOut;
 #X obj 450 94 t b b;
-#X obj 450 66 loadbang;
+#X obj 450 65 loadbang;
 #X msg 766 178 send /screenshot;
 #X obj 765 66 r notes;
 #X obj 766 104 route 83;
@@ -134,7 +134,7 @@ loud. Also sends values to the Organelle's OLED VU meter.;
 #X obj 766 217 s oscOut;
 #X obj 568 255 s oscIn;
 #X text 892 97 screen shot hack -- not for production release;
-#N canvas 15 50 633 581 LED 0;
+#N canvas 17 50 633 581 LED 0;
 #X msg 74 339 send /led \$1;
 #X obj 75 137 % 8;
 #X obj 75 86 r led;
@@ -143,26 +143,26 @@ loud. Also sends values to the Organelle's OLED VU meter.;
 #X obj 74 368 s oscOut;
 #X obj 89 235 sel 0 1 2 3 4 5 6 7, f 37;
 #X msg 87 266 0;
-#X msg 123 266 4;
-#X msg 160 266 5;
-#X msg 197 265 1;
-#X msg 232 265 3;
-#X msg 270 265 2;
-#X msg 306 267 6;
 #X msg 343 267 7;
+#X msg 123 266 1;
+#X msg 160 266 2;
+#X msg 197 265 3;
+#X msg 232 265 4;
+#X msg 270 265 5;
+#X msg 306 267 6;
 #X connect 0 0 5 0;
 #X connect 1 0 6 0;
 #X connect 2 0 1 0;
 #X connect 3 0 6 0;
 #X connect 4 0 3 0;
 #X connect 6 0 7 0;
-#X connect 6 1 8 0;
-#X connect 6 2 9 0;
-#X connect 6 3 10 0;
-#X connect 6 4 11 0;
-#X connect 6 5 12 0;
-#X connect 6 6 13 0;
-#X connect 6 7 14 0;
+#X connect 6 1 9 0;
+#X connect 6 2 10 0;
+#X connect 6 3 11 0;
+#X connect 6 4 12 0;
+#X connect 6 5 13 0;
+#X connect 6 6 14 0;
+#X connect 6 7 8 0;
 #X connect 7 0 0 0;
 #X connect 8 0 0 0;
 #X connect 9 0 0 0;
