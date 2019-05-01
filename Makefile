@@ -32,21 +32,30 @@ organelle_m : $(objects) hw_interfaces/CM3GPIO.o
 clean :
 	rm main $(objects)
 
-
 IMAGE_BUILD_VERSION = $(shell cat fw_dir/version)
 IMAGE_BUILD_TAG = $(shell cat fw_dir/buildtag)
 IMAGE_VERSION = $(IMAGE_BUILD_VERSION)$(IMAGE_BUILD_TAG)
 IMAGE_DIR = UpdateOS-$(IMAGE_VERSION)
 
-
 organelle_deploy : organelle
-	echo "Updating OS to $(IMAGE_VERSION)"
+	@echo "Updating OS to $(IMAGE_VERSION)"
 	fw_dir/scripts/remount-rw.sh
-	# copy fw files to /root
+	@echo "copying fw files to /root"
 	cp -fr fw_dir/* /root/
-	# copy system files 
+	@echo "copying system files"
 	cp -fr platforms/organelle/rootfs/* /
 	sync
+
+organelle_m_deploy : organelle_m
+	@echo "Updating OS to $(IMAGE_VERSION)"
+	@echo "copying common fw files"
+	cp -fr fw_dir/* /home/pi/fw_dir
+	@echo "copying platform fw files"
+	cp -fr platforms/organelle_m/fw_dir/* /home/pi/fw_dir
+	@echo "copying systems files"
+	cp -fr platforms/organelle_m/rootfs/* /
+	sync
+
 
 image : main
 	cp main host/root/mother

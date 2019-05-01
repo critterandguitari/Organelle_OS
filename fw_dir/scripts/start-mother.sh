@@ -15,8 +15,8 @@ mkdir -p /tmp/pids
 export USER_DIR=`$SCRIPTS_DIR/get-user-dir.sh`
 echo using USER_DIR: $USER_DIR
 
-M_DIR=/root
-FW_DIR=/root
+M_DIR=$FW_DIR
+
 # mother usbdrive/system -> usbdrive/Firmware -> sdcard/Firmrware -> root
 if [ -f /usbdrive/System/mother ]
 then

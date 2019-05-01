@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <fstream>
+#include <iostream>
 
 const char* USB_PATCHES="/usbdrive/Patches";
 const char* SD_PATCHES="/sdcard/Patches";
@@ -14,8 +15,6 @@ const char* USB_USERDIR="/usbdrive";
 const char* SD_USERDIR="/sdcard";
 const char* DEFAULT_USERDIR="/usbdrive";
 
-const char* USB_FW="/usbdrive/Firmware";
-const char* SD_FW="/sdcard/Firmware";
 const char* DEFAULT_FW="/root";
 
 const char* getDefaultPatchDir() {
@@ -45,14 +44,8 @@ const std::string getDefaultSystemDir(std::string& user_path) {
 
 
 const char* getDefaultFirwareDir() {
-    struct stat st;
-    if(stat(USB_FW, &st)==0) {
-        return USB_FW;
-    }
-    if(stat(SD_FW, &st)==0) {
-        return SD_FW;
-    }
-    return DEFAULT_FW;
+    if (getenv("FW_DIR")) return getenv("FW_DIR");
+    else return DEFAULT_FW;
 }
 
 AppData::AppData(){
@@ -107,6 +100,7 @@ void  AppData::setSystemDir(const char* path) {
 void AppData::setFirmwareDir(const char* path) {
     if(path==NULL) {
         firmware_path=getDefaultFirwareDir();
+        std::cout << "Using FW DIR: " << firmware_path  << std::endl;
     } else {
         firmware_path=path;
     }
