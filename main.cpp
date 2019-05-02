@@ -140,8 +140,8 @@ void footswitchInput(void);
 /* helpers */
 void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg);
 void patchLoaded(bool);
-void setEnv();
-int execScript(const char* cmd);
+//void setEnv();
+//int execScript(const char* cmd);
 std::string getMainSystemFile(  const std::vector<std::string>& paths,
                             const std::string& filename);
 
@@ -355,7 +355,15 @@ int main(int argc, char* argv[]) {
         if (knobPollTimer.getElapsed() > 40.f) {
             knobPollTimer.reset();
             controls.pollKnobs();
-            
+
+#ifdef MICSEL_SWITCH
+            if (app.micLineSelection != controls.micSelSwitch){
+                app.micLineSelection = controls.micSelSwitch;
+                if (app.micLineSelection == 1) system("amixer set 'Input Mux' 'Line In'");
+                else system("amixer set 'Input Mux' 'Mic'");
+            }
+#endif
+
             // service led flasher
             if(app.ledFlashCounter) {
                 app.ledFlashCounter--;
@@ -986,7 +994,7 @@ void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg) {
     screen.setLine(lineNum, screenLine);
     //    printf("%s\n", screenLine);
 }
-
+/*
 void setEnv() {
     setenv("PATCH_DIR", app.getPatchDir().c_str(), 1);
     setenv("FW_DIR", app.getFirmwareDir().c_str(), 1);
@@ -999,7 +1007,7 @@ int execScript(const char* cmd) {
     setEnv();
     return system(buf);
 }
-
+*/
 std::string getMainSystemFile(  const std::vector<std::string>& paths,
                             const std::string& filename) {
 // look for file in set of paths, in preference order

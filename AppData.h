@@ -74,6 +74,7 @@ public:
 
     OledScreen& oled(Screen s) { return oleds_[s];}
 
+    unsigned micLineSelection;
     unsigned ledColor;              // current led color
     unsigned ledFlashCounter;       // for flashing the led
     

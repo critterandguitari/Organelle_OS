@@ -40,7 +40,9 @@ class CM3GPIO
         uint32_t keyStatesLast;
         uint32_t keyFlag;
         
+        // organelle m specific stuff
         uint32_t pwrStatus;
+        uint32_t micSelSwitch;
 
     private:        
         uint32_t shiftRegRead();

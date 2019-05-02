@@ -139,7 +139,7 @@ void CM3GPIO::init(){
     // GPIO for power status 
     pinMode(PWR_STATUS, INPUT);
     pullUpDnControl(PWR_STATUS, PUD_OFF);
-    pwrStatus = 0;
+    pwrStatus = digitalRead(PWR_STATUS);
 
     // keys
     keyStatesLast = 0;
@@ -148,6 +148,7 @@ void CM3GPIO::init(){
     // get initial pin states
     shiftRegRead();
     pinValuesLast = pinValues;
+    micSelSwitch = (pinValues >> 3) & 1;
 }
 
 void CM3GPIO::clearFlags() {
@@ -165,12 +166,13 @@ void CM3GPIO::poll(){
 
     // get key values if a key pin changed (ignore the encoder pins)
     if ((pinValues & 0xFFFFFF80) != (pinValuesLast & 0xFFFFFF80)) {
-        //displayPinValues();
+//        displayPinValues();
         getKeys();
         keyFlag = 1;
     }
-
     pinValuesLast = pinValues;
+
+    micSelSwitch = (pinValues >> 3) & 1;
     
     // check encoder, gotta check every time for debounce purposes
     getEncoder();
@@ -222,37 +224,37 @@ void CM3GPIO::setLED(unsigned stat) {
         AUX_LED_GREEN_OFF;
         AUX_LED_BLUE_OFF;
     }
-    if (stat == 1) {
+    else if (stat == 1) {
         AUX_LED_RED_ON;
         AUX_LED_GREEN_OFF;
         AUX_LED_BLUE_OFF;
     }
-    if (stat == 2) {
+    else if (stat == 2) {
         AUX_LED_RED_ON;
         AUX_LED_GREEN_ON;
         AUX_LED_BLUE_OFF;
     }
-    if (stat == 3) {
+    else if (stat == 3) {
         AUX_LED_RED_OFF;
         AUX_LED_GREEN_ON;
         AUX_LED_BLUE_OFF;
     }
-    if (stat == 4) {
+    else if (stat == 4) {
         AUX_LED_RED_OFF;
         AUX_LED_GREEN_ON;
         AUX_LED_BLUE_ON;
     }
-    if (stat == 5) {
+    else if (stat == 5) {
         AUX_LED_RED_OFF;
         AUX_LED_GREEN_OFF;
         AUX_LED_BLUE_ON;
     }
-    if (stat == 6) {
+    else if (stat == 6) {
         AUX_LED_RED_ON;
         AUX_LED_GREEN_OFF;
         AUX_LED_BLUE_ON;
     }
-    if (stat == 7) {
+    else if (stat == 7) {
         AUX_LED_RED_ON;
         AUX_LED_GREEN_ON;
         AUX_LED_BLUE_ON;
