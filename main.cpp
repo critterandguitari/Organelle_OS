@@ -323,6 +323,9 @@ int main(int argc, char* argv[]) {
             pingTimer.reset();
             controls.ping();
 
+#ifdef PWR_SWITCH
+            // dont do shutdown shortcut if there is a power switch 
+#else
             // check for shutdown shortcut
             if (encoderDownTime != -1) {
                 encoderDownTime--;
@@ -342,7 +345,7 @@ int main(int argc, char* argv[]) {
                     menu.runShutdown(0, 0);
                 }
             }
-
+#endif
             // check for patch loading timeout
             if (app.hasPatchLoadingTimedOut(1000)) {
                 fprintf(stderr, "timeout: Patch did not return patchLoaded , will assume its loaded\n");

@@ -612,7 +612,13 @@ void MainMenu::buildMenu(signed mm_pos) {
     addMenuItem(numMenuEntries++, menuTitle.c_str(), "", &MainMenu::runDoNothing);
     systemMenuOffset = numMenuEntries;
 
+#ifdef PWR_SWITCH
+    // dont have shutdown menu item if there is a power switch
+#else
     addMenuItem(numMenuEntries++, "Shutdown", "Shutdown", &MainMenu::runShutdown);
+#endif
+    
+    
     switch (currentMenu) {
     case MenuMode::M_STORAGE: {
         addMenuItem(numMenuEntries++, "Eject", "Eject", &MainMenu::runEject);
