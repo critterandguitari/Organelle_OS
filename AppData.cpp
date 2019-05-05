@@ -60,6 +60,7 @@ AppData::AppData(){
     setPatchDir(NULL);
     setFirmwareDir(NULL);
     setUserDir(NULL);
+    inL = inR = outL = outR = 0;
 }
 
 bool AppData::isPatchHome() {

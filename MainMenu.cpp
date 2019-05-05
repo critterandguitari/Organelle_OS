@@ -557,7 +557,7 @@ void MainMenu::drawPatchList(void) {
     }
 
     if (! (app.isPatchRunning() || app.isPatchLoading()) ) {
-        app.oled(AppData::MENU).drawNotification("Select a patch...");
+        app.oled(AppData::MENU).drawNotification("Select patch");
     }
 
     app.oled(AppData::MENU).newScreen = 1;

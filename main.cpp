@@ -310,6 +310,9 @@ int main(int argc, char* argv[]) {
             if (screenFpsTimer.getElapsed() > 50.f) {
                 screenFpsTimer.reset();
                 if (app.oled(AppData::PATCH).newScreen) {
+                    if (app.oled((AppData::Screen) app.currentScreen).showInfoBar) {
+                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL);
+                    }
                     app.oled(AppData::PATCH).newScreen = 0;
                     controls.updateOLED(app.oled(AppData::PATCH));
                 }
@@ -616,13 +619,11 @@ void vuMeter(OSCMessage &msg) {
     char line[1024];
     int len, i, outR, outL, inR, inL;
 
-    if (msg.isInt(0)) inR = msg.getInt(0);
-    if (msg.isInt(1)) inL = msg.getInt(1);
-    if (msg.isInt(2)) outR = msg.getInt(2);
-    if (msg.isInt(3)) outL = msg.getInt(3);
-
-    if (app.oled((AppData::Screen) app.currentScreen).showInfoBar) {
-        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(inR, inL, outR, outL);
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
+        app.inR = msg.getInt(0);
+        app.inL = msg.getInt(1);
+        app.outR = msg.getInt(2);
+        app.outL = msg.getInt(3);
         app.oled((AppData::Screen) app.currentScreen).newScreen = 1;
     }
 }
@@ -780,7 +781,7 @@ void sendShutdown(OSCMessage &msg ) {
 
 /* end internal OSC messages received */
 
-/* OSC messages received from MCU (we only use ecncoder input, the key and knob messages get passed righ to PD or other program */
+/* functions to handle input from organelle hardware controls */
 
 // this is when the encoder gets turned
 // in menu screen, just navigate the menu

@@ -84,6 +84,12 @@ public:
     unsigned currentScreen;          // the current screen (AUX, MENU or PATCH)
     int menuScreenTimeout;
 
+    int inL;                        // vu meters
+    int inR;
+    int outL;
+    int outR;
+
+
 private:
     OledScreen oleds_[SCREEN_MAX];
 
