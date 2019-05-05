@@ -265,34 +265,26 @@ int main(int argc, char* argv[]) {
         if (controls.keyFlag) keysInput();
         if (controls.footswitchFlag) footswitchInput();
 
+        // clear the flags for next time
         controls.clearFlags();     
 
-        // slow it down for cm3 cause all the bit banging starts to eat CPU
-#ifdef CM3GPIO_HW
-        usleep(2000);
-#else
-        usleep(750);
-#endif
+        // update oled screen
+        if (screenFpsTimer.getElapsed() > 50.f) {
+            screenFpsTimer.reset();
 
-        if (app.currentScreen == AppData::AUX) {
-            // we can do a whole screen,  but not faster than 20fps
-            if (screenFpsTimer.getElapsed() > 50.f) {
-                screenFpsTimer.reset();
+            // aux screen
+            if (app.currentScreen == AppData::AUX) {
                 if (app.oled(AppData::AUX).newScreen) {
                     app.oled(AppData::AUX).newScreen = 0;
                     controls.updateOLED(app.oled(AppData::AUX));
                 }
-            }
-        }
-        else if (app.currentScreen == AppData::MENU) {
-            // we can do a whole screen,  but not faster than 20fps
-            if (screenFpsTimer.getElapsed() > 50.f) {
-                screenFpsTimer.reset();
+
+            // menu screen
+            } else if (app.currentScreen == AppData::MENU) {
                 if (app.oled(AppData::MENU).newScreen) {
                     app.oled(AppData::MENU).newScreen = 0;
                     controls.updateOLED(app.oled(AppData::MENU));
                 }
-
                 // don't timeout to patch screen, whilst holding down encoder
                 if (encoderDownTime == -1) {
                     // if there is a patch running while on menu screen, switch back to patch screen after the timeout
@@ -304,22 +296,21 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
-            }
-        }
-        else if (app.currentScreen == AppData::PATCH) {
-            if (screenFpsTimer.getElapsed() > 50.f) {
-                screenFpsTimer.reset();
+
+            // patch screen
+            } else if (app.currentScreen == AppData::PATCH) {
                 if (app.oled(AppData::PATCH).newScreen) {
+                    app.oled(AppData::PATCH).newScreen = 0;
+                    // check if we should draw info bar on this patch screen
                     if (app.oled((AppData::Screen) app.currentScreen).showInfoBar) {
                         app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL);
                     }
-                    app.oled(AppData::PATCH).newScreen = 0;
                     controls.updateOLED(app.oled(AppData::PATCH));
                 }
             }
         }
 
-        // every 1 second do (slwo) periodic tasks
+        // every 1 second do slow periodic tasks
         if (pingTimer.getElapsed() > 1000.f) {
             // printf("pinged the MCU at %f ms.\n", upTime.getElapsed());
             // send a ping in case MCU resets
@@ -354,10 +345,9 @@ int main(int argc, char* argv[]) {
                 fprintf(stderr, "timeout: Patch did not return patchLoaded , will assume its loaded\n");
                 patchLoaded(true);
             }
-
         }
 
-        // poll for knobs
+        // poll knobs every 40 ms
         if (knobPollTimer.getElapsed() > 40.f) {
             knobPollTimer.reset();
             controls.pollKnobs();
@@ -382,6 +372,14 @@ int main(int argc, char* argv[]) {
             printf("quitting\n");
             return 0;
         }
+
+        // main polling loop delay
+        // slow it down for cm3 cause all the bit banging starts to eat CPU
+#ifdef CM3GPIO_HW
+        usleep(2000);
+#else
+        usleep(750);
+#endif
     } // for;;
 }
 
