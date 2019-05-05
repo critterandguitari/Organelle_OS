@@ -268,8 +268,13 @@ int main(int argc, char* argv[]) {
         // clear the flags for next time
         controls.clearFlags();     
 
-        // update oled screen
+       // update oled screen, limit to about 20 fps for organelle 1  
+       // on RPI/CM3 hardware we can go a little higher
+#ifdef OLED_30FPS
+        if (screenFpsTimer.getElapsed() > 30.f) {
+#else
         if (screenFpsTimer.getElapsed() > 50.f) {
+#endif
             screenFpsTimer.reset();
 
             // aux screen
@@ -284,17 +289,6 @@ int main(int argc, char* argv[]) {
                 if (app.oled(AppData::MENU).newScreen) {
                     app.oled(AppData::MENU).newScreen = 0;
                     controls.updateOLED(app.oled(AppData::MENU));
-                }
-                // don't timeout to patch screen, whilst holding down encoder
-                if (encoderDownTime == -1) {
-                    // if there is a patch running while on menu screen, switch back to patch screen after the timeout
-                    if (app.isPatchRunning() || app.isPatchLoading()) {
-                        if (app.menuScreenTimeout > 0) app.menuScreenTimeout -= 50;
-                        else {
-                            app.currentScreen = AppData::PATCH;
-                            app.oled(AppData::PATCH).newScreen = 1;
-                        }
-                    }
                 }
 
             // patch screen
@@ -351,6 +345,18 @@ int main(int argc, char* argv[]) {
         if (knobPollTimer.getElapsed() > 40.f) {
             knobPollTimer.reset();
             controls.pollKnobs();
+            
+            // if there is a patch running while on menu screen, switch back to patch screen after the timeout
+            // but don't timeout to patch screen, whilst holding down encoder
+            if (encoderDownTime == -1 && app.currentScreen == AppData::MENU) {
+                if (app.isPatchRunning() || app.isPatchLoading()) {
+                    if (app.menuScreenTimeout > 0) app.menuScreenTimeout -= 40;
+                    else {
+                        app.currentScreen = AppData::PATCH;
+                        app.oled(AppData::PATCH).newScreen = 1;
+                    }
+                }
+            }
 
 #ifdef MICSEL_SWITCH
             if (app.micLineSelection != controls.micSelSwitch){
