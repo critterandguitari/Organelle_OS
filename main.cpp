@@ -297,7 +297,11 @@ int main(int argc, char* argv[]) {
                     app.oled(AppData::PATCH).newScreen = 0;
                     // check if we should draw info bar on this patch screen
                     if (app.oled((AppData::Screen) app.currentScreen).showInfoBar) {
+#ifdef BATTERY_METER
+                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, 0,0);
+#else
                         app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL);
+#endif
                     }
                     controls.updateOLED(app.oled(AppData::PATCH));
                 }

@@ -216,116 +216,6 @@ void OledScreen::fill_area(uint8_t x, uint8_t y, uint8_t sizex, uint8_t sizey, u
 
 }
 
-void OledScreen::drawNotification(const char * line) {
-
-  int i, len;
-
-  // first clear it out
-  for (i = 0; i < 128; i++)
-    pix_buf[i] = 0;
-
-  len = strlen(line);
-  println_8(line, len>21 ? 21: len,  2, 0);
-}
-
-
-void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
-
-  int i, len;
-
-  // bounds for vu
-  // i guess it goes up to 11 haha
-  if (inR < 0) inR = 0;
-  if (inR > 11) inR = 11;
-  if (inL < 0) inL = 0;
-  if (inL > 11) inL = 11;
-
-  if (outR < 0) outR = 0;
-  if (outR > 11) outR = 11;
-  if (outL < 0) outL = 0;
-  if (outL > 11) outL = 11;
-
-  // first clear it out
-  for (i = 0; i < 128; i++)
-    pix_buf[i] = 0;
-
-  // draw input output
-  put_char_small('I', 0, 0, 1);
-  put_char_small('O', 64, 0, 1);
-
-
-  // VU meter
-  // after I
-  // little guys
-  draw_box_filled(7,  1, 1, 2);
-  draw_box_filled(12, 1, 1, 2);
-  draw_box_filled(17, 1, 1, 2);
-  draw_box_filled(22, 1, 1, 2);
-  draw_box_filled(27, 1, 1, 2);
-  draw_box_filled(32, 1, 1, 2);
-  draw_box_filled(37, 1, 1, 2);
-  draw_box_filled(42, 1, 1, 2);
-  draw_box_filled(47, 1, 1, 2);
-  draw_box_filled(52, 1, 1, 2);
-  draw_box_filled(57, 1, 1, 2);
-
-  draw_box_filled(7,  5, 1, 2);
-  draw_box_filled(12, 5, 1, 2);
-  draw_box_filled(17, 5, 1, 2);
-  draw_box_filled(22, 5, 1, 2);
-  draw_box_filled(27, 5, 1, 2);
-  draw_box_filled(32, 5, 1, 2);
-  draw_box_filled(37, 5, 1, 2);
-  draw_box_filled(42, 5, 1, 2);
-  draw_box_filled(47, 5, 1, 2);
-  draw_box_filled(52, 5, 1, 2);
-  draw_box_filled(57, 5, 1, 2);
-
-  // big guys
-  for (i = 0; i < (inR); i++) {
-    draw_box_filled(7 + (5 * i), 0, 3, 4);
-  }
-
-  for (i = 0; i < (inL); i++) {
-    draw_box_filled(7 + (5 * i), 4, 3, 4);
-  }
-
-  // after O
-  // small guys
-  draw_box_filled(73, 1, 1, 2);
-  draw_box_filled(78, 1, 1, 2);
-  draw_box_filled(83, 1, 1, 2);
-  draw_box_filled(88, 1, 1, 2);
-  draw_box_filled(93, 1, 1, 2);
-  draw_box_filled(98, 1, 1, 2);
-  draw_box_filled(103, 1, 1, 2);
-  draw_box_filled(108, 1, 1, 2);
-  draw_box_filled(113, 1, 1, 2);
-  draw_box_filled(118, 1, 1, 2);
-  draw_box_filled(123, 1, 1, 2);
-
-  draw_box_filled(73, 5, 1, 2);
-  draw_box_filled(78, 5, 1, 2);
-  draw_box_filled(83, 5, 1, 2);
-  draw_box_filled(88, 5, 1, 2);
-  draw_box_filled(93, 5, 1, 2);
-  draw_box_filled(98, 5, 1, 2);
-  draw_box_filled(103, 5, 1, 2);
-  draw_box_filled(108, 5, 1, 2);
-  draw_box_filled(113, 5, 1, 2);
-  draw_box_filled(118, 5, 1, 2);
-  draw_box_filled(123, 5, 1, 2);
-
-  // big guys
-  for (i = 0; i < (outR); i++) {
-    draw_box_filled(73 + (5 * i), 0, 3, 4);
-  }
-
-  for (i = 0; i < (outL); i++) {
-    draw_box_filled(73 + (5 * i), 4, 3, 4);
-  }
-}
-
 void OledScreen::println(const char * line, int x, int y, int h, int color) {
   int i, deltax;
   deltax = x;
@@ -544,4 +434,171 @@ unsigned int OledScreen::put_char_small(unsigned char c, unsigned int y, unsigne
 }
 
 
+
+void OledScreen::drawNotification(const char * line) {
+
+  int i, len;
+
+  // first clear it out
+  for (i = 0; i < 128; i++)
+    pix_buf[i] = 0;
+
+  len = strlen(line);
+  println_8(line, len>21 ? 21: len,  2, 0);
+}
+
+
+void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus, int batteryLevel) {
+
+  int i, len;
+
+  // bounds for vu
+  // i guess it goes up to 11 haha
+  if (inR < 0) inR = 0;
+  if (inR > 11) inR = 11;
+  if (inL < 0) inL = 0;
+  if (inL > 11) inL = 11;
+
+  if (outR < 0) outR = 0;
+  if (outR > 11) outR = 11;
+  if (outL < 0) outL = 0;
+  if (outL > 11) outL = 11;
+
+  // first clear it out
+  for (i = 0; i < 128; i++)
+    pix_buf[i] = 0;
+
+  // draw input output
+  put_char_small('I', 0, 0, 1);
+  put_char_small('O', 44, 0, 1);
+
+  // VU meter
+  // after I
+ // little guys
+   for (i = 7; i<38; i+=3) {
+    draw_box_filled(i, 1, 1, 1);
+    draw_box_filled(i, 5, 1, 1);
+  }
+
+  // big guys
+  for (i = 0; i < (inR); i++) {
+    draw_box_filled(7 + (3 * i), 0, 3, 2);
+  }
+
+  for (i = 0; i < (inL); i++) {
+    draw_box_filled(7 + (3 * i), 4, 3, 2);
+  }
+
+  // after O
+  // small guys
+  for (i = 53; i<84; i+=3) {
+    draw_box_filled(i, 1, 1, 1);
+    draw_box_filled(i, 5, 1, 1);
+  }
+  // big guys
+  for (i = 0; i < (outR); i++) {
+    draw_box_filled(53 + (3 * i), 0, 3, 2);
+  }
+
+  for (i = 0; i < (outL); i++) {
+    draw_box_filled(53 + (3 * i), 4, 3, 2);
+  }
+}
+
+void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
+
+  int i, len;
+
+  // bounds for vu
+  // i guess it goes up to 11 haha
+  if (inR < 0) inR = 0;
+  if (inR > 11) inR = 11;
+  if (inL < 0) inL = 0;
+  if (inL > 11) inL = 11;
+
+  if (outR < 0) outR = 0;
+  if (outR > 11) outR = 11;
+  if (outL < 0) outL = 0;
+  if (outL > 11) outL = 11;
+
+  // first clear it out
+  for (i = 0; i < 128; i++)
+    pix_buf[i] = 0;
+
+  // draw input output
+  put_char_small('I', 0, 0, 1);
+  put_char_small('O', 64, 0, 1);
+
+
+  // VU meter
+  // after I
+  // little guys
+  draw_box_filled(7,  1, 1, 2);
+  draw_box_filled(12, 1, 1, 2);
+  draw_box_filled(17, 1, 1, 2);
+  draw_box_filled(22, 1, 1, 2);
+  draw_box_filled(27, 1, 1, 2);
+  draw_box_filled(32, 1, 1, 2);
+  draw_box_filled(37, 1, 1, 2);
+  draw_box_filled(42, 1, 1, 2);
+  draw_box_filled(47, 1, 1, 2);
+  draw_box_filled(52, 1, 1, 2);
+  draw_box_filled(57, 1, 1, 2);
+
+  draw_box_filled(7,  5, 1, 2);
+  draw_box_filled(12, 5, 1, 2);
+  draw_box_filled(17, 5, 1, 2);
+  draw_box_filled(22, 5, 1, 2);
+  draw_box_filled(27, 5, 1, 2);
+  draw_box_filled(32, 5, 1, 2);
+  draw_box_filled(37, 5, 1, 2);
+  draw_box_filled(42, 5, 1, 2);
+  draw_box_filled(47, 5, 1, 2);
+  draw_box_filled(52, 5, 1, 2);
+  draw_box_filled(57, 5, 1, 2);
+
+  // big guys
+  for (i = 0; i < (inR); i++) {
+    draw_box_filled(7 + (5 * i), 0, 3, 4);
+  }
+
+  for (i = 0; i < (inL); i++) {
+    draw_box_filled(7 + (5 * i), 4, 3, 4);
+  }
+
+  // after O
+  // small guys
+  draw_box_filled(73, 1, 1, 2);
+  draw_box_filled(78, 1, 1, 2);
+  draw_box_filled(83, 1, 1, 2);
+  draw_box_filled(88, 1, 1, 2);
+  draw_box_filled(93, 1, 1, 2);
+  draw_box_filled(98, 1, 1, 2);
+  draw_box_filled(103, 1, 1, 2);
+  draw_box_filled(108, 1, 1, 2);
+  draw_box_filled(113, 1, 1, 2);
+  draw_box_filled(118, 1, 1, 2);
+  draw_box_filled(123, 1, 1, 2);
+
+  draw_box_filled(73, 5, 1, 2);
+  draw_box_filled(78, 5, 1, 2);
+  draw_box_filled(83, 5, 1, 2);
+  draw_box_filled(88, 5, 1, 2);
+  draw_box_filled(93, 5, 1, 2);
+  draw_box_filled(98, 5, 1, 2);
+  draw_box_filled(103, 5, 1, 2);
+  draw_box_filled(108, 5, 1, 2);
+  draw_box_filled(113, 5, 1, 2);
+  draw_box_filled(118, 5, 1, 2);
+  draw_box_filled(123, 5, 1, 2);
+
+  // big guys
+  for (i = 0; i < (outR); i++) {
+    draw_box_filled(73 + (5 * i), 0, 3, 4);
+  }
+
+  for (i = 0; i < (outL); i++) {
+    draw_box_filled(73 + (5 * i), 4, 3, 4);
+  }
+}
 

@@ -24,8 +24,6 @@ class OledScreen
         void draw_box_filled(uint8_t x, uint8_t y, uint8_t sizex, uint8_t sizey );
         void draw_box(uint8_t x, uint8_t y, uint8_t sizex, uint8_t sizey, uint8_t color);
         void fill_area(uint8_t x, uint8_t y, uint8_t sizex, uint8_t sizey,uint8_t color);
-        void drawInfoBar(int inR, int inL, int outR, int outL);
-        void drawNotification(const char * line );
         void put_pixel(unsigned int color, unsigned int x, unsigned int y);
         unsigned int get_pixel(unsigned int x, unsigned int y);
         void invert_screen(void);
@@ -38,6 +36,10 @@ class OledScreen
         void println(const char * line, int x, int y, int h, int color);
         void println_8(const char * line, int len, int x, int y);
         void saveSVG(const char * filename);
+        
+        void drawInfoBar(int inR, int inL, int outR, int outL);
+        void drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus, int batteryLevel);
+        void drawNotification(const char * line );
 };
 
 
