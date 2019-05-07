@@ -11,24 +11,19 @@
 #
 # By default this script does nothing.
 
-# Print the IP address
-_IP=$(hostname -I) || true
-if [ "$_IP" ]; then
-  printf "My IP address is %s\n" "$_IP"
-fi
-
 # keep it fast
 echo -n performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
-# monitor power switch
-python /home/pi/pwrctl.py &
-
-# disable status led
+# disable status led after bootup
 echo none > /sys/class/leds/led0/trigger
 
-# start mother
+# set organelle fw dir
 export FW_DIR=/home/pi/fw_dir
 
+# monitor power switch
+python $FW_DIR/scripts/power_switch.py &
+
+# start organelle mother 
 su - pi $FW_DIR/scripts/start-mother.sh & > /dev/null 2>&1
 
 exit 0
