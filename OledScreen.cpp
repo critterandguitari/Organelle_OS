@@ -447,11 +447,52 @@ void OledScreen::drawNotification(const char * line) {
   println_8(line, len>21 ? 21: len,  2, 0);
 }
 
+void OledScreen::drawBatteryMeter(int lev) {
+    
+    int x = 112;
+    int y = 0;
+
+    draw_box(x, y, 13, 7, 1);
+
+    draw_line(x + 2, y + 2, x + 2, y + 4, 1);
+    draw_line(x + 4, y + 2, x + 4, y + 4, 1);
+    draw_line(x + 6, y + 2, x + 6, y + 4, 1);
+    draw_line(x + 8, y + 2, x + 8, y + 4, 1);
+    draw_line(x + 8, y + 2, x + 8, y + 4, 1);
+    draw_line(x + 10, y + 2, x + 10, y + 4, 1);
+    draw_line(x + 13, y + 2, x + 13, y + 4, 1);
+}
+
+void OledScreen::drawWifiMeter(int lev) {
+    int x = 95;
+    int y =0;
+
+    put_pixel(1, x + 0, y + 2);
+    put_pixel(1, x + 1, y + 1);
+    put_pixel(1, x + 2, y + 0);
+    put_pixel(1, x + 2, y + 3);
+    put_pixel(1, x + 3, y + 0);
+    put_pixel(1, x + 3, y + 2);
+    //put_pixel(1, x + 3, y + 5);
+    put_pixel(1, x + 4, y + 0);
+    put_pixel(1, x + 4, y + 2);
+    //put_pixel(1, x + 4, y + 4);
+    put_pixel(1, x + 4, y + 5);
+    //put_pixel(1, x + 4, y + 6);
+    put_pixel(1, x + 5, y + 0);
+    put_pixel(1, x + 5, y + 2);
+    //put_pixel(1, x + 5, y + 5);
+    put_pixel(1, x + 6, y + 0);
+    put_pixel(1, x + 6, y + 3);
+    put_pixel(1, x + 7, y + 1);
+    put_pixel(1, x + 8, y + 2);
+}
 
 void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus, int batteryLevel) {
 
   int i, len;
 
+    
   // bounds for vu
   // i guess it goes up to 11 haha
   if (inR < 0) inR = 0;
@@ -468,40 +509,44 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus
   for (i = 0; i < 128; i++)
     pix_buf[i] = 0;
 
+    drawBatteryMeter(0);
+    drawWifiMeter(0);
+  
   // draw input output
   put_char_small('I', 0, 0, 1);
-  put_char_small('O', 44, 0, 1);
+  put_char_small('O', 45, 0, 1);
 
   // VU meter
   // after I
- // little guys
-   for (i = 7; i<38; i+=3) {
-    draw_box_filled(i, 1, 1, 1);
-    draw_box_filled(i, 5, 1, 1);
+  // little guys
+  for (i = 0; i<11; i+=1) {
+    draw_box_filled((i * 3) + 8, 1, 1, 1);
+    draw_box_filled((i * 3) + 8, 5, 1, 1);
   }
 
   // big guys
   for (i = 0; i < (inR); i++) {
-    draw_box_filled(7 + (3 * i), 0, 3, 2);
+    draw_box_filled((i * 3) + 7, 0, 3, 2);
   }
 
   for (i = 0; i < (inL); i++) {
-    draw_box_filled(7 + (3 * i), 4, 3, 2);
+    draw_box_filled((i * 3) + 7, 4, 3, 2);
   }
 
   // after O
   // small guys
-  for (i = 53; i<84; i+=3) {
-    draw_box_filled(i, 1, 1, 1);
-    draw_box_filled(i, 5, 1, 1);
+  for (i = 0; i<11; i+=1) {
+    draw_box_filled((i * 3) + 55, 1, 1, 1);
+    draw_box_filled((i * 3) + 55, 5, 1, 1);
   }
+  
   // big guys
   for (i = 0; i < (outR); i++) {
-    draw_box_filled(53 + (3 * i), 0, 3, 2);
+    draw_box_filled((i * 3) + 54, 0, 3, 2);
   }
 
   for (i = 0; i < (outL); i++) {
-    draw_box_filled(53 + (3 * i), 4, 3, 2);
+    draw_box_filled((i * 3) + 54, 4, 3, 2);
   }
 }
 

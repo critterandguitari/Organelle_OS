@@ -40,6 +40,8 @@ class OledScreen
         void drawInfoBar(int inR, int inL, int outR, int outL);
         void drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus, int batteryLevel);
         void drawNotification(const char * line );
+        void drawBatteryMeter(int lev);
+        void drawWifiMeter(int lev);
 };
 
 
