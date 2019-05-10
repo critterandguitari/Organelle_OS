@@ -61,6 +61,7 @@ AppData::AppData(){
     setFirmwareDir(NULL);
     setUserDir(NULL);
     inL = inR = outL = outR = 0;
+    wifiStatus = 0;
 }
 
 bool AppData::isPatchHome() {

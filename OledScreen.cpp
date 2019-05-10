@@ -461,34 +461,38 @@ void OledScreen::drawBatteryMeter(int lev) {
     draw_line(x + 8, y + 2, x + 8, y + 4, 1);
     draw_line(x + 10, y + 2, x + 10, y + 4, 1);
     draw_line(x + 13, y + 2, x + 13, y + 4, 1);
+
+
+    put_pixel(0, x, y);
+    put_pixel(0, x, y + 6);
 }
 
 void OledScreen::drawWifiMeter(int lev) {
     int x = 95;
     int y =0;
 
-    put_pixel(1, x + 0, y + 2);
-    put_pixel(1, x + 1, y + 1);
-    put_pixel(1, x + 2, y + 0);
-    put_pixel(1, x + 2, y + 3);
-    put_pixel(1, x + 3, y + 0);
-    put_pixel(1, x + 3, y + 2);
-    //put_pixel(1, x + 3, y + 5);
-    put_pixel(1, x + 4, y + 0);
-    put_pixel(1, x + 4, y + 2);
-    //put_pixel(1, x + 4, y + 4);
-    put_pixel(1, x + 4, y + 5);
-    //put_pixel(1, x + 4, y + 6);
-    put_pixel(1, x + 5, y + 0);
-    put_pixel(1, x + 5, y + 2);
-    //put_pixel(1, x + 5, y + 5);
-    put_pixel(1, x + 6, y + 0);
-    put_pixel(1, x + 6, y + 3);
-    put_pixel(1, x + 7, y + 1);
-    put_pixel(1, x + 8, y + 2);
+    if (lev) {
+        put_pixel(1, x + 0, y + 2);
+        put_pixel(1, x + 1, y + 1);
+        put_pixel(1, x + 2, y + 0);
+        put_pixel(1, x + 2, y + 3);
+        put_pixel(1, x + 3, y + 0);
+        put_pixel(1, x + 3, y + 2);
+        put_pixel(1, x + 4, y + 0);
+        put_pixel(1, x + 4, y + 2);
+        put_pixel(1, x + 4, y + 4);
+        put_pixel(1, x + 4, y + 5);
+        put_pixel(1, x + 4, y + 6);
+        put_pixel(1, x + 5, y + 0);
+        put_pixel(1, x + 5, y + 2);
+        put_pixel(1, x + 6, y + 0);
+        put_pixel(1, x + 6, y + 3);
+        put_pixel(1, x + 7, y + 1);
+        put_pixel(1, x + 8, y + 2);
+    }
 }
 
-void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus, int batteryLevel) {
+void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus, int batteryLevel, int wifiStatus) {
 
   int i, len;
 
@@ -510,7 +514,7 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus
     pix_buf[i] = 0;
 
     drawBatteryMeter(0);
-    drawWifiMeter(0);
+    drawWifiMeter(wifiStatus);
   
   // draw input output
   put_char_small('I', 0, 0, 1);

@@ -89,6 +89,7 @@ public:
     int outL;
     int outR;
 
+    int wifiStatus;              // network connection status
 
 private:
     OledScreen oleds_[SCREEN_MAX];

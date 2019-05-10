@@ -270,7 +270,7 @@ void MainMenu::runPatch(const char* name, const char* arg) {
             if (guimode) {
                 args += " -audiobuf 10";
             } else {
-                args += " -nogui -audiobuf 4";
+                args += " -nogui -audiobuf 6";
             }
 
             args += std::string(" -path ") + app.getUserDir() + "/PdExtraLibs";

@@ -124,6 +124,7 @@ void quitMother(OSCMessage &msg);
 void programChange(OSCMessage &msg);
 void sendShutdown(OSCMessage &msg);
 void sendReady(OSCMessage &msg);
+void wifiStatus(OSCMessage &msg);
 
 void pedalExprMin(OSCMessage &msg);
 void pedalExprMax(OSCMessage &msg);
@@ -242,6 +243,8 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/pedal/exprMax", pedalExprMax, 0)
                     || msgIn.dispatch("/pedal/switchMode", pedalSwitchMode, 0)
 
+                    || msgIn.dispatch("/wifiStatus", wifiStatus, 0)
+
                     ;
                 if (!processed) {
                     char buf[128];
@@ -298,7 +301,7 @@ int main(int argc, char* argv[]) {
                     // check if we should draw info bar on this patch screen
                     if (app.oled((AppData::Screen) app.currentScreen).showInfoBar) {
 #ifdef BATTERY_METER
-                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, 0,0);
+                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, 0,0, app.wifiStatus);
 #else
                         app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL);
 #endif
@@ -605,6 +608,12 @@ void programChange(OSCMessage &msg) {
 
 void quitMother(OSCMessage &msg) {
     quit = 1;
+}
+
+void wifiStatus(OSCMessage &msg) {
+    if (msg.isInt(0)) {
+        app.wifiStatus = msg.getInt(0);
+    }
 }
 
 void setLED(OSCMessage &msg) {

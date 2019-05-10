@@ -23,6 +23,9 @@ export FW_DIR=/home/pi/fw_dir
 # monitor power switch
 python $FW_DIR/scripts/power_switch.py &
 
+# monitor wifi connection
+python $FW_DIR/scripts/wifi_statusd.py &
+
 # start organelle mother 
 su - pi $FW_DIR/scripts/start-mother.sh & > /dev/null 2>&1
 

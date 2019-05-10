@@ -38,7 +38,7 @@ class OledScreen
         void saveSVG(const char * filename);
         
         void drawInfoBar(int inR, int inL, int outR, int outL);
-        void drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus, int batteryLevel);
+        void drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus, int batteryLevel, int wifiStatus);
         void drawNotification(const char * line );
         void drawBatteryMeter(int lev);
         void drawWifiMeter(int lev);
