@@ -15,7 +15,7 @@ midiindevname1: /dev/midi3
 nomidiout: False
 midioutdev1: 0
 midioutdevname1: /dev/midi3
-path1: /home/pi/externals
+path1: /home/music/externals
 npath: 1
 standardpath: 1
 verbose: 0

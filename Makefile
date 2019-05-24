@@ -49,9 +49,9 @@ organelle_deploy : organelle
 organelle_m_deploy : organelle_m
 	@echo "Updating OS to $(IMAGE_VERSION)"
 	@echo "copying common fw files"
-	cp -fr fw_dir/* /home/pi/fw_dir
+	cp -fr fw_dir/* /home/music/fw_dir
 	@echo "copying platform fw files"
-	cp -fr platforms/organelle_m/fw_dir/* /home/pi/fw_dir
+	cp -fr platforms/organelle_m/fw_dir/* /home/music/fw_dir
 	@echo "copying version file to root for backwards compatiblility"
 	cp -fr fw_dir/version /root
 	@echo "copying systems files"

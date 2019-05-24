@@ -6,11 +6,11 @@
     </StartupCommand>
 
      <StartupCommand>
-       /home/pi/fw_dir/scripts/start-mother.sh
+       /home/music/fw_dir/scripts/start-mother.sh
     </StartupCommand>
 
      <StartupCommand>
-       conky -c /home/pi/conkyrc
+       conky -c /home/music/conkyrc
     </StartupCommand>
 
 
@@ -84,8 +84,8 @@
         <TaskList maxwidth="256"/>
 
         <Dock/>
-        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/emotes/face-uncertain.png" popup="Reset Menu">exec:/home/pi/fw_dir/scripts/restart-mother.sh</TrayButton>
-        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/actions/process-stop.png" popup="Exit Gui">exec:/home/pi/fw_dir/scripts/stop-gui.sh</TrayButton>
+        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/emotes/face-uncertain.png" popup="Reset Menu">exec:/home/music/fw_dir/scripts/restart-mother.sh</TrayButton>
+        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/actions/process-stop.png" popup="Exit Gui">exec:/home/music/fw_dir/scripts/stop-gui.sh</TrayButton>
         <!--Clock>xclock</Clock-->
 
     </Tray>

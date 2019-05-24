@@ -6,7 +6,7 @@
 # to startx in read only root fs
 export XAUTHORITY=/var/tmp/.Xauthority_$USER
 
-export FW_DIR=/home/pi/fw_dir
+export FW_DIR=/home/music/fw_dir
 
 ps cax | grep mother > /dev/null
 if [ $? -eq 0 ]; then
