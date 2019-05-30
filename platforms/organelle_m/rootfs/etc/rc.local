@@ -20,6 +20,9 @@ echo none > /sys/class/leds/led0/trigger
 # set organelle fw dir
 export FW_DIR=/home/music/fw_dir
 
+# start ttymidi
+ttymidi -s /dev/ttyAMA0 -b 38400 &
+
 # monitor power switch
 python $FW_DIR/scripts/power_switch.py &
 
