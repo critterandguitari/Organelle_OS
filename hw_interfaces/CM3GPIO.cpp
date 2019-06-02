@@ -395,27 +395,27 @@ void CM3GPIO::getEncoder(void){
 	encoder = (pinValues >> 5) & 0x3;
 	
     if (encoder != encoder_last) {
-		if (encoder_last == 0) {
-			if (encoder == 2){
-				encTurn = 0;
+        if (encoder_last == 0) {
+	    if (encoder == 2){
+	        encTurn = 1;
                 encTurnFlag = 1;
-			}
+            }
             if (encoder == 1){
+                encTurn = 0;
+                encTurnFlag = 1; 
+	    }
+        }
+        if (encoder_last == 3) {
+	    if (encoder == 1){
                 encTurn = 1;
                 encTurnFlag = 1;
-		    }
-        }
-		if (encoder_last == 3) {
-			if (encoder == 1){
+	    }
+            if (encoder == 2){
                 encTurn = 0;
                 encTurnFlag = 1;
-			}
-            if (encoder == 2){
-                encTurn = 1;
-                encTurnFlag = 1;
-		    }
+            }
         }
-		encoder_last = encoder;
+        encoder_last = encoder;
 	}
 }
 
