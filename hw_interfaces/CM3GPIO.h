@@ -50,6 +50,7 @@ class CM3GPIO
         void getKeys();
         uint32_t adcRead(uint8_t adcnum);
         void displayPinValues();
+	void checkFootSwitch ();
         
         uint32_t pinValues;
         uint32_t pinValuesLast;

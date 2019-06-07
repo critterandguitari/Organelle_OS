@@ -192,6 +192,8 @@ void CM3GPIO::pollKnobs(){
     // also check the pwr status pin
     pwrStatus = digitalRead(PWR_STATUS);
     
+    checkFootSwitch();
+
     knobFlag = 1;
 }
 
@@ -454,3 +456,16 @@ void CM3GPIO::displayPinValues(void)
     printf("\n");
 }
 
+void CM3GPIO::checkFootSwitch (void) {
+    static uint8_t foot_last = 0;
+    uint8_t tmp;
+
+    if (adcs[5] < 100) tmp = 0;
+    if (adcs[5] > 900) tmp = 1;
+
+    if (tmp != foot_last){
+        footswitch = tmp;
+        foot_last = tmp;
+        footswitchFlag = 1;
+    }
+}
