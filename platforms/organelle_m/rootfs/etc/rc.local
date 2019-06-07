@@ -11,6 +11,11 @@
 #
 # By default this script does nothing.
 
+# disable output from this script
+exec 2> /dev/null
+exec 1>&2
+set -x
+
 # keep it fast
 echo -n performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
@@ -24,12 +29,12 @@ export FW_DIR=/home/music/fw_dir
 ttymidi -s /dev/ttyAMA0 -b 38400 &
 
 # monitor power switch
-python $FW_DIR/scripts/power_switch_monitor.py & > /dev/null 2>&1
+python $FW_DIR/scripts/power_switch_monitor.py &
 
 # monitor wifi connection
-python $FW_DIR/scripts/wifi_monitor.py & > /dev/null 2>&1
+python $FW_DIR/scripts/wifi_monitor.py & 
 
 # start organelle mother 
-su - music $FW_DIR/scripts/start-mother.sh & > /dev/null 2>&1
+su - music $FW_DIR/scripts/start-mother.sh & 
 
 exit 0
