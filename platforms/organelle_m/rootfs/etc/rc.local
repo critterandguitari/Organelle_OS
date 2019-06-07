@@ -27,7 +27,7 @@ ttymidi -s /dev/ttyAMA0 -b 38400 &
 python $FW_DIR/scripts/power_switch_monitor.py & > /dev/null 2>&1
 
 # monitor wifi connection
-python $FW_DIR/scripts/wifi_status_monitor.py & > /dev/null 2>&1
+python $FW_DIR/scripts/wifi_monitor.py & > /dev/null 2>&1
 
 # start organelle mother 
 su - music $FW_DIR/scripts/start-mother.sh & > /dev/null 2>&1
