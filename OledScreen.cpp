@@ -471,7 +471,7 @@ void OledScreen::drawWifiMeter(int lev) {
     int x = 95;
     int y =0;
 
-    if (lev) {
+/*    if (lev) {
         put_pixel(1, x + 0, y + 2);
         put_pixel(1, x + 1, y + 1);
         put_pixel(1, x + 2, y + 0);
@@ -489,6 +489,42 @@ void OledScreen::drawWifiMeter(int lev) {
         put_pixel(1, x + 6, y + 3);
         put_pixel(1, x + 7, y + 1);
         put_pixel(1, x + 8, y + 2);
+    }
+*/
+
+   if (lev) {
+        put_pixel(1, x + 0, y + 0);
+        put_pixel(1, x + 1, y + 0);
+        put_pixel(1, x + 2, y + 0);
+        put_pixel(1, x + 3, y + 0);
+        put_pixel(1, x + 4, y + 0);
+        put_pixel(1, x + 5, y + 0);
+        put_pixel(1, x + 6, y + 0);
+        put_pixel(1, x + 7, y + 0);
+        put_pixel(1, x + 8, y + 0);
+        put_pixel(1, x + 9, y + 0);
+        put_pixel(1, x + 10, y + 0);
+        
+	put_pixel(1, x + 1, y + 1);
+	put_pixel(1, x + 5, y + 1);
+	put_pixel(1, x + 9, y + 1);
+
+	put_pixel(1, x + 2, y + 2);
+	put_pixel(1, x + 5, y + 2);
+	put_pixel(1, x + 8, y + 2);
+
+	put_pixel(1, x + 3, y + 3);
+	put_pixel(1, x + 5, y + 3);
+	put_pixel(1, x + 7, y + 3);
+
+	put_pixel(1, x + 4, y + 4);
+	put_pixel(1, x + 5, y + 4);
+	put_pixel(1, x + 6, y + 4);
+
+
+	put_pixel(1, x + 5, y + 5);
+	put_pixel(1, x + 5, y + 6);
+
     }
 }
 
