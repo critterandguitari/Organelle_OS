@@ -1,4 +1,4 @@
-# Organelle UI Program
+# Organelle OS Program
 
-Provides communication betweem MCU (OSC over serial) and Pd (OSC over UDP), handles OLED and menu interface.
+Provides menu interface for operating the Organelle, interfaces with hardware, launches patches, provides settings for midi, wifi, etc...
 
