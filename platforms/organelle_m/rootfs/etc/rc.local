@@ -34,7 +34,4 @@ python $FW_DIR/scripts/power_switch_monitor.py &
 # monitor wifi connection
 python $FW_DIR/scripts/wifi_monitor.py & 
 
-# start organelle mother 
-su - music $FW_DIR/scripts/start-mother.sh & 
-
 exit 0
