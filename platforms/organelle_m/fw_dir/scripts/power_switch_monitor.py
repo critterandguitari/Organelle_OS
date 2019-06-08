@@ -1,6 +1,9 @@
 import time
 import RPi.GPIO as GPIO
 import os
+import imp
+
+fw_dir = os.getenv("FW_DIR", "/root")
 
 GPIO.setmode(GPIO.BCM)
 
@@ -10,7 +13,6 @@ time.sleep(1)
 
 while True:
         if not GPIO.input(13):
-            print "shutting down....................................................................................................................................................................................."
-            os.system("sudo halt")
+            os.system(fw_dir + "/scripts/shutdown.sh")
         time.sleep(1)
 

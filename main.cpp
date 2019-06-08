@@ -794,6 +794,16 @@ void sendReady(OSCMessage &msg ) {
 
 void sendShutdown(OSCMessage &msg ) {
     controls.shutdown();
+#ifdef PWR_SWITCH
+    // the power switch got flipped off, so say shutting down
+    fprintf(stderr, "shutting down.....\n");
+    app.oled(AppData::AUX).clear();
+    app.oled(AppData::AUX).setLine(3, "Shutting down");
+    app.oled(AppData::AUX).newScreen = 1;
+    app.currentScreen = AppData::AUX;
+    // lock it to this screen
+    app.setAuxScreenEncoderOverride(1);
+#endif 
 }
 
 /* end internal OSC messages received */
