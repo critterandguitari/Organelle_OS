@@ -451,7 +451,6 @@ void OledScreen::drawBatteryMeter(int lev) {
     
     int x = 112;
     int y = 0;
-
     draw_box(x, y, 13, 7, 1);
 
     draw_line(x + 2, y + 2, x + 2, y + 4, 1);
@@ -462,9 +461,38 @@ void OledScreen::drawBatteryMeter(int lev) {
     draw_line(x + 10, y + 2, x + 10, y + 4, 1);
     draw_line(x + 13, y + 2, x + 13, y + 4, 1);
 
-
     put_pixel(0, x, y);
-    put_pixel(0, x, y + 6);
+    put_pixel(0, x, y + 6);  
+}
+
+void OledScreen::drawPlug(void) {
+	    
+    int x = 112;
+    int y = 0;
+
+    put_pixel(1, x + 0, y + 3);
+    put_pixel(1, x + 1, y + 3);
+    put_pixel(1, x + 2, y + 3);
+    put_pixel(1, x + 3, y + 3);
+    put_pixel(1, x + 4, y + 3);
+    put_pixel(1, x + 5, y + 3);
+
+    put_pixel(1, x + 6, y + 2);
+    put_pixel(1, x + 6, y + 3);
+    put_pixel(1, x + 6, y + 4);
+
+    put_pixel(1, x + 7, y + 1);
+    put_pixel(1, x + 7, y + 5);
+
+    put_pixel(1, x + 8, y + 0);
+    put_pixel(1, x + 8, y + 6);
+
+    put_pixel(1, x + 9, y + 0);
+    put_pixel(1, x + 9, y + 6);
+
+    draw_line(x + 10, y + 0, x + 10, y + 6, 1);
+    draw_line(x + 11, y + 1, x + 14, y + 1, 1);
+    draw_line(x + 11, y + 5, x + 14, y + 5, 1);
 }
 
 void OledScreen::drawWifiMeter(int lev) {
@@ -521,7 +549,6 @@ void OledScreen::drawWifiMeter(int lev) {
 	put_pixel(1, x + 5, y + 4);
 	put_pixel(1, x + 6, y + 4);
 
-
 	put_pixel(1, x + 5, y + 5);
 	put_pixel(1, x + 5, y + 6);
 
@@ -531,7 +558,6 @@ void OledScreen::drawWifiMeter(int lev) {
 void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus, int batteryLevel, int wifiStatus) {
 
   int i, len;
-
     
   // bounds for vu
   // i guess it goes up to 11 haha
@@ -549,8 +575,9 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus
   for (i = 0; i < 128; i++)
     pix_buf[i] = 0;
 
-    drawBatteryMeter(0);
-    drawWifiMeter(wifiStatus);
+  if (pwrStatus) drawBatteryMeter(batteryLevel);
+  else drawPlug();
+  drawWifiMeter(wifiStatus);
   
   // draw input output
   put_char_small('I', 0, 0, 1);

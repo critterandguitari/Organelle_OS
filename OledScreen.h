@@ -42,6 +42,7 @@ class OledScreen
         void drawNotification(const char * line );
         void drawBatteryMeter(int lev);
         void drawWifiMeter(int lev);
+        void drawPlug();
 };
 
 

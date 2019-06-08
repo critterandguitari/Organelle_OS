@@ -301,7 +301,7 @@ int main(int argc, char* argv[]) {
                     // check if we should draw info bar on this patch screen
                     if (app.oled((AppData::Screen) app.currentScreen).showInfoBar) {
 #ifdef BATTERY_METER
-                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, 0,0, app.wifiStatus);
+                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, controls.pwrStatus, 0, app.wifiStatus);
 #else
                         app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL);
 #endif
