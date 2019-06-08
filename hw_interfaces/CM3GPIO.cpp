@@ -149,6 +149,9 @@ void CM3GPIO::init(){
     shiftRegRead();
     pinValuesLast = pinValues;
     micSelSwitch = (pinValues >> 3) & 1;
+
+    // set 
+    batteryVoltage = 5; 
 }
 
 void CM3GPIO::clearFlags() {
@@ -181,6 +184,9 @@ void CM3GPIO::poll(){
 
 void CM3GPIO::pollKnobs(){    
 
+    static uint32_t battAvg = 0;
+    static uint8_t num = 0;
+    
     adcs[0] = adcRead(0);
     adcs[1] = adcRead(1);
     adcs[2] = adcRead(2);
@@ -193,6 +199,17 @@ void CM3GPIO::pollKnobs(){
     pwrStatus = digitalRead(PWR_STATUS);
     
     checkFootSwitch();
+    
+    // average 16 battery readings
+    battAvg += adcs[6];
+    num++;
+    num &= 0xf;
+    if (!num) {
+        battAvg >>= 4;
+	// calculate voltage, the 10.3125 is from the voltage divider
+    	batteryVoltage = ((float)battAvg / 1024) * 10.3125;
+	battAvg = 0;
+    }
 
     knobFlag = 1;
 }
