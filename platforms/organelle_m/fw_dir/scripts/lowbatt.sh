@@ -6,7 +6,8 @@ FW_DIR=${FW_DIR:="/root"}
 SCRIPTS_DIR=$FW_DIR/scripts
 
 oscsend localhost 4001 /oled/aux/clear i 1
-oscsend localhost 4001 /oled/aux/line/3 s "Shutting down"
+oscsend localhost 4001 /oled/aux/line/1 s "Low Battery"
+oscsend localhost 4001 /oled/aux/line/3 s "Auto power off"
 oscsend localhost 4001 /oled/setscreen i 1
 oscsend localhost 4001 /enableauxsub i 1
 
@@ -15,4 +16,4 @@ $SCRIPTS_DIR/killmother.sh
 
 # shutdown wifi
 
-shutdown -h now
+sudo shutdown -h now

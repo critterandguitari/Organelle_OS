@@ -49,6 +49,8 @@
 #define AUX_LED_BLUE_OFF digitalWrite(LEDB,HIGH);
 #define AUX_LED_BLUE_ON digitalWrite(LEDB,LOW);
 
+#define LOW_BATTERY_SHUTDOWN_THRESHOLD 5.05
+
 // OLED init bytes
 static unsigned char oled_initcode[] = {
 	// Initialisation sequence
@@ -151,7 +153,8 @@ void CM3GPIO::init(){
     micSelSwitch = (pinValues >> 3) & 1;
 
     // set 
-    batteryVoltage = 5; 
+    batteryVoltage = 5;
+    lowBatteryShutdown = false;
 }
 
 void CM3GPIO::clearFlags() {
@@ -206,9 +209,12 @@ void CM3GPIO::pollKnobs(){
     num &= 0xf;
     if (!num) {
         battAvg >>= 4;
-	// calculate voltage, the 10.3125 is from the voltage divider
+	    // calculate voltage, the 10.3125 is from the voltage divider
     	batteryVoltage = ((float)battAvg / 1024) * 10.3125;
-	battAvg = 0;
+	    battAvg = 0;
+
+        // check for low power 
+        if (batteryVoltage < LOW_BATTERY_SHUTDOWN_THRESHOLD) lowBatteryShutdown = true;
     }
 
     knobFlag = 1;

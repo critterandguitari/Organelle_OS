@@ -43,8 +43,9 @@ class CM3GPIO
         // organelle m specific stuff
         uint32_t pwrStatus;
         uint32_t micSelSwitch;
-	float batteryVoltage;
-	uint32_t batteryPercent;
+	    float batteryVoltage;
+	    uint32_t batteryPercent;
+        bool lowBatteryShutdown;
 
     private:        
         uint32_t shiftRegRead();

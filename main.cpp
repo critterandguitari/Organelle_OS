@@ -141,8 +141,8 @@ void footswitchInput(void);
 /* helpers */
 void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg);
 void patchLoaded(bool);
-//void setEnv();
-//int execScript(const char* cmd);
+void setEnv();
+int execScript(const char* cmd);
 std::string getMainSystemFile(  const std::vector<std::string>& paths,
                             const std::string& filename);
 
@@ -331,6 +331,19 @@ int main(int argc, char* argv[]) {
             // send a ping in case MCU resets
             pingTimer.reset();
             controls.ping();
+
+#ifdef BATTERY_METER
+            // if we have a battery / wifi meter, keep the screen updated to show status
+            app.oled((AppData::Screen) app.currentScreen).newScreen = 1;
+
+            // shutdown when batteries get low
+            //printf("battery %2.2f  \n", controls.batteryVoltage);
+            
+            if (controls.lowBatteryShutdown) {
+                printf("low battery detected.  shutting down.\n");
+                execScript("lowbatt.sh &");
+            }
+#endif
 
 #ifdef PWR_SWITCH
             // dont do shutdown shortcut if there is a power switch 
@@ -627,7 +640,6 @@ void quitMother(OSCMessage &msg) {
 void wifiStatus(OSCMessage &msg) {
     if (msg.isInt(0)) {
         app.wifiStatus = msg.getInt(0);
-        app.oled((AppData::Screen) app.currentScreen).newScreen = 1;
     }
 }
 
@@ -809,16 +821,6 @@ void sendReady(OSCMessage &msg ) {
 
 void sendShutdown(OSCMessage &msg ) {
     controls.shutdown();
-#ifdef PWR_SWITCH
-    // the power switch got flipped off, so say shutting down
-    fprintf(stderr, "shutting down.....\n");
-    app.oled(AppData::AUX).clear();
-    app.oled(AppData::AUX).setLine(3, "Shutting down");
-    app.oled(AppData::AUX).newScreen = 1;
-    app.currentScreen = AppData::AUX;
-    // lock it to this screen
-    app.setAuxScreenEncoderOverride(1);
-#endif 
 }
 
 /* end internal OSC messages received */
@@ -1040,7 +1042,7 @@ void setScreenLine(OledScreen &screen, int lineNum, OSCMessage &msg) {
     screen.setLine(lineNum, screenLine);
     //    printf("%s\n", screenLine);
 }
-/*
+
 void setEnv() {
     setenv("PATCH_DIR", app.getPatchDir().c_str(), 1);
     setenv("FW_DIR", app.getFirmwareDir().c_str(), 1);
@@ -1053,7 +1055,7 @@ int execScript(const char* cmd) {
     setEnv();
     return system(buf);
 }
-*/
+
 std::string getMainSystemFile(  const std::vector<std::string>& paths,
                             const std::string& filename) {
 // look for file in set of paths, in preference order
