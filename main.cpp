@@ -291,6 +291,20 @@ int main(int argc, char* argv[]) {
             } else if (app.currentScreen == AppData::MENU) {
                 if (app.oled(AppData::MENU).newScreen) {
                     app.oled(AppData::MENU).newScreen = 0;
+
+		            if (! (app.isPatchRunning() || app.isPatchLoading()) ) {
+#ifdef BATTERY_METER
+			            app.oled(AppData::MENU).drawNotification("Select patch", controls.pwrStatus, 0, app.wifiStatus);
+#else
+			            app.oled(AppData::MENU).drawNotification("Select patch");
+#endif
+		            } else {
+#ifdef BATTERY_METER
+                        app.oled(AppData::MENU).drawNotification(app.getCurrentPatch(), controls.pwrStatus, 0, app.wifiStatus);
+#else
+                        app.oled(AppData::MENU).drawNotification(app.getCurrentPatch());
+#endif
+                    }
                     controls.updateOLED(app.oled(AppData::MENU));
                 }
 

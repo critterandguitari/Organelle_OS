@@ -355,22 +355,6 @@ void MainMenu::runPatch(const char* name, const char* arg) {
         strcpy(app.currentPatch, arg);
         strcpy(app.currentPatchPath, app.getPatchDir().c_str());
 
-        // put the patch name on top of screen
-        // truncate long file names
-        int len = strlen(arg);
-        if (len > 20) {
-            sprintf(buf, "> %s", arg);
-            buf[11] = '.';
-            buf[12] = '.';
-            buf[13] = '.';
-            strcpy(&buf[14], &arg[len - 7]);
-
-        }
-        else {
-            sprintf(buf, "> %s", arg);
-        }
-
-        app.oled(AppData::MENU).drawNotification(buf);
     } else {
         std::cerr << "No patch found: " << patchlocation << std::endl;
     }
@@ -541,7 +525,6 @@ void MainMenu::drawPatchList(void) {
             line[10] = '.';
             line[11] = '.';
             strcpy(&line[12], &menuItems[i + menuOffset].name[len - 9]);
-
         }
         else {
             sprintf(line, "%s", menuItems[i + menuOffset].name);
@@ -554,10 +537,6 @@ void MainMenu::drawPatchList(void) {
     }
     else {
         app.oled(AppData::MENU).invertLine(cursorOffset + 1);
-    }
-
-    if (! (app.isPatchRunning() || app.isPatchLoading()) ) {
-        app.oled(AppData::MENU).drawNotification("Select patch");
     }
 
     app.oled(AppData::MENU).newScreen = 1;

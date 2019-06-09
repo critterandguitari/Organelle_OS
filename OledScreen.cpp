@@ -437,14 +437,29 @@ unsigned int OledScreen::put_char_small(unsigned char c, unsigned int y, unsigne
 
 void OledScreen::drawNotification(const char * line) {
 
-  int i, len;
+    int i, len;
 
-  // first clear it out
-  for (i = 0; i < 128; i++)
-    pix_buf[i] = 0;
+    // first clear it out
+    for (i = 0; i < 128; i++)
+        pix_buf[i] = 0;
 
-  len = strlen(line);
-  println_8(line, len>21 ? 21: len,  2, 0);
+    len = strlen(line);
+    println_8(line, len>21 ? 21: len,  2, 0);
+}
+
+void OledScreen::drawNotification(const char * line, int pwrStatus, int batteryLevel, int wifiStatus) {
+    int i, len;
+
+    // first clear it out
+    for (i = 0; i < 128; i++)
+        pix_buf[i] = 0;
+
+   if (pwrStatus) drawBatteryMeter(batteryLevel);
+   else drawPlug();
+   drawWifiMeter(wifiStatus);
+      
+   len = strlen(line);
+   println_8(line, len>14 ? 14: len,  2, 0);
 }
 
 void OledScreen::drawBatteryMeter(int lev) {
@@ -491,8 +506,8 @@ void OledScreen::drawPlug(void) {
     put_pixel(1, x + 9, y + 6);
 
     draw_line(x + 10, y + 0, x + 10, y + 6, 1);
-    draw_line(x + 11, y + 1, x + 14, y + 1, 1);
-    draw_line(x + 11, y + 5, x + 14, y + 5, 1);
+    draw_line(x + 11, y + 1, x + 13, y + 1, 1);
+    draw_line(x + 11, y + 5, x + 13, y + 5, 1);
 }
 
 void OledScreen::drawWifiMeter(int lev) {
