@@ -250,6 +250,15 @@ void MainMenu::runPatch(const char* name, const char* arg) {
         setEnv(patchlocation);
 
         if (isPD) {
+
+#ifdef FIX_ABL_LINK
+            // get rid of incompatible abl_link external in patch
+            std::cout << "Checking for abl_link external in patch directory: " << patchlocation << std::endl;
+            sprintf(buf2, "find \"%s\" -type f -name 'abl_link~.pd_linux' -exec mv {} {}.orig \\;", patchlocation.c_str());
+            printf("running: %s \n", buf2);
+            system(buf2);
+#endif 
+
             std::string mother = getSystemFile(paths, "mother.pd");
             if (mother.length() == 0) {
                 mother = app.getFirmwareDir() + "/mother.pd";

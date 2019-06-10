@@ -23,7 +23,7 @@ default :
 organelle : $(objects) hw_interfaces/SerialMCU.o
 	g++ -o fw_dir/mother $(objects) hw_interfaces/SerialMCU.o
 
-organelle_m : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER
+organelle_m : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER -DFIX_ABL_LINK
 organelle_m : $(objects) hw_interfaces/CM3GPIO.o
 	g++ -l wiringPi -o fw_dir/mother $(objects) hw_interfaces/CM3GPIO.o
 

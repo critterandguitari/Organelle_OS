@@ -213,8 +213,10 @@ void CM3GPIO::pollKnobs(){
     	batteryVoltage = ((float)battAvg / 1024) * 10.3125;
 	    battAvg = 0;
 
-        // check for low power 
-        if (batteryVoltage < LOW_BATTERY_SHUTDOWN_THRESHOLD) lowBatteryShutdown = true;
+        // check for low power auto shutdown, but only when running on batteries (pwrStatus = 1)
+        if (pwrStatus){
+            if (batteryVoltage < LOW_BATTERY_SHUTDOWN_THRESHOLD) lowBatteryShutdown = true;
+        }
     }
 
     knobFlag = 1;

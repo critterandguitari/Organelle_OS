@@ -338,8 +338,7 @@ int main(int argc, char* argv[]) {
 
             // shutdown when batteries get low
             //printf("battery %2.2f  \n", controls.batteryVoltage);
-            
-            if (controls.lowBatteryShutdown) {
+            if (controls.lowBatteryShutdown && controls.pwrStatus) {
                 printf("low battery detected.  shutting down.\n");
                 execScript("lowbatt.sh &");
             }
