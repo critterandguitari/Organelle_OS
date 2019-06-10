@@ -709,7 +709,7 @@ void patchConfig(void) {
     {
         printf("using config %s\n", postPatch.c_str());
         system(postPatch.c_str());
-    } 
+    }
 }
 
 void pedalConfig(OSCMessage &msg) {
