@@ -265,7 +265,7 @@ menu.items.append(['Midi In : ' + ("Enabled" if midiInGate>0 else "Disabled") , 
 menu.items.append(['Midi In Ch.: ' + (str(midiIn) if midiIn>0 else "Omni") , midiInSelect])
 menu.items.append(['Midi Out : ' + ("Enabled" if midiOutGate>0 else "Disabled") , midiOutGateSelect])
 menu.items.append(['Midi Out Ch.: ' + (str(midiOut)) , midiOutSelect])
-menu.items.append(['Midi Device: ' + midiDevice, midiDeviceSelect])
+menu.items.append(['Device: ' + midiDevice, midiDeviceSelect])
 menu.items.append(['Save', save])
 menu.items.append(['< Home', quit])
 menu.selection = 0

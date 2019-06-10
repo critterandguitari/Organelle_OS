@@ -42,8 +42,8 @@ def truncate_mid(s, n):
     return '{0}...{1}'.format(s[:n_1], s[-n_2:])
 
 def println(num, s) :
-    s = truncate_mid(s, 20)
-    liblo.send(osc_target, '/oled/gPrintln', 1, 2, num*11 + 2, 8, 1, s)
+    #s = truncate_mid(s, 20)
+    liblo.send(osc_target, '/oled/gPrintln', 1, 2, num*11 + 2, 8, 1, s[0:20])
 
 def clear_screen() :
     liblo.send(osc_target, '/oled/gClear', 1, 1)
