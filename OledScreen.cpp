@@ -467,17 +467,15 @@ void OledScreen::drawBatteryMeter(int lev) {
     int x = 112;
     int y = 0;
     draw_box(x, y, 13, 7, 1);
-
-    draw_line(x + 2, y + 2, x + 2, y + 4, 1);
-    draw_line(x + 4, y + 2, x + 4, y + 4, 1);
-    draw_line(x + 6, y + 2, x + 6, y + 4, 1);
-    draw_line(x + 8, y + 2, x + 8, y + 4, 1);
-    draw_line(x + 8, y + 2, x + 8, y + 4, 1);
-    draw_line(x + 10, y + 2, x + 10, y + 4, 1);
     draw_line(x + 13, y + 2, x + 13, y + 4, 1);
-
     put_pixel(0, x, y);
     put_pixel(0, x, y + 6);  
+
+    if (lev > 0) draw_line(x + 2, y + 2, x + 2, y + 4, 1);
+    if (lev > 1) draw_line(x + 4, y + 2, x + 4, y + 4, 1);
+    if (lev > 2) draw_line(x + 6, y + 2, x + 6, y + 4, 1);
+    if (lev > 3) draw_line(x + 8, y + 2, x + 8, y + 4, 1);
+    if (lev > 4) draw_line(x + 10, y + 2, x + 10, y + 4, 1);
 }
 
 void OledScreen::drawPlug(void) {

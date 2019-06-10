@@ -44,7 +44,7 @@ class CM3GPIO
         uint32_t pwrStatus;
         uint32_t micSelSwitch;
 	    float batteryVoltage;
-	    uint32_t batteryPercent;
+	    uint32_t batteryBars;
         bool lowBatteryShutdown;
 
     private:        

@@ -49,7 +49,13 @@
 #define AUX_LED_BLUE_OFF digitalWrite(LEDB,HIGH);
 #define AUX_LED_BLUE_ON digitalWrite(LEDB,LOW);
 
-#define LOW_BATTERY_SHUTDOWN_THRESHOLD 5.05
+#define BATTERY_BAR_5 5.4
+#define BATTERY_BAR_4 5.2
+#define BATTERY_BAR_3 5.1
+#define BATTERY_BAR_2 5.0
+#define BATTERY_BAR_1 4.9
+#define BATTERY_BAR_0 4.7
+#define LOW_BATTERY_SHUTDOWN_THRESHOLD 4.5
 
 // OLED init bytes
 static unsigned char oled_initcode[] = {
@@ -154,6 +160,7 @@ void CM3GPIO::init(){
 
     // set 
     batteryVoltage = 5;
+    batteryBars = 5;
     lowBatteryShutdown = false;
 }
 
@@ -213,8 +220,14 @@ void CM3GPIO::pollKnobs(){
     	batteryVoltage = ((float)battAvg / 1024) * 10.3125;
 	    battAvg = 0;
 
-        // check for low power auto shutdown, but only when running on batteries (pwrStatus = 1)
+        // check get bars and check for low batt shutdown, but only when running on batteries (pwrStatus = 1)
         if (pwrStatus){
+            if      (batteryVoltage > BATTERY_BAR_5) batteryBars = 5;
+            else if (batteryVoltage > BATTERY_BAR_4) batteryBars = 4;
+            else if (batteryVoltage > BATTERY_BAR_3) batteryBars = 3;
+            else if (batteryVoltage > BATTERY_BAR_2) batteryBars = 2;
+            else if (batteryVoltage > BATTERY_BAR_1) batteryBars = 1;
+            else if (batteryVoltage > BATTERY_BAR_0) batteryBars = 0;
             if (batteryVoltage < LOW_BATTERY_SHUTDOWN_THRESHOLD) lowBatteryShutdown = true;
         }
     }
