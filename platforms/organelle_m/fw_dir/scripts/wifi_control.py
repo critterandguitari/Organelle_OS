@@ -30,6 +30,7 @@ ip_address = ''
 
 # returns output if exit code 0, false otherwise
 def run_cmd(cmd) :
+    cmd = "sudo " + cmd
     ret = False
     try:
         ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
@@ -38,6 +39,7 @@ def run_cmd(cmd) :
 
 # returns true or false on exit status
 def run_cmd_check(cmd) :
+    cmd = "sudo " + cmd
     ret = False
     try:
         subprocess.check_output(['bash', '-c', cmd], close_fds=True)
@@ -47,23 +49,23 @@ def run_cmd_check(cmd) :
 
 def start_web_server():
     global web_server_state
-    run_cmd('sudo systemctl start cherrypy')
+    run_cmd('systemctl start cherrypy')
     web_server_state = WEB_SERVER_RUNNING
 
 def stop_web_server():
     global web_server_state
-    run_cmd('sudo systemctl stop cherrypy')
+    run_cmd('systemctl stop cherrypy')
     web_server_state = WEB_SERVER_STOPPED
 
 
 def start_ap_server():
     global ap_state
-    run_cmd('sudo systemctl start createap')
+    run_cmd('systemctl start createap')
     ap_state = AP_RUNNING
 
 def stop_ap_server():
     global ap_state
-    run_cmd('sudo systemctl stop createap')
+    run_cmd('systemctl stop createap')
     ap_state = AP_STOPPED
 
 
@@ -104,11 +106,11 @@ def initialize_state():
     else : state = NOT_CONNECTED
 
     # web server state on startup
-    if (run_cmd_check('sudo systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
+    if (run_cmd_check('systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
     else : web_server_state = WEB_SERVER_STOPPED
 
     # ap state on startup
-    if (run_cmd_check('sudo systemctl status createap')) : ap_state = AP_RUNNING
+    if (run_cmd_check('systemctl status createap')) : ap_state = AP_RUNNING
     else : ap_state = AP_STOPPED
 
 # assume this is called 1 / sec from the bg thread
@@ -129,11 +131,11 @@ def update_state() :
     #elif (state == CONNECTION_ERROR):  do nothing
 
     # web server states
-    if (run_cmd_check('sudo systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
+    if (run_cmd_check('systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
     else : web_server_state = WEB_SERVER_STOPPED
 
     # ap statu=e
-    if (run_cmd_check('sudo systemctl status createap')) : ap_state =  AP_RUNNING
+    if (run_cmd_check('systemctl status createap')) : ap_state =  AP_RUNNING
     else : ap_state = AP_STOPPED
 
 
