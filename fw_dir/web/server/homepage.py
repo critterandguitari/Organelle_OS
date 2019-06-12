@@ -42,7 +42,7 @@ class Root(object):
 
 <div style="border:1px solid; border-radius: 6px; padding: 16px; width: 500px; margin:16px auto;">
 
-<h2>Welcome to the Organelle!<h2>
+<h3>Organelle<h3>
 
 """ + self.links + """
 </div>
