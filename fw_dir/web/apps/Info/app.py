@@ -20,14 +20,14 @@ config = { '/':
 base = '/info'
 name = 'Info'
 
-stuff = ''
-for item in info.items :
-    stuff += str(item) + '</br></br>'
-
 class Root(object):
 
     @cherrypy.expose
     def index(self):
+        info.get_info()
+        stuff = ''
+        for item in info.items.values() :
+            stuff += '<b>' + item[0] +': </b>' + item[1] + '</br></br>'
         return """
 <html>
 <head>

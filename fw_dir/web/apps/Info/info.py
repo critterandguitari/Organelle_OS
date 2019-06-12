@@ -13,14 +13,21 @@ fw_dir = os.getenv("FW_DIR", "/home/music/fw_dir")
 #print fw_dir
 wifi = imp.load_source('wifi_control', fw_dir + '/scripts/wifi_control.py')
 
-ssid = "not connected"
-ip_address = "not connected"
+items = {
+    "ssid" : ["WiFi Network", "not connected"],
+    "ip_address" : ["IP Address", "not connected"],
+    "cpu" : ["CPU", ""],
+    "usbdrive" : ["USB Drive", ""],
+    "version" : ["OS Version", ""],
+    "patch" : ["Current Patch", ""],
+    "host_name" : ["Hostname", ""]
+}
 
 def check_wifi():
-    global ssid, ip_address
+    global items
     if wifi.wifi_connected() :
-        ssid = wifi.current_net
-        ip_address = wifi.ip_address
+        items["ssid"][1] = wifi.current_net
+        items["ip_address"][1] = wifi.ip_address
 
 # returns output if exit code 0, NA otherwise
 def run_cmd(cmd) :
@@ -31,26 +38,14 @@ def run_cmd(cmd) :
     return ret
 
 # get info
-cpu = "CPU: " + str(100 - int(run_cmd("vmstat 1 2|tail -1|awk '{print $15}'"))) + " %"
-usbdrive = "USB Drive: " + run_cmd("grep usbdrive /proc/mounts | awk '{print $1}' | sed -e 's/\/dev\///'")
-midi_dev =  run_cmd("aplaymidi -l | awk '{if (NR==2) print $2}'")
-if (midi_dev == ""): midi_dev = 'None'
-version = run_cmd("cat " + fw_dir + "/version")
-build_tag = run_cmd("cat " + fw_dir + "/buildtag")
-version = "OS version: " + version + build_tag
-patch = "  " + run_cmd("ls /tmp/curpatchname")
-host_name = "  " + run_cmd("ps aux | grep 'avahi.*running' | awk 'NR==1{print $13}' | sed 's/\[//' | sed 's/]//'")
+def get_info() :
+    global items
+    items["cpu"][1] = str(100 - int(run_cmd("vmstat 1 2|tail -1|awk '{print $15}'"))) + " %"
+    items["usbdrive"][1] = run_cmd("grep usbdrive /proc/mounts | awk '{print $1}' | sed -e 's/\/dev\///'")
+    version = run_cmd("cat " + fw_dir + "/version")
+    build_tag = run_cmd("cat " + fw_dir + "/buildtag")
+    items["version"][1] = version + build_tag
+    items["patch"][1] = run_cmd("ls /tmp/curpatchname")
+    items["host_name"][1] = run_cmd("ps aux | grep 'avahi.*running' | awk 'NR==1{print $13}' | sed 's/\[//' | sed 's/]//'")
+    check_wifi()
 
-check_wifi()
-
-items = [
-cpu,
-usbdrive, 
-"IP: " + ip_address, 
-"WiFi Network: " + ssid,
-"Host Name: " + host_name,
-"Patch: "+ patch,
-version, 
-]
-
-#print items
