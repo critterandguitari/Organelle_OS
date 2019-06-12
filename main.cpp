@@ -279,9 +279,14 @@ int main(int argc, char* argv[]) {
         if (screenFpsTimer.getElapsed() > 50.f) {
 #endif
             screenFpsTimer.reset();
-
+            // alert screen
+            if (app.currentScreen == AppData::ALERT) {
+                if (app.oled(AppData::ALERT).newScreen) {
+                    app.oled(AppData::ALERT).newScreen = 0;
+                    controls.updateOLED(app.oled(AppData::ALERT));
+                }
             // aux screen
-            if (app.currentScreen == AppData::AUX) {
+            } else if (app.currentScreen == AppData::AUX) {
                 if (app.oled(AppData::AUX).newScreen) {
                     app.oled(AppData::AUX).newScreen = 0;
                     controls.updateOLED(app.oled(AppData::AUX));

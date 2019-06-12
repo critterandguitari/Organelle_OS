@@ -17,6 +17,7 @@ public:
         AUX,
         MENU,
         PATCH,
+        ALERT,
         SCREEN_MAX,
     };
 
