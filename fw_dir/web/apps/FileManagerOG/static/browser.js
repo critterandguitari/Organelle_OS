@@ -1,8 +1,8 @@
 
 var appBaseURL = '/files'
 var fsurl = appBaseURL + '/fmdata'
-var workingDir = '/usbdrive/';
-var baseDirLabel = 'USB Drive';
+var workingDir = '/sdcard/';
+var baseDirLabel = 'SD Card';
 var clipboard = {};
 
 function alertDialog(msg){
