@@ -22,6 +22,8 @@ wifi = imp.load_source('wifi_control', current_dir + '/wifi_control.py')
 ssid = "not connected"
 ip_address = "not connected"
 
+wifi.initialize_state()
+
 def check_wifi():
     global ssid, ip_address
     if wifi.wifi_connected() :

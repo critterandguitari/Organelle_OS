@@ -25,6 +25,7 @@ items = {
 
 def check_wifi():
     global items
+    wifi.initialize_state()
     if wifi.wifi_connected() :
         items["ssid"][1] = wifi.current_net
         items["ip_address"][1] = wifi.ip_address

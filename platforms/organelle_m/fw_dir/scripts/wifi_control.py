@@ -145,10 +145,9 @@ def disconnect_all() :
     state = DISCONNECTING
     run_cmd("wpa_cli -i wlan0 terminate >> "+log_file+" 2>&1")
     run_cmd("dhcpcd -b -x wlan0 >> "+log_file+" 2>&1")
-    #run_cmd("/root/scripts/create_ap --stop wlan0 >> "+log_file+" 2>&1")   
     stop_ap_server()
+    stop_web_server()
 
-# shut
 def connect(ssid, pw) :
     global state, connecting_timer, current_net
 
@@ -163,6 +162,7 @@ def connect(ssid, pw) :
     connecting_timer = 0
     current_net = ssid
 
+    stop_ap_server()
     run_cmd("ip link set wlan0 up >> "+log_file+" 2>&1")
     run_cmd("wpa_supplicant -B -D nl80211,wext -i wlan0 -c <(cat <(echo ctrl_interface=/var/run/wpa_supplicant) <(wpa_passphrase \""+ssid+"\" \""+pw+"\")) >> "+log_file+" 2>&1") 
     run_cmd("dhcpcd -b wlan0 >> "+log_file+" 2>&1")
