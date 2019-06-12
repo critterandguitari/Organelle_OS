@@ -18,6 +18,8 @@ cherrypy.config.update({    'environment': 'production',
                             'log.screen': True,
                             'server.socket_host': '0.0.0.0',
                             'server.socket_port': 80,
+                            'server.max_request_body_size' : 0,  # don't limit file upload size
+                            'server.socket_timeout' : 60
                         })
 # load apps
 print "loading apps..."

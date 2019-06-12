@@ -62,6 +62,7 @@ class Root():
         return dl
     download.exposed = True
 
+    @cherrypy.config(**{'response.timeout': 3600}) # for large file
     def upload(self, dst, **fdata):
         upload = fdata['files[]']
         folder = dst
