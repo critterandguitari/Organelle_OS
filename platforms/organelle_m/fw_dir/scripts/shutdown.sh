@@ -14,5 +14,8 @@ $SCRIPTS_DIR/killpatch.sh
 $SCRIPTS_DIR/killmother.sh
 
 # shutdown wifi
+systemctl stop createap
+killall dhcpcd
+killall wpa_supplicant
 
 shutdown -h now

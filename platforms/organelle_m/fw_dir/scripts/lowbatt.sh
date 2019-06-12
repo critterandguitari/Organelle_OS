@@ -14,5 +14,8 @@ $SCRIPTS_DIR/killpatch.sh
 $SCRIPTS_DIR/killmother.sh
 
 # shutdown wifi
+sudo systemctl stop createap
+sudo killall dhcpcd
+sudo killall wpa_supplicant
 
 sudo shutdown -h now

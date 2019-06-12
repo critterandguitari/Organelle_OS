@@ -145,7 +145,8 @@ def disconnect_all() :
     state = DISCONNECTING
     run_cmd("wpa_cli -i wlan0 terminate >> "+log_file+" 2>&1")
     run_cmd("dhcpcd -b -x wlan0 >> "+log_file+" 2>&1")
-    run_cmd("/root/scripts/create_ap --stop wlan0 >> "+log_file+" 2>&1")   
+    #run_cmd("/root/scripts/create_ap --stop wlan0 >> "+log_file+" 2>&1")   
+    stop_ap_server()
 
 # shut
 def connect(ssid, pw) :
