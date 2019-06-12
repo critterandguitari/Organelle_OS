@@ -101,22 +101,22 @@ case "$ec" in
     0)
         oscsend localhost 4001 /oled/aux/line/5 s "restarting mother" 
         sleep 1
-        ~/scripts/restart-mother.sh
+        $FW_DIR/scripts/restart-mother.sh
     ;;
     1)
         oscsend localhost 4001 /oled/aux/line/5 s "restarting mother" 
         sleep 1
-        ~/scripts/restart-mother.sh
+        $FW_DIR/scripts/restart-mother.sh
     ;;
     2)
         oscsend localhost 4001 /oled/aux/line/5 s "rebooting..."
         sleep 1
-        ~/scripts/reboot.sh
+        $FW_DIR/scripts/reboot.sh
     ;;
     3)
         oscsend localhost 4001 /oled/aux/line/5 s "shutting down..."
         sleep 1
-        ~/scripts/shutdown.sh
+        $FW_DIR/scripts/shutdown.sh
     ;;
 esac
 
