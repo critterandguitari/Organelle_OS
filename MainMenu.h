@@ -97,7 +97,6 @@ private:
 
     bool actionTrigger;
 
-    std::string menuTitle;
     MenuMode currentMenu;
 
     bool favouriteMenu;

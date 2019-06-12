@@ -64,7 +64,6 @@ MainMenu::MainMenu() {
     favouriteMenu = false;
     actionTrigger = false;
     currentMenu = MenuMode::M_MAIN;
-    menuTitle = MM_TITLE[currentMenu];
 }
 
 static const std::string MOTHER_PD_VERSION ="1.2";
@@ -597,7 +596,8 @@ void MainMenu::buildMenu(signed mm_pos) {
     numMenuEntries = 0; // total things
 
     // System menu
-    addMenuItem(numMenuEntries++, menuTitle.c_str(), "", &MainMenu::runDoNothing);
+    addMenuItem(numMenuEntries++, MM_TITLE[currentMenu], "", &MainMenu::runDoNothing);
+    
     systemMenuOffset = numMenuEntries;
 
 #ifdef PWR_SWITCH
@@ -843,7 +843,6 @@ void MainMenu::runCdMenu(const char* name, const char*mode) {
         std::cerr << "unknown menu, use default menu";
         currentMenu = MenuMode::M_MAIN;
     }
-    menuTitle = MM_TITLE[currentMenu];
     buildMenu(currentMenu);
 }
 
