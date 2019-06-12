@@ -38,7 +38,7 @@ if [ -z "$ID_FS_TYPE" ]; then
 fi
 
 # just mount it
-sudo mount -o async,noatime,uid=1000 ${DEVICE} "/usbdrive"
+sudo mount -o async,noatime,uid=1000,gid=1000 ${DEVICE} "/usbdrive"
 exit 0
 
 # mount the device
