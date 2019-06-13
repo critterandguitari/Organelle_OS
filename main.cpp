@@ -120,6 +120,7 @@ void midiConfig(OSCMessage &msg);
 void pedalConfig(OSCMessage &msg);
 void patchLoaded(OSCMessage &msg);
 void reload(OSCMessage &msg);
+void reloadNoRemount(OSCMessage &msg);
 void quitMother(OSCMessage &msg);
 void programChange(OSCMessage &msg);
 void sendShutdown(OSCMessage &msg);
@@ -228,6 +229,7 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/led/flash", flashLED, 0)
                     || msgIn.dispatch("/oled/setscreen", setScreen, 0)
                     || msgIn.dispatch("/reload", reload, 0)
+                    || msgIn.dispatch("/reloadNoRemount", reloadNoRemount, 0)
                     || msgIn.dispatch("/quitmother", quitMother, 0)
                     || msgIn.dispatch("/screenshot", screenShot, 0)
                     || msgIn.dispatch("/pgmchg", programChange, 0)
@@ -684,6 +686,11 @@ void setScreen(OSCMessage &msg) {
 void reload(OSCMessage &msg) {
     printf("received reload msg\n");
     menu.reload();
+}
+
+void reloadNoRemount(OSCMessage &msg) {
+    printf("received reload no remount msg\n");
+    menu.reloadNoRemount();
 }
 
 void loadPatch(OSCMessage &msg) {

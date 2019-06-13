@@ -134,6 +134,16 @@ void MainMenu::reload(void) {
     buildMenu();
 }
 
+void MainMenu::reloadNoRemount(void) {
+    std::cout <<"Reloading without remounting... \n" << std::endl;
+    // set patch and user dir to defaults
+    app.setPatchDir(NULL);
+    app.setUserDir(NULL);
+    currentMenu = MenuMode::M_MAIN;
+    buildMenu();
+}
+
+
 void MainMenu::runScriptCommand(const char* name,const char* arg) {
     std::string cmd = std::string(arg) + " &";
     std::cout << "running : " << cmd << std::endl;

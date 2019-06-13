@@ -26,6 +26,7 @@ public:
 
     void buildMenu(int = -1);
     void reload();
+    void reloadNoRemount();
     bool loadPatch(const char* patchname);
     void runShutdown(const char* name,const char* arg);
 
