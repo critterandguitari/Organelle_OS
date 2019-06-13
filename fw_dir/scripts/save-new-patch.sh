@@ -48,7 +48,7 @@ cp -Hr /tmp/patch/ "${PATCH_DIR}/${NEWNAME}"
 cp -r /tmp/state/* "${PATCH_DIR}/${NEWNAME}"
 
 # reload
-oscsend localhost 4001 /reload i 1
+oscsend localhost 4001 /reloadNoRemount i 1
 oscsend localhost 4001 /gohome i 1
 oscsend localhost 4001 /loadPatch s "${NEWNAME}"
 
