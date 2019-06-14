@@ -60,6 +60,7 @@ organelle_m_deploy : organelle_m
 	chown -R root:root tmp/rootfs
 	chown -R music:music tmp/rootfs/home/music
 	cp -fr --preserve=mode,ownership tmp/rootfs/* /
+	rm -fr tmp
 	sync
 
 
