@@ -55,9 +55,11 @@ organelle_m_deploy : organelle_m
 	@echo "copying version file to root for backwards compatiblility"
 	cp -fr fw_dir/version /root
 	@echo "copying systems files"
-	chown -R root:root platforms/organelle_m/rootfs
-	chown -R music:music platforms/organelle_m/rootfs/home/music
-	cp -fr --preserve=mode,ownership platforms/organelle_m/rootfs/* /
+	mkdir tmp
+	cp -r platforms/organelle_m/rootfs tmp/
+	chown -R root:root tmp/rootfs
+	chown -R music:music tmp/rootfs/home/music
+	cp -fr --preserve=mode,ownership tmp/rootfs/* /
 	sync
 
 
