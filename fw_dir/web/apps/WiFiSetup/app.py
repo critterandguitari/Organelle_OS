@@ -11,27 +11,23 @@ import imp
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-info = imp.load_source('info', current_dir + '/info.py')
+#info = imp.load_source('info', current_dir + '/info.py')
 
 config = { '/': 
         {
         }
 }
-base = '/info'
-name = 'Info'
+base = '/wifi'
+name = 'WiFi Setup'
 
 class Root(object):
 
     @cherrypy.expose
     def index(self):
-        info.get_info()
-        stuff = ''
-        for item in info.items.values() :
-            stuff += '<b>' + item[0] +': </b>' + item[1] + '</br></br>'
         return """
 <html>
 <head>
-<title>Organelle Info</title>
+<title>Organelle WiFi</title>
 <link rel="stylesheet" href="/static/bootstrap.min.css">
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 </head>
@@ -42,7 +38,8 @@ class Root(object):
 <h3>Info</h3>
 </br>
 <div>
-""" + stuff + """
+
+
 </div>
 </br>
 <a id="home-but" href="/"><span class="glyphicon glyphicon-home"></span></a>
