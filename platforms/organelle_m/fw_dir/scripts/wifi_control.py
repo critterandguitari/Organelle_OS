@@ -29,6 +29,7 @@ current_net = ''
 ip_address = ''
 
 # returns output if exit code 0, false otherwise
+# most of the commands need sudo
 def run_cmd(cmd) :
     cmd = "sudo " + cmd
     ret = False
@@ -36,6 +37,15 @@ def run_cmd(cmd) :
         ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
     except: pass
     return ret
+
+# for commands without sudo
+def run_cmd_nosudo(cmd) :
+    ret = False
+    try:
+        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+    except: pass
+    return ret
+
 
 # returns true or false on exit status
 def run_cmd_check(cmd) :
@@ -56,7 +66,6 @@ def stop_web_server():
     global web_server_state
     run_cmd('systemctl stop cherrypy')
     web_server_state = WEB_SERVER_STOPPED
-
 
 def start_ap_server():
     global ap_state
@@ -164,7 +173,9 @@ def connect(ssid, pw) :
 
     stop_ap_server()
     run_cmd("ip link set wlan0 up >> "+log_file+" 2>&1")
-    run_cmd("wpa_supplicant -B -D nl80211,wext -i wlan0 -c <(cat <(echo ctrl_interface=/var/run/wpa_supplicant) <(wpa_passphrase \""+ssid+"\" \""+pw+"\")) >> "+log_file+" 2>&1") 
+    run_cmd("rm /tmp/wpa.conf") 
+    run_cmd_nosudo("cat <(echo ctrl_interface=/var/run/wpa_supplicant) <(wpa_passphrase \""+ssid+"\" \""+pw+"\") > /tmp/wpa.conf") 
+    run_cmd("wpa_supplicant -B -D nl80211,wext -i wlan0 -c /tmp/wpa.conf >> "+log_file+" 2>&1") 
     run_cmd("dhcpcd -b wlan0 >> "+log_file+" 2>&1")
 
 
