@@ -35,17 +35,20 @@ class Root(object):
 <link rel="stylesheet" href="/static/bootstrap.min.css">
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 </head>
-<body>
+<body style="margin:20px;">
+
+<span style="float:right;font-size: 1.5em; padding-top: .3em;"> 
+    <a id="flash-but" href="#"><span class="glyphicon glyphicon-flash"></span></a>
+    <a id="home-but" href="/"><span class="glyphicon glyphicon-home"></span></a>
+</span>
 
 <div style="border:1px solid; border-radius: 6px; padding: 16px; width: 500px; margin:16px auto;">
-
 <h3>Info</h3>
 </br>
 <div>
 """ + stuff + """
 </div>
 </br>
-<a id="home-but" href="/"><span class="glyphicon glyphicon-home"></span></a>
 </body>
 </html>
 """

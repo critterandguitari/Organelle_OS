@@ -11,38 +11,45 @@ import imp
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-#info = imp.load_source('info', current_dir + '/info.py')
+file_operations = imp.load_source('file_operations', current_dir + '/file_operations.py')
 
 config = { '/': 
         {
+ 		'tools.staticdir.on': True,
+		'tools.staticdir.dir': current_dir + '/static/',
+		'tools.staticdir.index': 'index.html',
         }
 }
 base = '/wifi'
 name = 'WiFi Setup'
 
-class Root(object):
+class Root():
 
-    @cherrypy.expose
-    def index(self):
-        return """
-<html>
-<head>
-<title>Organelle WiFi</title>
-<link rel="stylesheet" href="/static/bootstrap.min.css">
-<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-</head>
-<body>
+    def tester(self, name):
+        return "TESTdf"
+        print "cool"
+    tester.exposed = True
 
-<div style="border:1px solid; border-radius: 6px; padding: 16px; width: 500px; margin:16px auto;">
+    def flash(self):
+        os.system("oscsend localhost 4001 /led/flash i 4")
+        return "done"
+    flash.exposed = True
+         
+    def fmdata(self, **data):
+        ret = ''
+        if 'operation' in data :
+            cherrypy.response.headers['Content-Type'] = "application/json"
 
-<h3>Info</h3>
-</br>
-<div>
+            if data['operation'] == 'get_networks' :
+                return file_operations.get_networks()
+            if data['operation'] == 'add_network' :
+                return file_operations.add_network(data['name'], data['pw'])
+            if data['operation'] == 'delete_network' :
+                return file_operations.delete_network(data['name'])
+        else :
+            cherrypy.response.headers['Content-Type'] = "application/json"
+            return "no operation specified"
+
+    fmdata.exposed = True
 
 
-</div>
-</br>
-<a id="home-but" href="/"><span class="glyphicon glyphicon-home"></span></a>
-</body>
-</html>
-"""
