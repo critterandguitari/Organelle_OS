@@ -26,7 +26,7 @@ echo none > /sys/class/leds/led0/trigger
 export FW_DIR=/home/music/fw_dir
 
 # start ttymidi
-ttymidi -s /dev/ttyAMA0 -b 38400 &
+$FW_DIR/scripts/ttymidi -s /dev/ttyAMA0 -b 38400 &
 
 # monitor power switch
 python $FW_DIR/scripts/power_switch_monitor.py &
