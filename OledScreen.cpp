@@ -483,6 +483,8 @@ void OledScreen::drawPlug(void) {
     int x = 112;
     int y = 0;
 
+    draw_box_filled(113, 1, 5, 11);
+/*
     put_pixel(1, x + 0, y + 3);
     put_pixel(1, x + 1, y + 3);
     put_pixel(1, x + 2, y + 3);
@@ -494,8 +496,12 @@ void OledScreen::drawPlug(void) {
     put_pixel(1, x + 6, y + 3);
     put_pixel(1, x + 6, y + 4);
 
-    put_pixel(1, x + 7, y + 1);
-    put_pixel(1, x + 7, y + 5);
+    put_pixel(1, x + 6, y + 1);
+    put_pixel(1, x + 6, y + 5);
+
+    put_pixel(1, x + 7, y + 0);
+    put_pixel(1, x + 7, y + 6);
+
 
     put_pixel(1, x + 8, y + 0);
     put_pixel(1, x + 8, y + 6);
@@ -506,6 +512,9 @@ void OledScreen::drawPlug(void) {
     draw_line(x + 10, y + 0, x + 10, y + 6, 1);
     draw_line(x + 11, y + 1, x + 13, y + 1, 1);
     draw_line(x + 11, y + 5, x + 13, y + 5, 1);
+*/
+
+
 }
 
 void OledScreen::drawWifiMeter(int lev) {
