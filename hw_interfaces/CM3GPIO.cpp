@@ -51,10 +51,10 @@
 
 #define BATTERY_BAR_5 4.8
 #define BATTERY_BAR_4 4.7
-#define BATTERY_BAR_3 4.6
-#define BATTERY_BAR_2 4.5
-#define BATTERY_BAR_1 4.4
-#define BATTERY_BAR_0 4.3
+#define BATTERY_BAR_3 4.65
+#define BATTERY_BAR_2 4.4
+#define BATTERY_BAR_1 4.25
+#define BATTERY_BAR_0 4.1
 #define LOW_BATTERY_SHUTDOWN_THRESHOLD 4.0
 
 // OLED init bytes
