@@ -2,13 +2,13 @@
 #X obj 76 75 loadbang;
 #X obj 358 162 r knob1;
 #X obj 358 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 7610 1;
+-1 -1 5934 1;
 #X obj 421 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 6133 1;
+-1 -1 12700 1;
 #X obj 482 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 5202 1;
+-1 -1 5239 1;
 #X obj 544 196 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 5326 1;
 #X obj 421 162 r knob2;
 #X obj 482 162 r knob3;
 #X obj 544 162 r knob4;
@@ -27,27 +27,27 @@
 #X obj 653 163 r exp;
 #N canvas 142 50 922 604 audioIO 0;
 #X obj 513 336 dac~;
-#X obj 587 133 catch~ outR;
-#X obj 480 135 catch~ outL;
+#X obj 561 101 catch~ outR;
+#X obj 458 110 catch~ outL;
 #X obj 192 166 adc~, f 6;
 #X obj 190 480 pack 0 0 0 0, f 18;
 #X obj 285 219 s~ inR;
 #X obj 71 226 s~ inL;
 #X msg 190 502 sendtyped /oled/vumeter iiii \$1 \$2 \$3 \$4;
 #X obj 190 524 s oscOut;
-#X obj 483 233 *~;
-#X obj 572 235 *~;
+#X obj 479 225 *~;
+#X obj 568 224 *~;
 #X obj 810 69 r vol;
 #X obj 810 122 *;
 #X obj 810 95 t f f;
 #X obj 810 150 sig~;
-#X obj 482 179 clip~ -1 1;
-#X obj 571 179 clip~ -1 1;
+#X obj 482 264 clip~ -1 1;
+#X obj 553 278 clip~ -1 1;
 #X text 268 34 Receives and sends audio to patch. Outgoing audio is
 run through a compressor to provide some headroom if things get too
 loud. Also sends values to the Organelle's OLED VU meter.;
 #X obj 742 360 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 8814 1;
+-1 -1 0 1;
 #X obj 742 326 r vol;
 #X obj 74 431 timer;
 #X floatatom 74 453 5 0 0 0 - - -;
@@ -70,25 +70,25 @@ loud. Also sends values to the Organelle's OLED VU meter.;
 #X obj 132 241 env~ 8192 4096;
 #X obj 244 330 env~ 8192 4096;
 #X obj 309 362 env~ 8192 4096;
-#X connect 1 0 16 0;
-#X connect 2 0 15 0;
+#X connect 1 0 10 0;
+#X connect 2 0 9 0;
 #X connect 3 0 6 0;
 #X connect 3 0 38 0;
 #X connect 3 1 5 0;
 #X connect 3 1 37 0;
 #X connect 4 0 7 0;
 #X connect 7 0 8 0;
-#X connect 9 0 0 0;
-#X connect 9 0 39 0;
-#X connect 10 0 0 1;
-#X connect 10 0 40 0;
+#X connect 9 0 15 0;
+#X connect 10 0 16 0;
 #X connect 11 0 13 0;
 #X connect 12 0 14 0;
 #X connect 13 0 12 0;
 #X connect 13 1 12 1;
 #X connect 14 0 23 0;
-#X connect 15 0 9 0;
-#X connect 16 0 10 0;
+#X connect 15 0 0 0;
+#X connect 15 0 39 0;
+#X connect 16 0 0 1;
+#X connect 16 0 40 0;
 #X connect 19 0 18 0;
 #X connect 20 0 21 0;
 #X connect 22 0 20 0;
