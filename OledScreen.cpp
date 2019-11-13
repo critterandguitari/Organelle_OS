@@ -594,8 +594,10 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus
   if (outL > 11) outL = 11;
 
   // first clear it out
-  for (i = 0; i < 128; i++)
+  for (i = 0; i < 128; i++) {
     pix_buf[i] = 0;
+    put_pixel(0, i, 8); // really is first 9 rows
+  }
 
   if (pwrStatus) drawBatteryMeter(batteryLevel);
   else drawPlug();
@@ -656,8 +658,10 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
   if (outL > 11) outL = 11;
 
   // first clear it out
-  for (i = 0; i < 128; i++)
+  for (i = 0; i < 128; i++) {
     pix_buf[i] = 0;
+    put_pixel(0, i, 8); // really is first 9 rows
+  }
 
   // draw input output
   put_char_small('I', 0, 0, 1);
