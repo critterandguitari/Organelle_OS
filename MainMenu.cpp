@@ -581,8 +581,8 @@ void MainMenu::buildMenu(signed mm_pos) {
     int mindex;
 
     // set locale so sorting happens in right order
-    // not sure this does anything
     std::setlocale(LC_ALL, "en_US.UTF-8");
+    std::setlocale(LC_COLLATE, "en_US.UTF-8");
 
     // clear em out
     for (i = 0; i < MAX_MENU_ENTRIES; i++) {
