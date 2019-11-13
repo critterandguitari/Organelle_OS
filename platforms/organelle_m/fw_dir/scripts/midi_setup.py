@@ -187,13 +187,14 @@ def midiDeviceSelect():
     devices = run_cmd("aplaymidi -l")
     
     #remove empty lines, and header
-    midiDevices = [ x for x in devices.split("\n") if not len(x)==0]
+    # also remove the midi thru port 0 device that  causes problems 
+    midiDevices = [ x for x in devices.split("\n") if not len(x)==0 and x != ' 14:0    Midi Through                     Midi Through Port-0']
     if len(midiDevices)>0 : midiDevices.pop(0);
 
     og.clear_screen()
     og.println(1,"Midi Device")
     midiDeviceIdx=0
-    print(midiDevices)
+
     for x in midiDevices:
         #print(midiDevices[midiDeviceIdx][9:42].strip() + midiDevices[midiDeviceIdx][4:8].strip())
         if midiDevice == (midiDevices[midiDeviceIdx][9:42].strip() + ":" + midiDevices[midiDeviceIdx][4:8].strip()) : break
