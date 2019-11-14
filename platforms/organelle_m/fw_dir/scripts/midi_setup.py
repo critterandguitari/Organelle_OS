@@ -104,7 +104,7 @@ def midiInGateSelect():
                 og.flip()
             elif (og.enc_but_flag and og.enc_but==1):
                 print midiInGate
-                menu.items[menu.selection][0] = 'Midi In : ' + ("Enabled" if midiInGate>0 else "Disabled"); 
+                menu.items[menu.selection][0] = 'MIDI In : ' + ("Enabled" if midiInGate>0 else "Disabled"); 
                 break
 
 def midiOutGateSelect():
@@ -129,7 +129,7 @@ def midiOutGateSelect():
                 og.flip()
             elif (og.enc_but_flag and og.enc_but==1):
                 print midiOutGate
-                menu.items[menu.selection][0] = 'Midi Out : ' + ("Enabled" if midiOutGate>0 else "Disabled"); 
+                menu.items[menu.selection][0] = 'MIDI Out : ' + ("Enabled" if midiOutGate>0 else "Disabled"); 
                 break
 
 
@@ -155,7 +155,7 @@ def midiInSelect():
                 og.flip()
             elif (og.enc_but_flag and og.enc_but==1):
                 print midiIn
-                menu.items[menu.selection][0] = 'Midi In Ch.: ' + (str(midiIn) if midiIn>0 else "Omni")
+                menu.items[menu.selection][0] = 'MIDI In Ch.: ' + (str(midiIn) if midiIn>0 else "Omni")
                 break
 
 def midiOutSelect():
@@ -178,7 +178,7 @@ def midiOutSelect():
                 og.flip()
             elif (og.enc_but_flag and og.enc_but==1):
                 print midiOut
-                menu.items[menu.selection][0] = 'Midi Out Ch.: ' + (str(midiOut))
+                menu.items[menu.selection][0] = 'MIDI Out Ch.: ' + (str(midiOut))
                 break
 
 
@@ -192,7 +192,7 @@ def midiDeviceSelect():
     if len(midiDevices)>0 : midiDevices.pop(0);
 
     og.clear_screen()
-    og.println(1,"Midi Device")
+    og.println(1,"Select MIDI Device")
     midiDeviceIdx=0
 
     for x in midiDevices:
@@ -214,7 +214,7 @@ def midiDeviceSelect():
             elif(og.enc_turn==0 and midiDeviceIdx>0):
                 midiDeviceIdx-=1
             og.clear_screen()
-            og.println(1,"Midi Device")
+            og.println(1,"Select MIDI Device")
             device = midiDevices[midiDeviceIdx][42:].strip()
             og.println(2,device)
             og.flip()
@@ -222,7 +222,7 @@ def midiDeviceSelect():
             if(len(midiDevices)==0): midiDevice = "28:0"
             else: midiDevice = midiDevices[midiDeviceIdx][9:42].strip() + ":" + midiDevices[midiDeviceIdx][4:8].strip()
             print midiDevice
-            menu.items[menu.selection][0] = 'Midi Device: ' + midiDevice
+            menu.items[menu.selection][0] = 'MIDI Device: ' + midiDevice
             break
 
 
@@ -253,7 +253,7 @@ def save():
     os.system("aconnect -x")
     os.system("chmod +x "+user_dir+"/patch_loaded.sh")
     og.clear_screen()
-    og.println(1,"Midi configuration")
+    og.println(1,"MIDI configuration")
     og.println(2,"SAVED")
     og.flip()
     os.system('oscsend localhost 4001 /midiConfig i 1')
@@ -262,10 +262,10 @@ def save():
 
 
 
-menu.items.append(['Midi In : ' + ("Enabled" if midiInGate>0 else "Disabled") , midiInGateSelect])
-menu.items.append(['Midi In Ch.: ' + (str(midiIn) if midiIn>0 else "Omni") , midiInSelect])
-menu.items.append(['Midi Out : ' + ("Enabled" if midiOutGate>0 else "Disabled") , midiOutGateSelect])
-menu.items.append(['Midi Out Ch.: ' + (str(midiOut)) , midiOutSelect])
+menu.items.append(['MIDI In : ' + ("Enabled" if midiInGate>0 else "Disabled") , midiInGateSelect])
+menu.items.append(['MIDI In Ch.: ' + (str(midiIn) if midiIn>0 else "Omni") , midiInSelect])
+menu.items.append(['MIDI Out : ' + ("Enabled" if midiOutGate>0 else "Disabled") , midiOutGateSelect])
+menu.items.append(['MIDI Out Ch.: ' + (str(midiOut)) , midiOutSelect])
 menu.items.append(['Device: ' + midiDevice, midiDeviceSelect])
 menu.items.append(['Save', save])
 menu.items.append(['< Home', quit])
