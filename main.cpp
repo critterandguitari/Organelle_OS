@@ -762,7 +762,7 @@ void pedalSwitchMode(OSCMessage &msg) {
 }
 
 void midiConfig(OSCMessage &msg) {
-    patchConfig();
+    if (app.isPatchRunning()) patchConfig();
 }
 
 void patchLoaded(bool b) {
