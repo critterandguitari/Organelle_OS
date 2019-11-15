@@ -7,6 +7,7 @@ SCRIPTS_DIR=$FW_DIR/scripts
 
 oscsend localhost 4001 /oled/gClear ii 4 1
 oscsend localhost 4001 /oled/gPrintln iiiiis 4 10 10 8 1 "Low Battery"
+oscsend localhost 4001 /oled/gPrintln iiiiis 4 10 30 8 1 "Auto Shutdown"
 oscsend localhost 4001 /oled/gFlip ii 4 1
 oscsend localhost 4001 /oled/setscreen i 4
 
