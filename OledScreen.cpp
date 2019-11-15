@@ -52,11 +52,20 @@ void OledScreen::setLine(int lineNum, const char * line) {
   clearLine(lineNum);
 
   len = strlen(line);
+
+
   println_8(line, (len > 21 ? 21 : len), 2, calcxpos(lineNum) + 1);
 }
 
 void OledScreen::clearLine(int lineNum) {
   uint8_t i, j;
+
+  // if the first line, also clear the row of pixels right above...
+  // fixes a problem if an old 'set line' style patch is loaded after a newer graphics patch
+  // otherwise this row of pixels might not be cleared 
+  if (lineNum == 1) 
+  	for (i = 0; i < 128; i++)
+      		put_pixel(0, i, 8);
 
   for (i = 0; i < 128; i++)
     for (j = 0; j < 11; j++)
@@ -596,7 +605,6 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int pwrStatus
   // first clear it out
   for (i = 0; i < 128; i++) {
     pix_buf[i] = 0;
-    put_pixel(0, i, 8); // really is first 9 rows
   }
 
   if (pwrStatus) drawBatteryMeter(batteryLevel);
@@ -660,7 +668,6 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
   // first clear it out
   for (i = 0; i < 128; i++) {
     pix_buf[i] = 0;
-    put_pixel(0, i, 8); // really is first 9 rows
   }
 
   // draw input output
