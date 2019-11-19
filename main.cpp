@@ -322,7 +322,7 @@ int main(int argc, char* argv[]) {
                     // check if we should draw info bar on this patch screen
                     if (app.oled((AppData::Screen) app.currentScreen).showInfoBar) {
 #ifdef BATTERY_METER
-                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, controls.pwrStatus, controls.batteryBars, app.wifiStatus);
+                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, app.peaks, controls.pwrStatus, controls.batteryBars, app.wifiStatus);
 #else
                         app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL);
 #endif
@@ -669,11 +669,12 @@ void vuMeter(OSCMessage &msg) {
     char line[1024];
     int len, i, outR, outL, inR, inL;
 
-    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3)) {
+    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
         app.inR = msg.getInt(0);
         app.inL = msg.getInt(1);
         app.outR = msg.getInt(2);
         app.outL = msg.getInt(3);
+	app.peaks = msg.getInt(4);
         app.oled((AppData::Screen) app.currentScreen).newScreen = 1;
     }
 }

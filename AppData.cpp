@@ -60,7 +60,7 @@ AppData::AppData(){
     setPatchDir(NULL);
     setFirmwareDir(NULL);
     setUserDir(NULL);
-    inL = inR = outL = outR = 0;
+    inL = inR = outL = outR = peaks = 0;
     wifiStatus = 0;
     micLineSelection = 99; // so it gets correct initial value
 }

@@ -89,6 +89,7 @@ public:
     int inR;
     int outL;
     int outR;
+    int peaks;
 
     int wifiStatus;              // network connection status
 
