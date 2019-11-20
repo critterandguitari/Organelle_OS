@@ -22,6 +22,11 @@ name = 'Info'
 
 class Root(object):
 
+    def flash(self):
+        os.system("oscsend localhost 4001 /led/flash i 4")
+        return "done"
+    flash.exposed = True
+
     @cherrypy.expose
     def index(self):
         info.get_info()
@@ -38,7 +43,6 @@ class Root(object):
 <body style="margin:20px;">
 
 <span style="float:right;font-size: 1.5em; padding-top: .3em;"> 
-    <a id="flash-but" href="#"><span class="glyphicon glyphicon-flash"></span></a>
     <a id="home-but" href="/"><span class="glyphicon glyphicon-home"></span></a>
 </span>
 

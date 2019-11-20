@@ -41,8 +41,6 @@ class Root(object):
 <body style="margin:20px;">
 
 <span style="float:right;font-size: 1.5em; padding-top: .3em;"> 
-    <a id="flash-but" href="#"><span class="glyphicon glyphicon-flash"></span></a>
-    <a id="home-but" href="/"><span class="glyphicon glyphicon-home"></span></a>
 </span>
 
 
