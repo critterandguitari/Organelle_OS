@@ -41,7 +41,12 @@ def run_cmd(cmd) :
 def check_status():
     global info, ssid, ip_address
     while True:
-        info.items[0] = "CPU: " + str(100 - int(run_cmd("vmstat 1 2|tail -1|awk '{print $15}'"))) + " %"
+        cpu_load = run_cmd("top -d 1 -n 2 -b -p `ps -C pd -o %p | tail -1` | tail -1 | awk '{print $9}'").rstrip()
+        if cpu_load == '' : cpu_load = 0
+        else : cpu_load = int(float(cpu_load))
+        # cpu load is of Pd only... just add 5% for the other stuff
+        cpu_load += 5
+        info.items[0] = "CPU: " + str(cpu_load) + " %"
         check_wifi()
         info.items[2] = "IP: " + ip_address
         info.items[4] = "  " + ssid

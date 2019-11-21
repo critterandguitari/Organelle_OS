@@ -16,7 +16,6 @@ wifi = imp.load_source('wifi_control', fw_dir + '/scripts/wifi_control.py')
 items = {
     "ssid" : ["WiFi Network", "not connected"],
     "ip_address" : ["IP Address", "not connected"],
-    "cpu" : ["CPU", ""],
     "usbdrive" : ["USB Drive", ""],
     "version" : ["OS Version", ""],
     "patch" : ["Current Patch", ""],
@@ -41,7 +40,7 @@ def run_cmd(cmd) :
 # get info
 def get_info() :
     global items
-    items["cpu"][1] = str(100 - int(run_cmd("vmstat 1 2|tail -1|awk '{print $15}'"))) + " %"
+
     items["usbdrive"][1] = run_cmd("grep usbdrive /proc/mounts | awk '{print $1}' | sed -e 's/\/dev\///'")
     version = run_cmd("cat " + fw_dir + "/version")
     build_tag = run_cmd("cat " + fw_dir + "/buildtag")
