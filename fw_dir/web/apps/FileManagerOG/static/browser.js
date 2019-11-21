@@ -302,7 +302,7 @@ $(function () {
                 selectedNodes.forEach(function(n) {
                     $('#copy-modal-msg').append('<p>').append(nodeNameWithIcon(n.path,n.type));   
                 });       
-                $('#copy-modal-msg').append('<p> to current folder?</p>');   
+                $('#copy-modal-msg').append('<p> <br /> to current folder?</p>');   
             }
             else if (clipboard.operation == "cut") {
                 $('#move-modal').modal({backdrop: false});
@@ -311,7 +311,7 @@ $(function () {
                 selectedNodes.forEach(function(n) {
                     $('#move-modal-msg').append('<p>').append(nodeNameWithIcon(n.path,n.type));  
                 });       
-                $('#move-modal-msg').append('<p> to current folder?</p>');   
+                $('#move-modal-msg').append('<p> <br />to current folder?</p>');   
             }
         }
         else {
