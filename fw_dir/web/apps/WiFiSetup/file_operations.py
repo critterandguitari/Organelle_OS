@@ -5,7 +5,9 @@ import cherrypy
 
 BASE_DIR = "/"
 
-user_dir = os.getenv("USER_DIR", "/sdcard")
+# mother stashes user_dir in /tmp
+with open('/tmp/user_dir') as f:
+        user_dir = f.readline().rstrip('\n')
 
 def add_network(name, pw):
     wifi_file = user_dir + "/wifi.txt"
@@ -32,6 +34,11 @@ def delete_network(name):
     return '{"ok":"ok"}'
 
 def get_networks():
+    
+    # this might have changed so check it again
+    with open('/tmp/user_dir') as f:
+        user_dir = f.readline().rstrip('\n')
+
     network_names = []
     # check for wifi file, create one if not found
     wifi_file = user_dir + "/wifi.txt"
