@@ -85,7 +85,7 @@ def wifi_connected():
     ret = False
     if ap_state == AP_RUNNING :
         ip_address = "192.168.12.1"
-        current_net = "Organelle"
+        current_net = "AP Mode"
         return True
 
     try :
