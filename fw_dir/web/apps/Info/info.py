@@ -6,11 +6,17 @@ import threading
 import subprocess
 import socket
 
-# usb or sd card
-fw_dir = os.getenv("FW_DIR", "/home/music/fw_dir")
+
+# mother stashes fw_dir in /tmp
+with open('/tmp/fw_dir') as f:
+        fw_dir = f.readline().rstrip('\n')
+
+# mother stashes user_dir in /tmp
+with open('/tmp/user_dir') as f:
+        user_dir = f.readline().rstrip('\n')
 
 # imports
-#print fw_dir
+print fw_dir
 wifi = imp.load_source('wifi_control', fw_dir + '/scripts/wifi_control.py')
 
 items = {
@@ -19,7 +25,8 @@ items = {
     "usbdrive" : ["USB Drive", ""],
     "version" : ["OS Version", ""],
     "patch" : ["Current Patch", ""],
-    "host_name" : ["Hostname", ""]
+    "host_name" : ["Hostname", ""],
+    "user_root" : ["User Root", ""]
 }
 
 def check_wifi():
@@ -40,8 +47,12 @@ def run_cmd(cmd) :
 # get info
 def get_info() :
     global items
+    # mother stashes user_dir in /tmp
+    with open('/tmp/user_dir') as f:
+        user_dir = f.readline()
 
     items["usbdrive"][1] = run_cmd("grep usbdrive /proc/mounts | awk '{print $1}' | sed -e 's/\/dev\///'")
+    items["user_root"][1] = user_dir
     version = run_cmd("cat " + fw_dir + "/version")
     build_tag = run_cmd("cat " + fw_dir + "/buildtag")
     items["version"][1] = version + build_tag

@@ -89,6 +89,10 @@ void AppData::setUserDir(const char* path) {
         user_path=path;
     }
     system_path = getDefaultSystemDir(user_path);
+    
+    // stash the user dir in a tmp file for other parts of the system to use (like web apps)
+    std::string cmd = std::string("echo ") + user_path + " > /tmp/user_dir";
+    system(cmd.c_str());
 }
 
 void  AppData::setSystemDir(const char* path) {
@@ -107,5 +111,8 @@ void AppData::setFirmwareDir(const char* path) {
     } else {
         firmware_path=path;
     }
+    // stash the fw dir in a tmp file for other parts of the system to use (like web apps)
+    std::string cmd = std::string("echo ") + firmware_path + " > /tmp/fw_dir";
+    system(cmd.c_str());
 }
 
