@@ -47,7 +47,7 @@ class Root():
             if data['operation'] == 'delete_network' :
                 return file_operations.delete_network(data['name'])
             if data['operation'] == 'edit_ap' :
-                return file_operations.delete_network(data['name'], data['pw'])
+                return file_operations.edit_ap(data['name'], data['pw'])
         else :
             cherrypy.response.headers['Content-Type'] = "application/json"
             return "no operation specified"

@@ -9,6 +9,22 @@ BASE_DIR = "/"
 with open('/tmp/user_dir') as f:
         user_dir = f.readline().rstrip('\n')
 
+def edit_ap(name, pw):
+    # check for wifi file, create one if not found
+    ap_file = user_dir + "/ap.txt"
+    if os.path.exists(ap_file):
+        f = open(user_dir + "/ap.txt", "r")
+    else :
+        print "wifi file not found, creating"
+        f = open(user_dir + "/ap.txt", "w")
+        f.close()
+
+    ap_file = user_dir + "/ap.txt"
+    with open(ap_file, "w") as wf:
+        wf.write(name + "\n")
+        wf.write(pw + "\n")
+    return '{"ok":"ok"}'
+
 def add_network(name, pw):
     wifi_file = user_dir + "/wifi.txt"
     with open(wifi_file, "a") as wf:

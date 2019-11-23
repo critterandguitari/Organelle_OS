@@ -65,7 +65,7 @@
         /*float: right;*/
     }
     #new-net-but {
-        float: right;
+        /*float: right;*/
     }
     .breadcrumb {
         margin-top: 1em;
@@ -106,7 +106,7 @@
                     </div>
                     <div class="modal-body">
                         <input id="new-ssid" type="text" class="form-control" id="inputEmail" placeholder="Network Name">
-			</br>
+			<br />
                         <input id="new-pw" type="text" class="form-control" id="inputEmail" placeholder="Password">
                     </div>
                      <div class="modal-footer">
@@ -118,7 +118,27 @@
                 </div>
             </div>
         </div>
-
+ 
+        <div id="edit-ap-modal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+			    <h4 class="modal-title">Enter Access Point Settings</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input id="ap-ssid" type="text" class="form-control" id="inputEmail" placeholder="AP Network Name">
+			<br />
+                        <input id="ap-pw" type="text" class="form-control" id="inputEmail" placeholder="AP Password (at least 8 characters)">
+                    </div>
+                     <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button id="confirm-edit-ap" type="button" class="btn btn-primary">OK</button>
+                    </div>
+                   <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div id="info-modal" class="modal fade">
             <div class="modal-dialog">
@@ -146,18 +166,28 @@
         <div style="border:1px solid; border-radius: 6px; padding: 16px; width: 500px; margin:16px auto;">
 
              <h3>WiFi Setup</h3>
-	        </br>
-            After adding a WiFi network navigate to the WiFi settings on your Organelle and connect.
-	        </br>
-		<h4>Stored Networks &nbsp; &nbsp; <button id="new-net-but" type="button" class="btn btn-default">Add</button></h4>
-	        </br>
+	        <br />
+		<h4>Stored Networks &nbsp; &nbsp;</h4>
+	        <br />
+            	      Add or remove WiFi networks.  After adding a WiFi network navigate to the WiFi settings on your Organelle to connect.
+	        <br /> 
+	        <br /> 
+		      <button id="new-net-but" type="button" class="btn btn-default">Add</button>
+	        <br />
+	        <br /> 
             	<table class="table table-striped table-hover">
                 </thead>
                   <tbody id="wifi-table">
                   </tbody>
                 </table>
 
-	        </br>
+	        <br />
+		<h4>AP Settings &nbsp; &nbsp; </h4>
+            		Set the network name and password when operating in Access Point mode (when the Organelle creates its own WiFi network).
+			<br />     
+			<br />     
+		<button id="ap-net-but" type="button" class="btn btn-default">Edit AP Settings</button>
+	        <br />
         </div>
     </body>
 </html>

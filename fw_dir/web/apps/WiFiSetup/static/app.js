@@ -73,6 +73,22 @@ $(function () {
     $("#new-net-but").click(function(){
             $('#new-net-modal').modal({backdrop: false});
     });
+ 
+    $("#ap-net-but").click(function(){
+            $('#edit-ap-modal').modal({backdrop: false});
+    });
+
+    $("#confirm-edit-ap").click(function(){
+        $('#edit-ap-modal').modal('hide');
+        $.get(fsurl+'?operation=edit_ap', {  'name' : $('#ap-ssid').val(), 'pw' : $('#ap-pw').val()  })
+        .done(function () {
+            console.log('added');
+            refresh();
+        })
+        .fail(function () {
+            console.log('problem adding');
+        });
+    });
 
     $("#confirm-add").click(function(){
         $('#new-net-modal').modal('hide');
