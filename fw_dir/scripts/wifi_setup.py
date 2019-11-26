@@ -23,6 +23,12 @@ banner = og.Alert()
 # lock for updating menu
 menu_lock = threading.Lock()
 
+# quits but doesn't return to main menu
+# for vnc start / stop, keeps the starting / stopping message up until mother is restarted
+def quit_no_return():
+    og.osc_server.free()
+    exit()
+
 def quit():
     og.end_app()
 
@@ -48,14 +54,14 @@ def start_vnc():
     try:
         ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
     except: pass
-    quit()
+    quit_no_return()
 
 def stop_vnc():
     cmd = fw_dir + "/scripts/vnc-stop.sh"
     try:
         ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
     except: pass
-    quit()
+    quit_no_return()
 
 def check_vnc():
     cmd = "pgrep vncserver"
