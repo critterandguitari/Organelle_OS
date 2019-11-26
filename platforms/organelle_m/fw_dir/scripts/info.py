@@ -30,6 +30,15 @@ def check_wifi():
         ssid = wifi.current_net
         ip_address = wifi.ip_address
 
+def check_vnc():
+    cmd = "pgrep vncserver"
+    try:
+        subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+        ret = True
+    except: 
+        ret = False
+    return ret
+
 # returns output if exit code 0, NA otherwise
 def run_cmd(cmd) :
     ret = 'None'
@@ -70,7 +79,8 @@ patch_dir = "  " + patch_dir.split(user_dir + "/", 1).pop()
 user_dir = "  " + user_dir
 patch = "  " + run_cmd("ls /tmp/curpatchname")
 host_name = "  " + run_cmd("ps aux | grep 'avahi.*running' | awk 'NR==1{print $13}' | sed 's/\[//' | sed 's/]//'")
-
+if check_vnc() : vnc_server = "  Running"
+else : vnc_server = "  Not Running"
 check_wifi()
 
 #info.items = [usbdrive, midi_dev, version, "Patch Folder:", patch_dir, "User Root:", user_dir, ip_address, "Host Name:",host_name]
@@ -82,6 +92,8 @@ usbdrive,
 "  " + ssid,
 "Host Name:",
 host_name,
+"VNC Server",
+vnc_server,
 "Patch: ",
 patch,
 "Patch Folder:", 
