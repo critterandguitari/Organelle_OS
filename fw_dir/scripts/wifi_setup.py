@@ -3,9 +3,11 @@ import imp
 import sys
 import time
 import threading
+import subprocess
 
 # usb or sd card
 user_dir = os.getenv("USER_DIR", "/usbdrive")
+fw_dir = os.getenv("FW_DIR", "/root/scripts")
 
 # imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -41,6 +43,29 @@ def disconnect():
     update_menu()
     og.redraw_flag = True
 
+def start_vnc():
+    cmd = fw_dir + "/scripts/vnc-start.sh"
+    try:
+        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+    except: pass
+    quit()
+
+def stop_vnc():
+    cmd = fw_dir + "/scripts/vnc-stop.sh"
+    try:
+        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+    except: pass
+    quit()
+
+def check_vnc():
+    cmd = "pgrep vncserver"
+    try:
+        subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+        ret = True
+    except: 
+        ret = False
+    return ret
+
 def start_web():
     print "start web"
     wifi.start_web_server()
@@ -52,8 +77,6 @@ def stop_web():
     wifi.stop_web_server()
     update_menu()
     og.redraw_flag = True
-
-
 
 def start_ap():
     print "start ap"
@@ -146,7 +169,6 @@ def update_ap_menu_entry(stat):
         except :
             pass
 
-
 # bg connection checker
 def check_status():
     while True:
@@ -206,6 +228,8 @@ except :
 
 menu.items.append(['Start Web Server', non, {'type':'web_server_control'}])
 menu.items.append(['Start AP', non, {'type':'ap_control'}])
+if check_vnc() :  menu.items.append(['Stop VNC', stop_vnc])
+else : menu.items.append(['Start VNC', start_vnc])
 menu.items.append(['Turn Wifi Off', disconnect])
 menu.items.append(['< Home', quit])
 menu.selection = 0
