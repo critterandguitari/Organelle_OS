@@ -94,6 +94,7 @@ void gInvertArea(OSCMessage &msg);
 void gCharacter(OSCMessage &msg);
 void gPrintln(OSCMessage &msg);
 void gWaveform(OSCMessage &msg);
+void gFrame(OSCMessage &msg);
 void gFlip(OSCMessage &msg);
 
 // older legacy messages for screen
@@ -150,8 +151,8 @@ std::string getMainSystemFile(  const std::vector<std::string>& paths,
 int main(int argc, char* argv[]) {
     printf("build date " __DATE__ "   " __TIME__ "/n");
     uint32_t seconds = 0;
-    char udpPacketIn[256];
-    uint8_t i = 0;
+    char udpPacketIn[2048];
+    int i = 0;
     int len = 0;
     int page = 0;
 
@@ -181,7 +182,7 @@ int main(int argc, char* argv[]) {
 
     for (;;) {
         // receive udp osc messages
-        len = udpSock.readBuffer(udpPacketIn, 256, 0);
+        len = udpSock.readBuffer(udpPacketIn, 2048, 0);
         if (len > 0) {
             msgIn.empty();
             for (i = 0; i < len; i++) {
@@ -206,6 +207,7 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/oled/gCharacter", gCharacter, 0)
                     || msgIn.dispatch("/oled/gPrintln", gPrintln, 0)
                     || msgIn.dispatch("/oled/gWaveform", gWaveform, 0)
+                    || msgIn.dispatch("/oled/gFrame", gFrame, 0)
                     || msgIn.dispatch("/oled/gInvertArea", gInvertArea, 0)
                     || msgIn.dispatch("/oled/gFlip", gFlip, 0)
 
@@ -518,6 +520,21 @@ void gWaveform(OSCMessage &msg) {
             for (i = 1; i < 128; i++) {
                 app.oled(gScreen(msg.getInt(0))).draw_line(i - 1, tmp[i + 3], i, tmp[i + 4], 1);
             }
+        }
+    }
+}
+
+void gFrame(OSCMessage &msg) {
+    uint8_t tmp[1028]; 
+    int len = 0;
+    int i;
+    app.oled(gScreen(msg.getInt(0))).newScreen = 0;
+    if (msg.isInt(0) && msg.isBlob(1)) {
+        len = msg.getBlob(1, tmp, 1028);
+        // only if we got 1024 values (len and tmp includes the 4 size bytes of blob)
+        if (len == 1028) {
+		// copy it right to screen buffer
+        	memcpy(app.oled(gScreen(msg.getInt(0))).pix_buf, tmp + 4, 1024);
         }
     }
 }
