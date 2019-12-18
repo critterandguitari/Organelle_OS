@@ -686,6 +686,7 @@ void vuMeter(OSCMessage &msg) {
     char line[1024];
     int len, i, outR, outL, inR, inL;
 
+    // vu with peak
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4)) {
         app.inR = msg.getInt(0);
         app.inL = msg.getInt(1);
@@ -694,6 +695,7 @@ void vuMeter(OSCMessage &msg) {
 	app.peaks = msg.getInt(4);
         app.oled((AppData::Screen) app.currentScreen).newScreen = 1;
     }
+
 }
 
 void setScreen(OSCMessage &msg) {

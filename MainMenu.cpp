@@ -66,7 +66,7 @@ MainMenu::MainMenu() {
     currentMenu = MenuMode::M_MAIN;
 }
 
-static const std::string MOTHER_PD_VERSION ="1.3";
+static const std::string MOTHER_PD_VERSION ="1.2";
 
 bool MainMenu::isMotherPdCompatible(const std::string& motherpd) {
     std::string cmd = std::string ("check-mother-pd.sh \"") + motherpd + "\" " + MOTHER_PD_VERSION; 
