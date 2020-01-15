@@ -326,7 +326,7 @@ int main(int argc, char* argv[]) {
 #ifdef BATTERY_METER
                         app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, app.peaks, controls.pwrStatus, controls.batteryBars, app.wifiStatus);
 #else
-                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL);
+                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, app.peaks);
 #endif
                     }
                     controls.updateOLED(app.oled(AppData::PATCH));

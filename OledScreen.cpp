@@ -655,7 +655,7 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int peaks, in
   if (peaks & 8) draw_box_filled((11 * 3) + 54, 4, 3, 2);
 }
 
-void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
+void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int peaks) {
 
   int i, len;
 
@@ -751,5 +751,10 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL) {
   for (i = 0; i < (outL); i++) {
     draw_box_filled(73 + (5 * i), 4, 3, 4);
   }
+  // peaks
+  if (peaks & 1) draw_box_filled((10 * 5) + 7, 0, 3, 4);
+  if (peaks & 2) draw_box_filled((10 * 5) + 7, 4, 3, 4);
+  if (peaks & 4) draw_box_filled((10 * 5) + 73, 0, 3, 4);
+  if (peaks & 8) draw_box_filled((10 * 5) + 73, 4, 3, 4);
 }
 
