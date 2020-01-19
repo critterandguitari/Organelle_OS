@@ -64,7 +64,7 @@ def stop_vnc():
     quit_no_return()
 
 def check_vnc():
-    cmd = "pgrep Xvnc"
+    cmd = "pgrep vncserver"
     try:
         subprocess.check_output(['bash', '-c', cmd], close_fds=True)
         ret = True

@@ -34,6 +34,15 @@ def check_status():
         info.items[3] = "IP: " + socket.gethostbyname(socket.gethostname())
         og.redraw_flag = True
 
+def check_vnc():
+    cmd = "pgrep Xvnc"
+    try:
+        subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+        ret = True
+    except: 
+        ret = False
+    return ret
+
 info = og.InfoList()
 
 print "start app"
@@ -54,6 +63,8 @@ user_dir = "  " + user_dir
 patch = "  " + run_cmd("ls /tmp/curpatchname")
 ip_address = "IP: " + socket.gethostbyname(socket.gethostname())
 host_name = "  " + run_cmd("ps aux | grep 'avahi.*running' | awk 'NR==1{print $13}' | sed 's/\[//' | sed 's/]//'")
+if check_vnc() : vnc_server = "  Running"
+else : vnc_server = "  Not Running"
 
 # check for wifi
 ssid = "not connected"
@@ -71,6 +82,8 @@ ip_address,
 ssid,
 "Host Name:",
 host_name,
+"VNC Server:",
+vnc_server,
 "Patch: ",
 patch,
 "Patch Folder:", 
