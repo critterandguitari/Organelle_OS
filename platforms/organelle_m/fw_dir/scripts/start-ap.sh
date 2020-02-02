@@ -2,7 +2,8 @@
 killall wpa_supplicant
 killall dhcpcd
 
-FW_DIR=${FW_DIR:="$HOME/fw_dir"}
+# $HOME not set when called from systemd service, so need to use /home/music
+FW_DIR=${FW_DIR:="/home/music/fw_dir"}
 
 USER_DIR=$(cat /tmp/user_dir)
 
