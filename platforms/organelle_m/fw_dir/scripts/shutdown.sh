@@ -2,7 +2,7 @@
 
 # USER_DIR=${USER_DIR:="/usbdrive"}
 # PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
-FW_DIR=${FW_DIR:="/home/music/fw_dir"}
+FW_DIR=${FW_DIR:="$HOME/fw_dir"}
 SCRIPTS_DIR=$FW_DIR/scripts
 
 oscsend localhost 4001 /oled/gClear ii 4 1

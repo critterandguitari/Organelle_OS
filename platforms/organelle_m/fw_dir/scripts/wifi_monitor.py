@@ -2,7 +2,7 @@ import imp
 import time
 import os
 
-fw_dir = os.getenv("FW_DIR", "/root")
+fw_dir = os.getenv("FW_DIR")
 wifi = imp.load_source('wifi_control', fw_dir + '/scripts/wifi_control.py')
 
 
