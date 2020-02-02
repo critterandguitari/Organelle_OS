@@ -13,7 +13,7 @@ $SCRIPTS_DIR/killmother.sh
 # shutdown wifi
 wpa_cli -i wlan0 terminate
 dhcpcd -b -x wlan0 
-/root/scripts/create_ap --stop wlan0 
+$SCRIPTS_DIR/create_ap --stop wlan0 
 
 shutdown -h now
 #echo "shutting down"

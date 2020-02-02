@@ -2,6 +2,8 @@
 killall wpa_supplicant
 killall dhcpcd
 
+FW_DIR=${FW_DIR:="$HOME/fw_dir"}
+
 USER_DIR=$(cat /tmp/user_dir)
 
 AP_FILE="${USER_DIR}/ap.txt"
@@ -16,5 +18,5 @@ else
     PW=coolmusic
 fi
 
-/root/scripts/create_ap --no-virt -n wlan0 $NET $PW
+$FW_DIR/scripts/create_ap --no-virt -n wlan0 $NET $PW
 

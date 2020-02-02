@@ -11,7 +11,7 @@ print "Starting INFO script"
 # usb or sd card
 user_dir = os.getenv("USER_DIR", "/usbdrive")
 patch_dir = os.getenv("PATCH_DIR", "/usbdrive/Patches")
-fw_dir = os.getenv("FW_DIR", "/root")
+fw_dir = os.getenv("FW_DIR")
 
 print "loading og module"
 # imports

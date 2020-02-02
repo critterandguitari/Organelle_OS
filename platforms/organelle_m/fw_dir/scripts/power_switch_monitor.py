@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 import os
 import imp
 
-fw_dir = os.getenv("FW_DIR", "/root")
+fw_dir = os.getenv("FW_DIR")
 
 GPIO.setmode(GPIO.BCM)
 
