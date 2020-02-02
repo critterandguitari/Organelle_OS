@@ -41,7 +41,11 @@ organelle_deploy : organelle
 	@echo "Updating OS to $(IMAGE_VERSION)"
 	fw_dir/scripts/remount-rw.sh
 	@echo "copying fw files to /root"
-	cp -fr fw_dir/* /root/
+	rm -fr /root/fw_dir
+	mkdir /root/fw_dir
+	cp -fr fw_dir/* /root/fw_dir
+	@echo "copying version file to root for backwards compatiblility"
+	cp -fr fw_dir/version /root
 	@echo "copying system files"
 	cp -fr platforms/organelle/rootfs/* /
 	sync
@@ -65,51 +69,6 @@ organelle_m_deploy : organelle_m
 	cp -fr --preserve=mode,ownership tmp/rootfs/* /
 	rm -fr tmp
 	sync
-
-
-image : main
-	cp main host/root/mother
-	rm -rf $(IMAGE_DIR)
-	@echo creating image $(IMAGE_VERSION) in $(IMAGE_DIR)
-	mkdir -p $(IMAGE_DIR)/root
-	cp -f host/root/mother.pd $(IMAGE_DIR)/root
-	cp -f host/root/mother.scd $(IMAGE_DIR)/root
-	cp -f host/root/mother $(IMAGE_DIR)/root
-	cp -f host/root/version $(IMAGE_DIR)/root
-	cp -f host/root/buildtag $(IMAGE_DIR)/root
-	cp -f host/root/.bash_profile $(IMAGE_DIR)/root
-	cp -f host/root/.jwmrc $(IMAGE_DIR)/root
-	cp -f host/root/.pdsettings $(IMAGE_DIR)/root
-	mkdir -p $(IMAGE_DIR)/scripts
-	cp -f host/root/scripts/* $(IMAGE_DIR)/scripts
-	mkdir -p $(IMAGE_DIR)/externals
-	cp -f host/root/externals/* $(IMAGE_DIR)/externals
-	mkdir -p $(IMAGE_DIR)/web
-	cp -fr host/root/web/* $(IMAGE_DIR)/web
-	mkdir -p $(IMAGE_DIR)/Desktop
-	cp -fr host/root/Desktop/* $(IMAGE_DIR)/Desktop
-	mkdir -p ${IMAGE_DIR}/.ssh
-	cp -f host/root/.ssh/environment $(IMAGE_DIR)/.ssh/environment
-	mkdir -p ${IMAGE_DIR}/system/etc/ssh 
-	cp -f host/etc/ssh/sshd_config $(IMAGE_DIR)/system/etc/ssh/sshd_config
-	mkdir -p ${IMAGE_DIR}/system/etc/udev/rules.d
-	cp -f host/etc/udev/rules.d/70-wifi-powersave.rules $(IMAGE_DIR)/system/etc/udev/rules.d/70-wifi-powersave.rules
-	cp -f host/etc/nsswitch.conf $(IMAGE_DIR)/system/etc/
-	mkdir -p ${IMAGE_DIR}/system/lib/systemd/system 
-	cp -f host/lib/systemd/system/cherrypy.service $(IMAGE_DIR)/system/lib/systemd/system
-	cp -f host/lib/systemd/system/createap.service $(IMAGE_DIR)/system/lib/systemd/system
-	cp -fr host/extra $(IMAGE_DIR)/extra/
-	mkdir -p $(IMAGE_DIR)/.config/SuperCollider
-	cp -f host/root/.config/SuperCollider/* $(IMAGE_DIR)/.config/SuperCollider
-	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/deploy.template > $(IMAGE_DIR)/deploy.sh
-	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/deploypd.template > $(IMAGE_DIR)/deploypd.sh
-	sed "s/XXXXXXXXXX/$(IMAGE_VERSION)/g" < host/main.pd.template > $(IMAGE_DIR)/main.pd
-	chmod +x $(IMAGE_DIR)/*.sh
-	find $(IMAGE_DIR) -type f -print0  | xargs -0 sha1sum > /tmp/manifest.new
-	mv /tmp/manifest.new $(IMAGE_DIR)/manifest.txt
-	zip -r $(IMAGE_DIR).zip $(IMAGE_DIR)
-	rm -rf $(IMAGE_DIR)
-	@echo created $(IMAGE_DIR).zip
 
 # Generate with g++ -MM *.c* OSC/*.* 
 AppData.o: AppData.cpp AppData.h OledScreen.h
