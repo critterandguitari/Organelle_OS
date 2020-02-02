@@ -2,7 +2,7 @@
 
 # USER_DIR=${USER_DIR:="/usbdrive"}
 # PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
-FW_DIR=${FW_DIR:="/root/fw_dir"}
+FW_DIR=${FW_DIR:="$HOME/fw_dir"}
 
 oscsend localhost 4001 /oled/setscreen i 1
 

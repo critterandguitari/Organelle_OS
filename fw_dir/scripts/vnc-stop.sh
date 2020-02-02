@@ -5,7 +5,7 @@ if [ ! $? -eq 0 ]
 then 
 	export FW_DIR=${FW_DIR:="~/fw_dir"}
 else 
-	export FW_DIR=${FW_DIR:="/root/fw_dir"}
+	export FW_DIR=${FW_DIR:="$HOME/fw_dir"}
 fi
 
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # export PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
-export FW_DIR=${FW_DIR:="/root/fw_dir"}
+export FW_DIR=${FW_DIR:="$HOME/fw_dir"}
 export SCRIPTS_DIR=$FW_DIR/scripts
 
 clear

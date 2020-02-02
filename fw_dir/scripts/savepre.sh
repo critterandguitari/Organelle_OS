@@ -2,7 +2,7 @@
 
 USER_DIR=${USER_DIR:="/usbdrive"}
 # PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
-# FW_DIR=${FW_DIR:="/root/fw_dir"}
+# FW_DIR=${FW_DIR:="$HOME/fw_dir"}
 # SCRIPTS_DIR=$FW_DIR/scripts
 
 # don't clear aux screen.  it is cleared and set with OG version 
