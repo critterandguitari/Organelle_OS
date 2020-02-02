@@ -14,5 +14,5 @@ if [ $? -eq 0 ]; then
 else
     $FW_DIR/scripts/setup.sh > /dev/null 2>&1
     $FW_DIR/scripts/start-mother.sh > /dev/null 2>&1
-    $FW_DIR/root/scripts/welcome.sh
+    $FW_DIR/scripts/welcome.sh
 fi
