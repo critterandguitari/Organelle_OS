@@ -2,7 +2,7 @@
 
 # USER_DIR=${USER_DIR:="/usbdrive"}
 # PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
-# FW_DIR=${FW_DIR:="/root"}
+# FW_DIR=${FW_DIR:="/root/fw_dir"}
 # SCRIPTS_DIR=$FW_DIR/scripts
 
 # usage $1 mother.pd file to check,  $2 version number requried

@@ -3,7 +3,7 @@
 #in case the deploy scripts need these
 export USER_DIR=${USER_DIR:="/usbdrive"}
 export PATCH_DIR=${PATCH_DIR:="$USER_DIR/Patches"}
-export FW_DIR=${FW_DIR:="/root"}
+export FW_DIR=${FW_DIR:="/root/fw_dir"}
 export SCRIPTS_DIR=$FW_DIR/scripts
 
 oscsend localhost 4001 /oled/setscreen i 1

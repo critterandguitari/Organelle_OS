@@ -2,7 +2,7 @@
 
 # USER_DIR=${USER_DIR:="/usbdrive"}
 # PATCH_DIR=${PATCH_DIR:="/usbdrive/Patches"}
-# FW_DIR=${FW_DIR:="/root"}
+# FW_DIR=${FW_DIR:="/root/fw_dir"}
 # SCRIPTS_DIR=$FW_DIR/scripts
 
 for i in 1 2 3 4 5

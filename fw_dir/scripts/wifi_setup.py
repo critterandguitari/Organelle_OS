@@ -7,7 +7,7 @@ import subprocess
 
 # usb or sd card
 user_dir = os.getenv("USER_DIR", "/usbdrive")
-fw_dir = os.getenv("FW_DIR", "/root/scripts")
+fw_dir = os.getenv("FW_DIR", "/root/fw_dir")
 
 # imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
