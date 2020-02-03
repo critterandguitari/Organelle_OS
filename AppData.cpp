@@ -15,7 +15,7 @@ const char* USB_USERDIR="/usbdrive";
 const char* SD_USERDIR="/sdcard";
 const char* DEFAULT_USERDIR="/usbdrive";
 
-const char* DEFAULT_FW="/root";
+const char* DEFAULT_FW="/root/fw_dir";
 
 const char* getDefaultPatchDir() {
     struct stat st;

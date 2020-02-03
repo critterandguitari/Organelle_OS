@@ -6,7 +6,7 @@
     </StartupCommand>
 
      <StartupCommand>
-        /root/scripts/start-mother.sh
+        $HOME/fw_dir/scripts/start-mother.sh
     </StartupCommand>
 
 
@@ -76,7 +76,6 @@
 
         <!--TrayButton label="Menu">root:1</TrayButton-->
         <TrayButton icon="/usr/share/icons/Adwaita/32x32/apps/utilities-terminal.png">exec:lxterminal</TrayButton>
-        <!--TrayButton icon="/root/pd.png">exec:wish /usr/lib/pd/tcl/pd-gui.tcl</TrayButton-->
         <!--TrayButton label="_">showdesktop</TrayButton-->
 
         <!-- Pager labeled="true"/ -->
@@ -84,8 +83,8 @@
         <TaskList maxwidth="256"/>
 
         <Dock/>
-        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/emotes/face-uncertain.png" popup="Reset Menu">exec:/root/scripts/restart-mother.sh</TrayButton>
-        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/actions/process-stop.png" popup="Exit Gui">exec:/root/scripts/stop-gui.sh</TrayButton>
+        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/emotes/face-uncertain.png" popup="Reset Menu">exec:$HOME/fw_dir/scripts/restart-mother.sh</TrayButton>
+        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/actions/process-stop.png" popup="Exit Gui">exec:$HOME/fw_dir/scripts/stop-gui.sh</TrayButton>
         <!--Clock>xclock</Clock-->
 
     </Tray>

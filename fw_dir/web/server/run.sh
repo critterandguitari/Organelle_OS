@@ -1,11 +1,11 @@
 #!/bin/sh
 
 
-export SCRIPTS_DIR=~/scripts
-export USER_DIR=`$SCRIPTS_DIR/get-user-dir.sh`
+export FW_DIR=${FW_DIR:="$HOME/fw_dir"}
+export USER_DIR=`$FW_DIR/scripts/get-user-dir.sh`
 echo using USER_DIR: $USER_DIR
 
 
 # start webserver
-cd /root/web/server
+cd $FW_DIR/web/server
 python2 server.py 
