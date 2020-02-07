@@ -135,7 +135,9 @@ def update_state() :
         else :
             connecting_timer += 1
             if (connecting_timer > 30) : state = CONNECTION_ERROR
-    #elif (state == CONNECTED): do nothing
+    elif (state == CONNECTED):
+        if wifi_connected() : state = CONNECTED
+        else : state = NOT_CONNECTED
     elif (state == DISCONNECTING): state = NOT_CONNECTED
     #elif (state == CONNECTION_ERROR):  do nothing
 
