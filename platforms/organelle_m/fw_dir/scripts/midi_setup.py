@@ -222,7 +222,8 @@ def midiDeviceSelect():
             if(len(midiDevices)==0): midiDevice = "28:0"
             else: midiDevice = midiDevices[midiDeviceIdx][9:42].strip() + ":" + midiDevices[midiDeviceIdx][4:8].strip()
             print midiDevice
-            menu.items[menu.selection][0] = 'MIDI Device: ' + midiDevice
+            if midiDevice == "28:0" : menu.items[menu.selection][0] = 'Device: None'
+            else : menu.items[menu.selection][0] = 'Device: ' + midiDevice
             break
 
 
@@ -266,7 +267,8 @@ menu.items.append(['MIDI In : ' + ("Enabled" if midiInGate>0 else "Disabled") , 
 menu.items.append(['MIDI In Ch.: ' + (str(midiIn) if midiIn>0 else "Omni") , midiInSelect])
 menu.items.append(['MIDI Out : ' + ("Enabled" if midiOutGate>0 else "Disabled") , midiOutGateSelect])
 menu.items.append(['MIDI Out Ch.: ' + (str(midiOut)) , midiOutSelect])
-menu.items.append(['Device: ' + midiDevice, midiDeviceSelect])
+if midiDevice == "28:0" : menu.items.append(['Device: None', midiDeviceSelect])
+else : menu.items.append(['Device: ' + midiDevice, midiDeviceSelect])
 menu.items.append(['Save', save])
 menu.items.append(['< Home', quit])
 menu.selection = 0
