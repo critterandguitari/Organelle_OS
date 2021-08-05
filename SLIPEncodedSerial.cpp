@@ -23,7 +23,7 @@ static const uint8_t slipescesc = 0335;
 int SLIPEncodedSerial::sendMessage(const uint8_t *buf, uint32_t len, Serial &s)
 {
     encode(buf, len);
-    s.writeBuffer(encodedBuf, encodedLength);
+    return s.writeBuffer(encodedBuf, encodedLength);
 }
 
 //int SLIPEncodedSerial::recvPacket(uint8_t * buf, uint32_t len)
