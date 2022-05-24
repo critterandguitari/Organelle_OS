@@ -49,14 +49,19 @@ class CM3GPIO
 
     private:        
         uint32_t shiftRegRead();
-        void getEncoder();
+        int getEncoder();
         void getKeys();
         uint32_t adcRead(uint8_t adcnum);
         void displayPinValues();
-	void checkFootSwitch ();
+	    void checkFootSwitch ();
         
         uint32_t pinValues;
         uint32_t pinValuesLast;
+    
+        uint8_t lrmem;
+	    int lrsum;
+	    int num;
+
 };
 
 

@@ -162,6 +162,12 @@ void CM3GPIO::init(){
     batteryVoltage = 5;
     batteryBars = 5;
     lowBatteryShutdown = false;
+ 
+	// for the encoder algo
+    lrmem = 3;
+	lrsum = 0;
+	num = 0;
+
 }
 
 void CM3GPIO::clearFlags() {
@@ -397,7 +403,7 @@ void CM3GPIO::getKeys(void){
     keyStates = ~keyStates;
 }
 
-void CM3GPIO::getEncoder(void){
+int CM3GPIO::getEncoder(void){
 
 	static uint8_t encoder_last = 0;
 	uint8_t encoder = 0;
@@ -433,31 +439,37 @@ void CM3GPIO::getEncoder(void){
 	}
 
 	// turning
+  	static int8_t TRANS[] = {0,-1,1,14,1,0,14,-1,-1,14,0,1,14,1,-1,0};
+   	int8_t l, r;
+
 	encoder = (pinValues >> 5) & 0x3;
-	
-    if (encoder != encoder_last) {
-        if (encoder_last == 0) {
-	    if (encoder == 2){
-	        encTurn = 1;
-                encTurnFlag = 1;
-            }
-            if (encoder == 1){
-                encTurn = 0;
-                encTurnFlag = 1; 
-	    }
-        }
-        if (encoder_last == 3) {
-	    if (encoder == 1){
-                encTurn = 1;
-                encTurnFlag = 1;
-	    }
-            if (encoder == 2){
-                encTurn = 0;
-                encTurnFlag = 1;
-            }
-        }
-        encoder_last = encoder;
-	}
+   	l = encoder & 0x1;
+   	r = (encoder >> 1) & 0x1;
+
+   	lrmem = ((lrmem & 0x03) << 2) + 2*l + r;
+   	lrsum = lrsum + TRANS[lrmem];
+   	// encoder not in the neutral state 
+    //if(lrsum % 4 != 0) return 0;
+   	if(lrsum % 2 != 0) return 0;  // using 2 instead of 4 since our encoder is 2 detents per pulse
+   	// encoder in the neutral state 
+   	if (lrsum == 2)
+    {
+      	lrsum=0;
+		encTurn = 0;
+		encTurnFlag = 1;
+      	return 1;
+    }
+   	if (lrsum == -2)
+    {
+      	lrsum=0;
+		encTurn = 1;
+		encTurnFlag = 1;
+      	return -1;
+    }
+   	// lrsum > 0 if the impossible transition 
+   	lrsum=0;
+   	return 0;
+
 }
 
 uint32_t CM3GPIO::adcRead(uint8_t adcnum)
