@@ -19,7 +19,7 @@
 #ifdef CM3GPIO_HW
 #include "hw_interfaces/CM3GPIO.h"
 #else
-#include "hw_interfaces/SerialMCU.h"
+#include "hw_interfaces/SDLEmu.h"
 #endif
 
 static const unsigned int MAX_KNOBS = 6;
@@ -47,7 +47,7 @@ SimpleWriter oscBuf;
 #ifdef CM3GPIO_HW
 CM3GPIO controls;
 #else
-SerialMCU controls;
+SDLEmu controls;
 #endif
 
 /*

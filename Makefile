@@ -17,11 +17,16 @@ objects =  \
 	OSC/OSCTiming.o \
 	OSC/SimpleWriter.o
 
+SDL_FLAGS := $(shell pkg-config --libs --cflags sdl2)
+
 default :
 	@echo "platform not specified"
 
 organelle : $(objects) hw_interfaces/SerialMCU.o
 	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/SerialMCU.o
+
+emulator : $(objects) hw_interfaces/SDLEmu.o
+	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/SDLEmu.o $(SDL_FLAGS)
 
 organelle_m : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER -DFIX_ABL_LINK
 organelle_m : $(objects) hw_interfaces/CM3GPIO.o
@@ -92,4 +97,6 @@ OSCMessage.o: OSC/OSCMessage.cpp OSC/OSCMessage.h OSC/OSCData.h \
 OSCTiming.o: OSC/OSCTiming.cpp OSC/OSCTiming.h
 SimpleWriter.o: OSC/SimpleWriter.cpp OSC/SimpleWriter.h
 SerialMCU.o: hardwares/SerialMCU.cpp hardwares/SerialMCU.h \
+ hardwares/../OledScreen.h
+SDLEmu.o: hardwares/SDLEmu.cpp hardwares/SDLEmu.h \
  hardwares/../OledScreen.h
