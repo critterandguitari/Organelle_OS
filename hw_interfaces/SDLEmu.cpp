@@ -3,6 +3,7 @@
 
 SDL_Window* window = NULL;
 SDL_Surface* screenSurface = NULL;
+SDL_Renderer *renderer = NULL;
 
 SDLEmu::SDLEmu() {
 }
@@ -14,8 +15,7 @@ void SDLEmu::init(){
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) {
         printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
     }
-    window = SDL_CreateWindow( "Organelle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, SDL_WINDOW_SHOWN );
-    screenSurface = SDL_GetWindowSurface( window );
+    window = SDL_CreateWindow( "Organelle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN );
 
     // keys
     keyStatesLast = 0;
@@ -44,29 +44,9 @@ void SDLEmu::poll(){
             return;
         }
     }
-    SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0,0,0 ) );
-    SDL_UpdateWindowSurface( window );
-
-    OSCMessage msgIn;
-    // receive serial
-    if (slip.recvMessage(serial)) {
-        // check if we need to do something with this message
-        msgIn.empty();
-        msgIn.fill(slip.decodedBuf, slip.decodedLength);
-
-        if (msgIn.fullMatch("/key", 0)) keysInput(msgIn);
-        if (msgIn.fullMatch("/fs", 0)) footswitchInput(msgIn);
-        if (msgIn.fullMatch("/enc", 0)) encoderInput(msgIn);
-        if (msgIn.fullMatch("/encbut", 0)) encoderButtonInput(msgIn);
-        if (msgIn.fullMatch("/knobs", 0)) knobsInput(msgIn);
-    }
 }
 
-void SDLEmu::pollKnobs(){    
-    OSCMessage msg("/getknobs");
-    msg.add(1);
-    msg.send(oscBuf);
-    slip.sendMessage(oscBuf.buffer, oscBuf.length, serial);
+void SDLEmu::pollKnobs(){
 }
 
 void SDLEmu::updateOLED(OledScreen &s){
@@ -81,7 +61,6 @@ void SDLEmu::updateOLED(OledScreen &s){
 }
 
 void SDLEmu::updateScreenPage(uint8_t page, OledScreen &screen) {
-
     uint8_t oledPage[128];
     uint8_t tmp;
     uint32_t i, j, esc;
@@ -100,35 +79,18 @@ void SDLEmu::updateScreenPage(uint8_t page, OledScreen &screen) {
         }
         oledPage[j] = tmp;
     }
-    OSCMessage oledMsg("/oled");
-    oledMsg.add(i);
-    oledMsg.add(oledPage, 128);
-    oledMsg.send(oscBuf);
-    slip.sendMessage(oscBuf.buffer, oscBuf.length, serial);
-    oledMsg.empty();
 }
 
 void SDLEmu::ping(){
-    OSCMessage msg("/ready");
-    msg.send(oscBuf);
-    slip.sendMessage(oscBuf.buffer, oscBuf.length, serial);
 }
 
 void SDLEmu::shutdown() {
     printf("sending shutdown...\n");
     SDL_Quit();
-    OSCMessage msg("/shutdown");
-    msg.add(1);
-    msg.send(oscBuf);
-    slip.sendMessage(oscBuf.buffer, oscBuf.length, serial);
     exit(0);
 }
 
 void SDLEmu::setLED(unsigned c) {
-    OSCMessage msg("/led");
-    msg.add(c);
-    msg.send(oscBuf);
-    slip.sendMessage(oscBuf.buffer, oscBuf.length, serial);
 }
 
 void SDLEmu::footswitchInput(OSCMessage &msg){

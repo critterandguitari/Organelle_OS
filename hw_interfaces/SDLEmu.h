@@ -43,9 +43,6 @@ class SDLEmu
         void keysInput(OSCMessage &msg);
 
         void updateScreenPage(uint8_t page, OledScreen &screen);
-        SLIPEncodedSerial slip;
-        Serial serial;
-        SimpleWriter oscBuf;
 };
 
 

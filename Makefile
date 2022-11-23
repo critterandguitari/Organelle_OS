@@ -37,7 +37,7 @@ organelle_m : $(objects) hw_interfaces/CM3GPIO.o
 .PHONY : clean
 
 clean :
-	rm main $(objects)
+	rm -f main $(objects) fw_dir/mother hw_interfaces/SDLEmu.o hw_interfaces/SerialMCU.o hw_interfaces/CM3GPIO.o
 
 IMAGE_BUILD_VERSION = $(shell cat fw_dir/version)
 IMAGE_BUILD_TAG = $(shell cat fw_dir/buildtag)
