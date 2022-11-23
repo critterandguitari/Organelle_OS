@@ -30,20 +30,26 @@ void SDLEmu::clearFlags() {
     footswitchFlag = 0;
 }
 
+bool quitting = false;
 void SDLEmu::poll(){
-    SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0,0,0 ) );
-    SDL_UpdateWindowSurface( window );
+    if (quitting) {
+        return;
+    }
 
     SDL_Event e;
-    SDL_PollEvent(&e);
-    if( e.type == SDL_QUIT ) {
-        shutdown();
+    while(SDL_PollEvent(&e)) {
+        if ( e.type == SDL_QUIT ) {
+            shutdown();
+            quitting = true;
+            return;
+        }
     }
+    SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0,0,0 ) );
+    SDL_UpdateWindowSurface( window );
 
     OSCMessage msgIn;
     // receive serial
     if (slip.recvMessage(serial)) {
-
         // check if we need to do something with this message
         msgIn.empty();
         msgIn.fill(slip.decodedBuf, slip.decodedLength);
@@ -53,7 +59,6 @@ void SDLEmu::poll(){
         if (msgIn.fullMatch("/enc", 0)) encoderInput(msgIn);
         if (msgIn.fullMatch("/encbut", 0)) encoderButtonInput(msgIn);
         if (msgIn.fullMatch("/knobs", 0)) knobsInput(msgIn);
-
     }
 }
 
@@ -111,12 +116,12 @@ void SDLEmu::ping(){
 
 void SDLEmu::shutdown() {
     printf("sending shutdown...\n");
-    SDL_DestroyWindow(window);
     SDL_Quit();
     OSCMessage msg("/shutdown");
     msg.add(1);
     msg.send(oscBuf);
     slip.sendMessage(oscBuf.buffer, oscBuf.length, serial);
+    exit(0);
 }
 
 void SDLEmu::setLED(unsigned c) {
