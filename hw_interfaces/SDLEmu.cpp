@@ -12,10 +12,20 @@ void SDLEmu::init(){
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
-    if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) {
+    if (SDL_Init( SDL_INIT_VIDEO) < 0 ) {
         printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
     }
-    window = SDL_CreateWindow( "Organelle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN );
+    window = SDL_CreateWindow("Organelle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
+    if(window == NULL){
+        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+    }
+    renderer = SDL_GetRenderer(window);
+    SDL_RenderSetLogicalSize(renderer, 128, 64);
+    
+    screenSurface = SDL_GetWindowSurface(window);
+    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0, 0, 0));
+
+    SDL_UpdateWindowSurface( window );
 
     // keys
     keyStatesLast = 0;
@@ -30,17 +40,11 @@ void SDLEmu::clearFlags() {
     footswitchFlag = 0;
 }
 
-bool quitting = false;
 void SDLEmu::poll(){
-    if (quitting) {
-        return;
-    }
-
     SDL_Event e;
     while(SDL_PollEvent(&e)) {
         if ( e.type == SDL_QUIT ) {
             shutdown();
-            quitting = true;
             return;
         }
     }
@@ -50,35 +54,6 @@ void SDLEmu::pollKnobs(){
 }
 
 void SDLEmu::updateOLED(OledScreen &s){
-    updateScreenPage(0, s);
-    updateScreenPage(1, s);
-    updateScreenPage(2, s);
-    updateScreenPage(3, s);
-    updateScreenPage(4, s);
-    updateScreenPage(5, s);
-    updateScreenPage(6, s);
-    updateScreenPage(7, s);
-}
-
-void SDLEmu::updateScreenPage(uint8_t page, OledScreen &screen) {
-    uint8_t oledPage[128];
-    uint8_t tmp;
-    uint32_t i, j, esc;
-
-    i = page;
-    esc = 0;
-    // copy 128 byte page from the screen buffer
-    for (j = 0; j < 128; j++) {
-
-        // hack to avoid too many SLIP END characters (192) in packet 
-        // which causes packet size to increase and causes problems down the line
-        tmp = screen.pix_buf[j + (i * 128)];
-        if (tmp == 192){
-            esc++;
-            if (esc > 64) tmp = 128; // replace 192 with 128 'next best' 
-        }
-        oledPage[j] = tmp;
-    }
 }
 
 void SDLEmu::ping(){

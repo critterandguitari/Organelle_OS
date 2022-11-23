@@ -41,8 +41,6 @@ class SDLEmu
         void encoderInput(OSCMessage &msg);
         void encoderButtonInput(OSCMessage &msg);
         void keysInput(OSCMessage &msg);
-
-        void updateScreenPage(uint8_t page, OledScreen &screen);
 };
 
 
