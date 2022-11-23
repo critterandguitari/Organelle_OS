@@ -20,8 +20,8 @@
     #include "hw_interfaces/CM3GPIO.h"
 #endif
 
-#ifdef SDLEMU_HW
-    #include "hw_interfaces/SDLEmu.h"
+#ifdef SDLPI_HW
+    #include "hw_interfaces/SDLPi.h"
 #endif
 
 #ifdef SERIAL_HW
@@ -54,8 +54,8 @@ SimpleWriter oscBuf;
     CM3GPIO controls;
 #endif
 
-#ifdef SDLEMU_HW
-    SDLEmu controls;
+#ifdef SDLPI_HW
+    SDLPi controls;
 #endif
 
 #ifdef SERIAL_HW

@@ -9,10 +9,10 @@
 #include "../SLIPEncodedSerial.h"
 #include "../Serial.h"
 
-class SDLEmu
+class SDLPi
 {
     public:
-        SDLEmu();
+        SDLPi();
         void init();
         void poll();
         void pollKnobs();

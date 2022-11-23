@@ -1,28 +1,25 @@
-#include "SDLEmu.h"
+#include "SDLPi.h"
 #include <SDL2/SDL.h>
-
-#define LOGICAL_WIDTH 128
-#define LOGICAL_HEIGHT 64
 
 SDL_Renderer *renderer;
 
-SDLEmu::SDLEmu() {
+SDLPi::SDLPi() {
 }
 
-void SDLEmu::init(){
+void SDLPi::init(){
     SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_Window *window = SDL_CreateWindow("Organelle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_RESIZABLE);
+    SDL_Window *window = SDL_CreateWindow("Organelle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ORGANELLE_HW_WIDTH, ORGANELLE_HW_HEIGHT, SDL_WINDOW_RESIZABLE);
     renderer = SDL_CreateRenderer(window, -1, 0);
 
     SDL_RenderSetIntegerScale(renderer, SDL_TRUE);
-    SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    SDL_RenderSetLogicalSize(renderer, 128, 64);
 
     // keys
     keyStatesLast = 0;
     clearFlags();
 }
 
-void SDLEmu::clearFlags() {
+void SDLPi::clearFlags() {
     encButFlag = 0;
     encTurnFlag = 0;
     knobFlag = 0;
@@ -30,7 +27,7 @@ void SDLEmu::clearFlags() {
     footswitchFlag = 0;
 }
 
-void SDLEmu::poll(){
+void SDLPi::poll(){
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         switch (e.type) {
@@ -51,10 +48,10 @@ void SDLEmu::poll(){
     }
 }
 
-void SDLEmu::pollKnobs(){
+void SDLPi::pollKnobs(){
 }
 
-void SDLEmu::updateOLED(OledScreen &s){
+void SDLPi::updateOLED(OledScreen &s){
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     int x, y;
@@ -69,20 +66,20 @@ void SDLEmu::updateOLED(OledScreen &s){
     SDL_RenderPresent(renderer);
 }
 
-void SDLEmu::ping(){
+void SDLPi::ping(){
 }
 
-void SDLEmu::shutdown() {
+void SDLPi::shutdown() {
     printf("sending shutdown...\n");
     SDL_Quit();
     exit(0);
 }
 
-void SDLEmu::setLED(unsigned c) {
+void SDLPi::setLED(unsigned c) {
     printf("LED: %d\n", c);
 }
 
-void SDLEmu::footswitchInput(OSCMessage &msg){
+void SDLPi::footswitchInput(OSCMessage &msg){
      if (msg.isInt(0)) {
         printf("fs %d \n", msg.getInt(0));
         footswitch = msg.getInt(0);
@@ -90,7 +87,7 @@ void SDLEmu::footswitchInput(OSCMessage &msg){
     }
 }
 
-void SDLEmu::encoderInput(OSCMessage &msg){
+void SDLPi::encoderInput(OSCMessage &msg){
     if (msg.isInt(0)) {
         printf("enc %d \n", msg.getInt(0));
         encTurn = msg.getInt(0);
@@ -98,7 +95,7 @@ void SDLEmu::encoderInput(OSCMessage &msg){
     }
 }
 
-void SDLEmu::encoderButtonInput(OSCMessage &msg){
+void SDLPi::encoderButtonInput(OSCMessage &msg){
     if (msg.isInt(0)) {
         printf("enc but %d \n", msg.getInt(0));
         encBut = msg.getInt(0);
@@ -107,7 +104,7 @@ void SDLEmu::encoderButtonInput(OSCMessage &msg){
     }
 }
 
-void SDLEmu::knobsInput(OSCMessage &msg){
+void SDLPi::knobsInput(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4) && msg.isInt(5)) {
         printf("knobs %d %d %d %d %d %d \n", msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4), msg.getInt(5));
         for (int i = 0; i < 6; i++) adcs[i] = msg.getInt(i);
@@ -115,7 +112,7 @@ void SDLEmu::knobsInput(OSCMessage &msg){
     }
 }
 
-void SDLEmu::keysInput(OSCMessage &msg){
+void SDLPi::keysInput(OSCMessage &msg){
     if (msg.isInt(0) && msg.isInt(1)) {
         printf("%d %d \n", msg.getInt(0), msg.getInt(1));   
         if (msg.getInt(1)) keyStates |= (1 << msg.getInt(0));
