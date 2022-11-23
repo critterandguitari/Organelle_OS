@@ -22,11 +22,13 @@ SDL_FLAGS := $(shell pkg-config --libs --cflags sdl2)
 default :
 	@echo "platform not specified"
 
+emulator : CXXFLAGS += -DSDLEMU_HW
+emulator : $(objects) hw_interfaces/SDLEmu.o
+	$(CXX) -o fw_dir/mother $(SDL_FLAGS) $(objects) hw_interfaces/SDLEmu.o
+
+organelle : CXXFLAGS += -DSERIAL_HW
 organelle : $(objects) hw_interfaces/SerialMCU.o
 	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/SerialMCU.o
-
-emulator : $(objects) hw_interfaces/SDLEmu.o
-	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/SDLEmu.o $(SDL_FLAGS)
 
 organelle_m : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER -DFIX_ABL_LINK
 organelle_m : $(objects) hw_interfaces/CM3GPIO.o

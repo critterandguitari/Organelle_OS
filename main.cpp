@@ -17,9 +17,15 @@
 // include hardware interface
 // default to organelle original
 #ifdef CM3GPIO_HW
-#include "hw_interfaces/CM3GPIO.h"
-#else
-#include "hw_interfaces/SDLEmu.h"
+    #include "hw_interfaces/CM3GPIO.h"
+#endif
+
+#ifdef SDLEMU_HW
+    #include "hw_interfaces/SDLEmu.h"
+#endif
+
+#ifdef SERIAL_HW
+    #include "hw_interfaces/SerialMCU.h"
 #endif
 
 static const unsigned int MAX_KNOBS = 6;
@@ -45,9 +51,15 @@ SimpleWriter oscBuf;
 // hardware interface controls
 // default to organelle original
 #ifdef CM3GPIO_HW
-CM3GPIO controls;
-#else
-SDLEmu controls;
+    CM3GPIO controls;
+#endif
+
+#ifdef SDLEMU_HW
+    SDLEmu controls;
+#endif
+
+#ifdef SERIAL_HW
+    SerialMCU controls;
 #endif
 
 /*
