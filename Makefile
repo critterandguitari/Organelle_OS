@@ -20,7 +20,6 @@ objects =  \
 SDL_CFLAGS := $(shell pkg-config --cflags sdl2)
 SDL_LIBS := $(shell pkg-config --libs sdl2)
 
-
 default :
 	@echo "platform not specified"
 
