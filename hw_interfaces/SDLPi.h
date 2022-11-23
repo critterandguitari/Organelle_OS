@@ -33,14 +33,6 @@ class SDLPi
         uint32_t keyStates;
         uint32_t keyStatesLast;
         uint32_t keyFlag;
-
-    private:        
-        // handlers for the inputs
-        void knobsInput(OSCMessage &msg);
-        void footswitchInput(OSCMessage &msg);
-        void encoderInput(OSCMessage &msg);
-        void encoderButtonInput(OSCMessage &msg);
-        void keysInput(OSCMessage &msg);
 };
 
 

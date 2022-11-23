@@ -27,23 +27,35 @@ void SDLPi::clearFlags() {
     footswitchFlag = 0;
 }
 
+// this polll uses keys for buttons and arrows for 2 menu knobs
+// eventually it will use stuff attached to GPIO
 void SDLPi::poll(){
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
-        switch (e.type) {
-        case SDL_QUIT:
-                shutdown();
-                break;
-            case SDL_KEYDOWN:
-                printf( "Key press detected\n" );
-                break;
-
-            case SDL_KEYUP:
-                printf( "Key release detected\n" );
-                break;
-
-            default:
-                break;
+        if (e.type == SDL_QUIT) {
+            shutdown();
+        } else if (e.type == SDL_KEYDOWN) {
+            switch(e.key.keysym.sym) {
+                case SDLK_LEFT:
+                    encTurnFlag = 1;
+                    encTurn = 0;
+                    break;
+                case SDLK_RIGHT:
+                    encTurnFlag = 1;
+                    encTurn = 1;
+                    break;
+                case SDLK_RETURN:
+                    encButFlag = 1;
+                    encBut = 1;
+                    break;
+            }
+        } else if (e.type == SDL_KEYUP) {
+            switch(e.key.keysym.sym) {
+                case SDLK_RETURN:
+                    encButFlag = 1;
+                    encBut = 0;
+                    break;
+            }
         }
     }
 }
@@ -75,49 +87,27 @@ void SDLPi::shutdown() {
     exit(0);
 }
 
-void SDLPi::setLED(unsigned c) {
-    printf("LED: %d\n", c);
-}
+void SDLPi::setLED(unsigned stat) {
+    stat %= 8;
 
-void SDLPi::footswitchInput(OSCMessage &msg){
-     if (msg.isInt(0)) {
-        printf("fs %d \n", msg.getInt(0));
-        footswitch = msg.getInt(0);
-        footswitchFlag = 1;
+    if (stat == 0) {
+        printf("LED: 0 0 0\n");
+    } else if (stat == 1) {
+        printf("LED: 1 0 0\n");
+    } else if (stat == 2) {
+        printf("LED: 1 1 0\n");
+    } else if (stat == 3) {
+        printf("LED: 0 1 0\n");
+    } else if (stat == 4) {
+        printf("LED: 0 1 1\n");
+    } else if (stat == 5) {
+        printf("LED: 0 0 1\n");
+    } else if (stat == 6) {
+        printf("LED: 1 0 1\n");
+    } else if (stat == 7) {
+        printf("LED: 1 1 1\n");
     }
 }
 
-void SDLPi::encoderInput(OSCMessage &msg){
-    if (msg.isInt(0)) {
-        printf("enc %d \n", msg.getInt(0));
-        encTurn = msg.getInt(0);
-        encTurnFlag = 1;
-    }
-}
 
-void SDLPi::encoderButtonInput(OSCMessage &msg){
-    if (msg.isInt(0)) {
-        printf("enc but %d \n", msg.getInt(0));
-        encBut = msg.getInt(0);
-        encButFlag = 1;
-        
-    }
-}
-
-void SDLPi::knobsInput(OSCMessage &msg){
-    if (msg.isInt(0) && msg.isInt(1) && msg.isInt(2) && msg.isInt(3) && msg.isInt(4) && msg.isInt(5)) {
-        printf("knobs %d %d %d %d %d %d \n", msg.getInt(0), msg.getInt(1), msg.getInt(2), msg.getInt(3), msg.getInt(4), msg.getInt(5));
-        for (int i = 0; i < 6; i++) adcs[i] = msg.getInt(i);
-        knobFlag = 1;
-    }
-}
-
-void SDLPi::keysInput(OSCMessage &msg){
-    if (msg.isInt(0) && msg.isInt(1)) {
-        printf("%d %d \n", msg.getInt(0), msg.getInt(1));   
-        if (msg.getInt(1)) keyStates |= (1 << msg.getInt(0));
-        else keyStates &= ~(1 << msg.getInt(0));
-        keyFlag = 1;
-    }
-}
 
