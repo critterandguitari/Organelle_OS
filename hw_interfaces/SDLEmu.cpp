@@ -11,10 +11,10 @@ SDLEmu::SDLEmu() {
 
 void SDLEmu::init(){
     SDL_Init(SDL_INIT_EVERYTHING);
-
     SDL_Window *window = SDL_CreateWindow("Organelle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_RESIZABLE);
-
     renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_RenderSetIntegerScale(renderer, SDL_TRUE);
+    SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
     // keys
     keyStatesLast = 0;
@@ -43,9 +43,6 @@ void SDLEmu::pollKnobs(){
 }
 
 void SDLEmu::updateOLED(OledScreen &s){
-    SDL_RenderSetIntegerScale(renderer, SDL_TRUE);
-    SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
-    
     SDL_RenderClear(renderer);
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
