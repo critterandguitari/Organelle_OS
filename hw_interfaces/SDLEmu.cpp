@@ -13,6 +13,7 @@ void SDLEmu::init(){
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window = SDL_CreateWindow("Organelle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_RESIZABLE);
     renderer = SDL_CreateRenderer(window, -1, 0);
+
     SDL_RenderSetIntegerScale(renderer, SDL_TRUE);
     SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
@@ -31,10 +32,21 @@ void SDLEmu::clearFlags() {
 
 void SDLEmu::poll(){
     SDL_Event e;
-    while(SDL_PollEvent(&e)) {
-        if ( e.type == SDL_QUIT ) {
-            shutdown();
-            return;
+    while (SDL_PollEvent(&e)) {
+        switch (e.type) {
+        case SDL_QUIT:
+                shutdown();
+                break;
+            case SDL_KEYDOWN:
+                printf( "Key press detected\n" );
+                break;
+
+            case SDL_KEYUP:
+                printf( "Key release detected\n" );
+                break;
+
+            default:
+                break;
         }
     }
 }
@@ -44,11 +56,15 @@ void SDLEmu::pollKnobs(){
 
 void SDLEmu::updateOLED(OledScreen &s){
     SDL_RenderClear(renderer);
-
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_Rect rect = { 0, 0, 128, 64};
-    SDL_RenderFillRect(renderer, &rect);
-
+    int x, y;
+    for (y = 0; y < 64; y++) {
+        for (x = 0; x < 128; x++) {
+            if (s.get_pixel(x, y)) {
+                SDL_RenderDrawPoint(renderer, x, y);
+            }
+        }
+    }
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderPresent(renderer);
 }
@@ -63,6 +79,7 @@ void SDLEmu::shutdown() {
 }
 
 void SDLEmu::setLED(unsigned c) {
+    printf("LED: %d\n", c);
 }
 
 void SDLEmu::footswitchInput(OSCMessage &msg){
