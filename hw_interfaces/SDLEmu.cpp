@@ -1,31 +1,20 @@
 #include "SDLEmu.h"
 #include <SDL2/SDL.h>
 
-SDL_Window* window = NULL;
-SDL_Surface* screenSurface = NULL;
-SDL_Renderer *renderer = NULL;
+#define LOGICAL_WIDTH 128
+#define LOGICAL_HEIGHT 64
+
+SDL_Renderer *renderer;
 
 SDLEmu::SDLEmu() {
 }
 
 void SDLEmu::init(){
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        printf("error initializing SDL: %s\n", SDL_GetError());
-    }
-    if (SDL_Init( SDL_INIT_VIDEO) < 0 ) {
-        printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
-    }
-    window = SDL_CreateWindow("Organelle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
-    if(window == NULL){
-        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-    }
-    renderer = SDL_GetRenderer(window);
-    SDL_RenderSetLogicalSize(renderer, 128, 64);
-    
-    screenSurface = SDL_GetWindowSurface(window);
-    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0, 0, 0));
+    SDL_Init(SDL_INIT_EVERYTHING);
 
-    SDL_UpdateWindowSurface( window );
+    SDL_Window *window = SDL_CreateWindow("Organelle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_RESIZABLE);
+
+    renderer = SDL_CreateRenderer(window, -1, 0);
 
     // keys
     keyStatesLast = 0;
@@ -54,6 +43,17 @@ void SDLEmu::pollKnobs(){
 }
 
 void SDLEmu::updateOLED(OledScreen &s){
+    SDL_RenderSetIntegerScale(renderer, SDL_TRUE);
+    SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    
+    SDL_RenderClear(renderer);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Rect rect = { 0, 0, 128, 64};
+    SDL_RenderFillRect(renderer, &rect);
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderPresent(renderer);
 }
 
 void SDLEmu::ping(){
