@@ -17,14 +17,16 @@ objects =  \
 	OSC/OSCTiming.o \
 	OSC/SimpleWriter.o
 
-SDL_FLAGS := $(shell pkg-config --libs --cflags sdl2)
+SDL_CFLAGS := $(shell pkg-config --cflags sdl2)
+SDL_LIBS := $(shell pkg-config --libs sdl2)
+
 
 default :
 	@echo "platform not specified"
 
-sdlpi : CXXFLAGS += -DSDLPI_HW -DORGANELLE_HW_WIDTH=800 -DORGANELLE_HW_HEIGHT=600
+sdlpi : CXXFLAGS += $(SDL_CFLAGS) -DSDLPI_HW -DORGANELLE_HW_WIDTH=800 -DORGANELLE_HW_HEIGHT=600
 sdlpi : $(objects) hw_interfaces/SDLPi.o
-	$(CXX) -o fw_dir/mother $(SDL_FLAGS) $(objects) hw_interfaces/SDLPi.o
+	$(CXX) $(SDL_LIBS) -o fw_dir/mother $(objects) hw_interfaces/SDLPi.o
 
 organelle : CXXFLAGS += -DSERIAL_HW
 organelle : $(objects) hw_interfaces/SerialMCU.o
