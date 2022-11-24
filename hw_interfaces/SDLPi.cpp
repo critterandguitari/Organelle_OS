@@ -2,17 +2,28 @@
 #include <SDL2/SDL.h>
 
 SDL_Renderer *renderer;
+SDL_Window *window;
+SDL_Joystick *joystick;
 
 SDLPi::SDLPi() {
 }
 
 void SDLPi::init(){
     SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_Window *window = SDL_CreateWindow("Organelle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ORGANELLE_HW_WIDTH, ORGANELLE_HW_HEIGHT, SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow("Organelle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ORGANELLE_HW_WIDTH, ORGANELLE_HW_HEIGHT, SDL_WINDOW_RESIZABLE);
     renderer = SDL_CreateRenderer(window, -1, 0);
 
     SDL_RenderSetIntegerScale(renderer, SDL_TRUE);
     SDL_RenderSetLogicalSize(renderer, 128, 64);
+
+    if (SDL_NumJoysticks() < 1) {
+        printf( "Warning: No joysticks connected!\n" );
+    } else {
+        joystick = SDL_JoystickOpen(0);
+        if (joystick == NULL) {
+            printf("Warning: Unable to open game controller! SDL Error: %s\n", SDL_GetError());
+        }
+    }
 
     // keys
     keyStatesLast = 0;
@@ -56,6 +67,20 @@ void SDLPi::poll(){
                     encBut = 0;
                     break;
             }
+        } else if (e.type == SDL_JOYBUTTONDOWN) {
+            if (e.jbutton.button == SDL_CONTROLLER_BUTTON_A) {
+                encButFlag = 1;
+                encBut = 1;
+            }
+            if (e.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) {
+                encTurnFlag = 1;
+                encTurn = 0;
+            }
+            if (e.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) {
+                encTurnFlag = 1;
+                encTurn = 1;
+            }
+            printf("button: %i\n", e.jbutton.button);
         }
     }
 }
@@ -83,6 +108,9 @@ void SDLPi::ping(){
 
 void SDLPi::shutdown() {
     printf("sending shutdown...\n");
+    SDL_JoystickClose(joystick);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
     SDL_Quit();
     exit(0);
 }
