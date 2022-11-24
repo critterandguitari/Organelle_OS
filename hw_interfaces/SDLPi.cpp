@@ -36,11 +36,11 @@ void SDLPi::poll(){
             shutdown();
         } else if (e.type == SDL_KEYDOWN) {
             switch(e.key.keysym.sym) {
-                case SDLK_LEFT:
+                case SDLK_UP:
                     encTurnFlag = 1;
                     encTurn = 0;
                     break;
-                case SDLK_RIGHT:
+                case SDLK_DOWN:
                     encTurnFlag = 1;
                     encTurn = 1;
                     break;
