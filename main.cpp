@@ -131,6 +131,11 @@ void wifiStatus(OSCMessage &msg);
 void pedalExprMin(OSCMessage &msg);
 void pedalExprMax(OSCMessage &msg);
 void pedalSwitchMode(OSCMessage &msg);
+
+void navUp(OSCMessage &msg );
+void navDown(OSCMessage &msg );
+void navPress(OSCMessage &msg );
+void navRelease(OSCMessage &msg );
 /* end internal OSC messages received */
 
 /* hardware input event handlers */
@@ -248,6 +253,12 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/pedal/switchMode", pedalSwitchMode, 0)
 
                     || msgIn.dispatch("/wifiStatus", wifiStatus, 0)
+
+                    // support for puredata to send navigation messages
+                    || msgIn.dispatch("/nav/up", navUp, 0)
+                    || msgIn.dispatch("/nav/down", navDown, 0)
+                    || msgIn.dispatch("/nav/press", navPress, 0)
+                    || msgIn.dispatch("/nav/release", navRelease, 0)
 
                     ;
                 if (!processed) {
@@ -852,6 +863,19 @@ void sendReady(OSCMessage &msg ) {
 
 void sendShutdown(OSCMessage &msg ) {
     controls.shutdown();
+}
+
+void navUp(OSCMessage &msg ) {
+    menu.encoderUp();
+}
+void navDown(OSCMessage &msg ) {
+    menu.encoderDown();
+}
+void navPress(OSCMessage &msg ) {
+    menu.encoderPress();
+}
+void navRelease(OSCMessage &msg ) {
+    menu.encoderRelease();
 }
 
 /* end internal OSC messages received */
