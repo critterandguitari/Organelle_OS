@@ -17,9 +17,17 @@ objects =  \
 	OSC/OSCTiming.o \
 	OSC/SimpleWriter.o
 
+SDL_CFLAGS := $(shell pkg-config --cflags sdl2)
+SDL_LIBS := $(shell pkg-config --libs sdl2)
+
 default :
 	@echo "platform not specified"
 
+sdlpi : CXXFLAGS += $(SDL_CFLAGS) -DSDLPI_HW -DORGANELLE_HW_WIDTH=800 -DORGANELLE_HW_HEIGHT=600
+sdlpi : $(objects) hw_interfaces/SDLPi.o
+	$(CXX) $(SDL_LIBS) -o fw_dir/mother $(objects) hw_interfaces/SDLPi.o
+
+organelle : CXXFLAGS += -DSERIAL_HW
 organelle : $(objects) hw_interfaces/SerialMCU.o
 	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/SerialMCU.o
 
@@ -30,7 +38,7 @@ organelle_m : $(objects) hw_interfaces/CM3GPIO.o
 .PHONY : clean
 
 clean :
-	rm main $(objects)
+	rm -f main $(objects) fw_dir/mother hw_interfaces/SDLPi.o hw_interfaces/SerialMCU.o hw_interfaces/CM3GPIO.o
 
 IMAGE_BUILD_VERSION = $(shell cat fw_dir/version)
 IMAGE_BUILD_TAG = $(shell cat fw_dir/buildtag)
@@ -92,4 +100,6 @@ OSCMessage.o: OSC/OSCMessage.cpp OSC/OSCMessage.h OSC/OSCData.h \
 OSCTiming.o: OSC/OSCTiming.cpp OSC/OSCTiming.h
 SimpleWriter.o: OSC/SimpleWriter.cpp OSC/SimpleWriter.h
 SerialMCU.o: hardwares/SerialMCU.cpp hardwares/SerialMCU.h \
+ hardwares/../OledScreen.h
+SDLPi.o: hardwares/SDLPi.cpp hardwares/SDLPi.h \
  hardwares/../OledScreen.h

@@ -817,6 +817,8 @@ void MainMenu::buildMenu(signed mm_pos) {
         std::cout << "num patches " <<  numPatches << std::endl;
         std::cout << "patch menu offset " << patchMenuOffset << std::endl;
 
+        std::cout << "patch path: " << app.getPatchDir() << std::endl;
+
         // notify if no patches found
         if (!numPatches) {
             addMenuItem(numMenuEntries++, "No patches found!", "", &MainMenu::runDoNothing);
