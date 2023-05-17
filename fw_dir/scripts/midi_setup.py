@@ -237,14 +237,19 @@ def save():
     f.write("# midiInGate,"  + str(midiInGate) +"\n")
     f.write("# midiOutGate," + str(midiOutGate) +"\n")
     f.write("# midiDevice," + str(midiDevice) + "\n")
+    midiDeviceName = midiDevice.split(":")[0]
+    midiDevicePort = midiDevice.split(":")[1]
+    f.write("# midiDeviceName," + str(midiDeviceName) + "\n")
+    f.write("# midiDevicePort," + str(midiDevicePort) + "\n")
     f.write("# MIDI PARAMETERS:END\n")
     # write script to be executed
+    f.write("device_number=$(" + "aplaymidi -l | grep " + "\"" + midiDeviceName + "\"" + " | head -n 1 | awk '{ print $1 }' | awk -F: '{ print $1 }'" +")\n")
     f.write("oscsend localhost 4000 /midiInCh i " + str(midiIn) + "\n")
     f.write("oscsend localhost 4000 /midiOutCh i " + str(midiOut) + "\n")
     f.write("oscsend localhost 4000 /midiInGate i " + str(midiInGate) + "\n")
     f.write("oscsend localhost 4000 /midiOutGate i " + str(midiOutGate) + "\n")
-    f.write("aconnect \"" + str(midiDevice) + "\" \"Pure Data:0\"\n")
-    f.write("aconnect \"Pure Data:1\" \"" + str(midiDevice) + "\"\n")
+    f.write("aconnect \"" + "${device_number}:" + midiDevicePort + "\" \"Pure Data:0\"\n")
+    f.write("aconnect \"Pure Data:1\" \"" + "${device_number}:" + midiDevicePort + "\"\n")
     f.close()
     os.system("aconnect -x")
     os.system("chmod +x "+user_dir+"/patch_loaded.sh")
