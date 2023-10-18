@@ -320,7 +320,7 @@ void MainMenu::runPatch(const char* name, const char* arg) {
             }
 
             std::string args = opts;
-            sprintf(buf, "( cd /tmp/patch ; echo "" | /usr/local/bin/sclang %s \"%s\" & echo $! > /tmp/pids/sclang.pid )",
+            sprintf(buf, "( cd /tmp/patch ; echo "" | /usr/bin/sclang %s \"%s\" & echo $! > /tmp/pids/sclang.pid )",
                     args.c_str(),
                     mother.c_str()
                    );
