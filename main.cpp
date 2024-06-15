@@ -20,6 +20,10 @@
     #include "hw_interfaces/CM3GPIO.h"
 #endif
 
+#ifdef CM4OG4_HW
+    #include "hw_interfaces/CM4OG4.h"
+#endif
+
 #ifdef SDLPI_HW
     #include "hw_interfaces/SDLPi.h"
 #endif
@@ -52,6 +56,10 @@ SimpleWriter oscBuf;
 // default to organelle original
 #ifdef CM3GPIO_HW
     CM3GPIO controls;
+#endif
+
+#ifdef CM4OG4_HW
+    CM4OG4 controls;
 #endif
 
 #ifdef SDLPI_HW
@@ -447,6 +455,8 @@ int main(int argc, char* argv[]) {
         // main polling loop delay
         // slow it down for cm3 cause all the bit banging starts to eat CPU
 #ifdef CM3GPIO_HW
+        usleep(2000);
+#elif CM4OG4_HW
         usleep(2000);
 #else
         usleep(750);

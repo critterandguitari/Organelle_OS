@@ -33,7 +33,11 @@ organelle : $(objects) hw_interfaces/SerialMCU.o
 
 organelle_m : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER -DFIX_ABL_LINK
 organelle_m : $(objects) hw_interfaces/CM3GPIO.o
-	$(CXX) -l wiringPi -o fw_dir/mother $(objects) hw_interfaces/CM3GPIO.o
+	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/CM3GPIO.o -l wiringPi
+
+organelle_4 : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS 
+organelle_4 : $(objects) hw_interfaces/CM4OG4.o
+	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/CM4OG4.o -l wiringPi
 
 .PHONY : clean
 
@@ -72,6 +76,26 @@ organelle_m_deploy : organelle_m
 	@echo "copying systems files"
 	mkdir tmp
 	cp -r platforms/organelle_m/rootfs tmp/
+	chown -R root:root tmp/rootfs
+	chown -R music:music tmp/rootfs/home/music
+	cp -fr --preserve=mode,ownership tmp/rootfs/* /
+	rm -fr tmp
+	sync
+
+organelle_4_deploy : organelle_4
+	@echo "Updating OS to $(IMAGE_VERSION)"
+	@echo "copying common fw files"
+	rm -fr /home/music/fw_dir
+	mkdir /home/music/fw_dir
+	cp -fr fw_dir/* /home/music/fw_dir
+	@echo "copying platform fw files"
+	cp -fr platforms/organelle_4/fw_dir/* /home/music/fw_dir
+	chown -R music:music /home/music/fw_dir
+	@echo "copying version file to root for backwards compatiblility"
+	cp -fr fw_dir/version /root
+	@echo "copying systems files"
+	mkdir tmp
+	cp -r platforms/organelle_4/rootfs tmp/
 	chown -R root:root tmp/rootfs
 	chown -R music:music tmp/rootfs/home/music
 	cp -fr --preserve=mode,ownership tmp/rootfs/* /
