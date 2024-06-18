@@ -1,0 +1,12 @@
+[Unit] 
+Description=Cherrypy Web Server
+
+[Service] 
+Type=simple 
+WorkingDirectory=/home/music/fw_dir/web/server
+ExecStart=/home/music/fw_dir/web/server/run.sh
+User=music
+Group=music
+
+[Install] 
+WantedBy=multi-user.target

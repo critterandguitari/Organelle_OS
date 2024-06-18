@@ -4,6 +4,7 @@
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include <wiringShift.h>
+#include <wiringPiI2C.h>
 #include <stdio.h>  
 #include <stdlib.h>  
 #include <stdint.h>
@@ -48,19 +49,25 @@ class CM4OG4
         bool lowBatteryShutdown;
 
     private:        
-        uint32_t shiftRegRead();
         int getEncoder();
         void getKeys();
         uint32_t adcRead(uint8_t adcnum);
         void displayPinValues();
 	    void checkFootSwitch ();
-        
-        uint32_t pinValues;
-        uint32_t pinValuesLast;
+         
+        // pin values from io expanders
+        uint8_t io0l;
+        uint8_t io0h;
+        uint8_t io1l;
+        uint8_t io1h;
     
         uint8_t lrmem;
 	    int lrsum;
 	    int num;
+        uint8_t int0;
+        uint8_t int1;
+        int fd0;
+        int fd1;
 
 };
 

@@ -37,6 +37,11 @@
 #define ENCA 12
 #define ENCB 13
 #define ENCS 16
+#define INT0 26
+#define INT1 27
+
+#define PCA555_0 0x20
+#define PCA555_1 0x21
 
 #define AUX_LED_RED_OFF digitalWrite(LEDR,HIGH);
 #define AUX_LED_RED_ON digitalWrite(LEDR,LOW);
@@ -117,16 +122,27 @@ void CM4OG4::init(){
     wiringPiSPIDataRW(0, oled_initcode, 28);
 
    	// Encoder
-     	lrmem = 3;
+    lrmem = 3;
 	lrsum = 0;
 	num = 0;
-        pinMode(ENCA, INPUT);
-   	pullUpDnControl(ENCA, PUD_OFF);
-        pinMode(ENCB, INPUT);
-   	pullUpDnControl(ENCB, PUD_OFF);
-        pinMode(ENCS, INPUT);
+    pinMode(ENCA, INPUT);
+    pullUpDnControl(ENCA, PUD_OFF);
+    pinMode(ENCB, INPUT);
+	pullUpDnControl(ENCB, PUD_OFF);
+    pinMode(ENCS, INPUT);
    	pullUpDnControl(ENCS, PUD_OFF);
  
+    // keys
+    pinMode(INT0, INPUT);
+    pullUpDnControl(INT0, PUD_OFF);
+    pinMode(INT1, INPUT);
+    pullUpDnControl(INT1, PUD_OFF);
+    int0 = int1 = 1;                    // active low interrupt pins
+    fd0 = wiringPiI2CSetup(PCA555_0);
+    fd1 = wiringPiI2CSetup(PCA555_1);
+    io0l = io0h = io1l = io1h = 0xFF;   // active low keys
+    
+    clearFlags();
 /*
     // GPIO for LEDs
     pinMode(LEDR, OUTPUT);
@@ -147,7 +163,6 @@ void CM4OG4::init(){
 
     // keys
     keyStatesLast = 0;
-    clearFlags();
 
     // get initial pin states
     shiftRegRead();
@@ -186,12 +201,36 @@ void CM4OG4::poll(){
     micSelSwitch = (pinValues >> 3) & 1;
     
   */  
-    // check encoder, gotta check every time for debounce purposes
+    // check key int event io expander 0
+    uint8_t tmp = digitalRead(INT0);
+    uint8_t tmp2 = digitalRead(INT1);
+    if (tmp == 0) { 
+        io0l = wiringPiI2CReadReg8(fd0, 0);
+        io0h = wiringPiI2CReadReg8(fd0, 1);
+        keyFlag = 1;
+    }
+
+    if (tmp2 == 0) {
+        io1l = wiringPiI2CReadReg8(fd1, 0);
+        io1h = wiringPiI2CReadReg8(fd1, 1);
+        keyFlag = 1;
+    }
+
+    if (keyFlag) {
+        keyStates = 0;
+        keyStates |= io1h << 24;
+        keyStates |= io1l << 16;
+        keyStates |= io0h << 8;
+        keyStates |= io0l;
+        keyStates |= 0xFE000000;
+        keyStates = ~keyStates;
+    }
+    // check encoder
     getEncoder();
 }
 
 void CM4OG4::pollKnobs(){    
-/*
+
     static uint32_t battAvg = 0;
     static uint8_t num = 0;
     
@@ -200,39 +239,8 @@ void CM4OG4::pollKnobs(){
     adcs[2] = adcRead(2);
     adcs[3] = adcRead(3);
     adcs[4] = adcRead(4);
-    adcs[5] = adcRead(5);
-    adcs[6] = adcRead(7);
-
-    // also check the pwr status pin
-    pwrStatus = digitalRead(PWR_STATUS);
     
-    checkFootSwitch();
-    
-    // average 16 battery readings
-    battAvg += adcs[6];
-    num++;
-    num &= 0xf;
-    if (!num) {
-        battAvg >>= 4;
-	    // calculate voltage, the 10.3125 is from the voltage divider
-    	batteryVoltage = ((float)battAvg / 1024) * 10.3125;
-	    battAvg = 0;
-
-        // get bars 
-        if      (batteryVoltage > BATTERY_BAR_5) batteryBars = 5;
-        else if (batteryVoltage > BATTERY_BAR_4) batteryBars = 4;
-        else if (batteryVoltage > BATTERY_BAR_3) batteryBars = 3;
-        else if (batteryVoltage > BATTERY_BAR_2) batteryBars = 2;
-        else if (batteryVoltage > BATTERY_BAR_1) batteryBars = 1;
-        else if (batteryVoltage > BATTERY_BAR_0) batteryBars = 0;
-        // check for low batt shutdown, but only when running on batteries (pwrStatus = 1)
-        if (pwrStatus){
-            if (batteryVoltage < LOW_BATTERY_SHUTDOWN_THRESHOLD) lowBatteryShutdown = true;
-        }
-    }
-
     knobFlag = 1;
-    */
 }
 
 void CM4OG4::updateOLED(OledScreen &s){
@@ -303,10 +311,6 @@ void CM4OG4::setLED(unsigned stat) {
 }
 
 
-uint32_t CM4OG4::shiftRegRead(void)
-{
-	return 0;
-}
 
 void CM4OG4::getKeys(void){
     /*keyStates = 0;
@@ -409,7 +413,7 @@ int CM4OG4::getEncoder(void){
 
 uint32_t CM4OG4::adcRead(uint8_t adcnum)
 { 
-/*    unsigned int commandout = 0;
+    unsigned int commandout = 0;
 
     // read a channel from the MCP3008 ADC
     commandout = adcnum & 0x7;  // only 0-7
@@ -424,7 +428,7 @@ uint32_t CM4OG4::adcRead(uint8_t adcnum)
     wiringPiSPIDataRW(1, spibuf, 3);    
 
     return ((spibuf[1] << 8) | (spibuf[2])) >> 4;
-  */  
+    
 	return 0;
 }
 
