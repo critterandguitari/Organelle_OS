@@ -175,8 +175,24 @@ def connect(ssid, pw) :
 
     stop_ap_server()
     run_cmd("ip link set wlan0 up >> "+log_file+" 2>&1")
-    run_cmd("rm /tmp/wpa.conf") 
-    run_cmd_nosudo("cat <(echo ctrl_interface=/var/run/wpa_supplicant) <(wpa_passphrase \""+ssid+"\" \""+pw+"\") > /tmp/wpa.conf") 
+    run_cmd("rm /tmp/wpa.conf")
+    run_cmd_nosudo("cat <(echo ctrl_interface=/var/run/wpa_supplicant) <(wpa_passphrase \""+ssid+"\" \""+pw+"\") > /tmp/wt.conf") 
+    fl = '#nothing\n'
+    with open("/tmp/wt.conf") as file:
+        for line in file:
+            if '\tpsk' in line:
+               fl = line
+               break
+    run_cmd("rm /tmp/wt.conf")
+    f = open("/tmp/wpa.conf", "w")
+    f.write("ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n")
+    f.write("network={\n")
+    f.write("ssid=\""+ssid+"\"\n")
+    f.write("scan_ssid=1\n")
+    #f.write("psk=\""+pw+"\"\n")
+    f.write(fl)
+    f.write("}\n")
+    f.close()
     run_cmd("wpa_supplicant -B -D nl80211,wext -i wlan0 -c /tmp/wpa.conf >> "+log_file+" 2>&1") 
     run_cmd("dhcpcd -b wlan0 >> "+log_file+" 2>&1")
 
