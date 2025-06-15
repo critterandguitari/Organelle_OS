@@ -434,6 +434,7 @@ int main(int argc, char* argv[]) {
 #ifdef MICSEL_SWITCH
             if (app.micLineSelection != controls.micSelSwitch){
                 app.micLineSelection = controls.micSelSwitch;
+                printf("mic sel %d \n", app.micLineSelection);
                 if (app.micLineSelection == 1) system("amixer set 'Input Mux' 'Line In'");
                 else system("amixer set 'Input Mux' 'Mic'");
             }

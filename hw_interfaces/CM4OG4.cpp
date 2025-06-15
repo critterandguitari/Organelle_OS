@@ -34,11 +34,13 @@
 #define LEDG 22          
 #define LEDR 23       
 #define LEDB 24         
-#define ENCA 12
-#define ENCB 13
+#define ENCA 17
+#define ENCB 25
 #define ENCS 16
 #define INT0 26
 #define INT1 27
+#define PWR_STATUS 13
+#define MIC_SEL 4
 
 #define PCA555_0 0x20
 #define PCA555_1 0x21
@@ -131,7 +133,12 @@ void CM4OG4::init(){
 	pullUpDnControl(ENCB, PUD_OFF);
     pinMode(ENCS, INPUT);
    	pullUpDnControl(ENCS, PUD_OFF);
- 
+
+    // mic sel
+    pinMode(MIC_SEL, INPUT);
+    pullUpDnControl(MIC_SEL, PUD_OFF);
+    micSelSwitch = digitalRead(MIC_SEL);
+
     // keys
     pinMode(INT0, INPUT);
     pullUpDnControl(INT0, PUD_OFF);
@@ -143,7 +150,6 @@ void CM4OG4::init(){
     io0l = io0h = io1l = io1h = 0xFF;   // active low keys
     
     clearFlags();
-/*
     // GPIO for LEDs
     pinMode(LEDR, OUTPUT);
     pinMode(LEDG, OUTPUT);
@@ -161,6 +167,7 @@ void CM4OG4::init(){
     pullUpDnControl(PWR_STATUS, PUD_OFF);
     pwrStatus = digitalRead(PWR_STATUS);
 
+/*
     // keys
     keyStatesLast = 0;
 
@@ -201,6 +208,9 @@ void CM4OG4::poll(){
     micSelSwitch = (pinValues >> 3) & 1;
     
   */  
+    // check mic switch
+    micSelSwitch = digitalRead(MIC_SEL);
+
     // check key int event io expander 0
     uint8_t tmp = digitalRead(INT0);
     uint8_t tmp2 = digitalRead(INT1);
@@ -239,6 +249,7 @@ void CM4OG4::pollKnobs(){
     adcs[2] = adcRead(2);
     adcs[3] = adcRead(3);
     adcs[4] = adcRead(4);
+    adcs[5] = adcRead(5);
     
     knobFlag = 1;
 }
@@ -264,7 +275,6 @@ void CM4OG4::shutdown() {
 }
 
 void CM4OG4::setLED(unsigned stat) {
-/*
     stat %= 8;
 
     if (stat == 0) {
@@ -307,7 +317,6 @@ void CM4OG4::setLED(unsigned stat) {
         AUX_LED_GREEN_ON;
         AUX_LED_BLUE_ON;
     }
-    */
 }
 
 
@@ -396,13 +405,13 @@ int CM4OG4::getEncoder(void){
    	// encoder in the neutral state 
    	if (lrsum == 2) {
       		lrsum=0;
-		encTurn = 0;
+		encTurn = 1;
 		encTurnFlag = 1;
       		return 1;
     	}
    	if (lrsum == -2) {
       		lrsum=0;
-		encTurn = 1;
+		encTurn = 0;
 		encTurnFlag = 1;
       		return -1;
     	}
