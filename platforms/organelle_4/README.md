@@ -55,3 +55,22 @@ install software
     sudo chmod o+r ./wiringpi_3.16_armhf.deb
     sudo apt install ./wiringpi_3.16_armhf.deb
 
+Don't persist logs. add Storage=volatile to /etc/systemd/journald.conf then remove old sudo rm -rf /var/log/journal
+
+Don't log nmcli commands Open the sudoers file for editing using visudo:
+
+    sudo visudo
+
+Add a rule to disable logging for music user:
+
+    Defaults:music !syslog
+
+disable swap
+
+    sudo dphys-swapfile swapoff
+    sudo dphys-swapfile uninstall
+    sudo update-rc.d dphys-swapfile remove
+
+run disable_services.sh
+
+copy config.txt and cmdline.txt
