@@ -343,11 +343,11 @@ void MainMenu::runPatch(const char* name, const char* arg) {
             }
 
             std::string args = opts;
-            sprintf(buf, "( cd /tmp/patch ; python2 %s \"%s\" & echo $! > /tmp/pids/patchpy.pid ) ",
+            sprintf(buf, "( cd /tmp/patch ; python %s \"%s\" & echo $! > /tmp/pids/patchpy.pid ) ",
                     args.c_str(),
                     mother.c_str()
                    );
-            std::cout << "starting python2 : " << buf << std::endl;
+            std::cout << "starting python : " << buf << std::endl;
             execShell(buf, app.getPatchDir());
         } else if (isShell) {
             std::string optsfile = getSystemFile(paths, "run-opts.txt");
@@ -911,7 +911,7 @@ void MainMenu::setEnv(const std::string& location) {
 
 
 int  MainMenu::execPython(const std::string& pyscript, const std::string& wd) {
-    std::string cmd = "python2 " + pyscript;
+    std::string cmd = "python " + pyscript;
     return execShell(cmd,wd);
 }
 

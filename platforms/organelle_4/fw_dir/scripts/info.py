@@ -6,14 +6,13 @@ import threading
 import subprocess
 import socket
 
-print "Starting INFO script"
+print ("Starting INFO script")
 
 # usb or sd card
 user_dir = os.getenv("USER_DIR", "/usbdrive")
 patch_dir = os.getenv("PATCH_DIR", "/usbdrive/Patches")
 fw_dir = os.getenv("FW_DIR")
 
-print "loading og module"
 # imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
 og = imp.load_source('og', current_dir + '/og.py')
@@ -63,7 +62,6 @@ def check_status():
 
 info = og.InfoList()
 
-print "start app"
 # start it up
 og.start_app()
 

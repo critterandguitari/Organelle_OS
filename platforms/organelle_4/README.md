@@ -46,7 +46,7 @@ enable i2c from raspi-config
 
 install software
 
-    sudo apt-get install zip jwm xinit x11-utils x11-xserver-utils lxterminal pcmanfm libasound2-dev liblo-dev liblo-tools mpg123 puredata conky
+    sudo apt-get install zip jwm xinit x11-utils x11-xserver-utils lxterminal pcmanfm libasound2-dev liblo-dev liblo-tools mpg123 puredata conky python3-liblo
 
     git clone https://github.com/WiringPi/WiringPi.git
     cd WiringPi

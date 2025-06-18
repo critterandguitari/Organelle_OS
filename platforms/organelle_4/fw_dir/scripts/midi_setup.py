@@ -103,7 +103,7 @@ def midiInGateSelect():
                 og.println(2,ms)
                 og.flip()
             elif (og.enc_but_flag and og.enc_but==1):
-                print midiInGate
+                print (midiInGate)
                 menu.items[menu.selection][0] = 'MIDI In : ' + ("Enabled" if midiInGate>0 else "Disabled"); 
                 break
 
@@ -128,7 +128,7 @@ def midiOutGateSelect():
                 og.println(2,ms)
                 og.flip()
             elif (og.enc_but_flag and og.enc_but==1):
-                print midiOutGate
+                print (midiOutGate)
                 menu.items[menu.selection][0] = 'MIDI Out : ' + ("Enabled" if midiOutGate>0 else "Disabled"); 
                 break
 
@@ -154,7 +154,7 @@ def midiInSelect():
                 og.println(2,ms)
                 og.flip()
             elif (og.enc_but_flag and og.enc_but==1):
-                print midiIn
+                print (midiIn)
                 menu.items[menu.selection][0] = 'MIDI In Ch.: ' + (str(midiIn) if midiIn>0 else "Omni")
                 break
 
@@ -177,7 +177,7 @@ def midiOutSelect():
                 og.println(2,str(midiOut))
                 og.flip()
             elif (og.enc_but_flag and og.enc_but==1):
-                print midiOut
+                print (midiOut)
                 menu.items[menu.selection][0] = 'MIDI Out Ch.: ' + (str(midiOut))
                 break
 
@@ -221,7 +221,7 @@ def midiDeviceSelect():
         elif (og.enc_but_flag and og.enc_but==1):
             if(len(midiDevices)==0): midiDevice = "28:0"
             else: midiDevice = midiDevices[midiDeviceIdx][9:42].strip() + ":" + midiDevices[midiDeviceIdx][4:8].strip()
-            print midiDevice
+            print (midiDevice)
             if midiDevice == "28:0" : menu.items[menu.selection][0] = 'Device: None'
             else : menu.items[menu.selection][0] = 'Device: ' + midiDevice
             break
