@@ -32,7 +32,7 @@ menu_lock = threading.Lock()
 def run_cmd(cmd) :
     ret = False
     try:
-        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True, text=True)
     except: 
         pass
     return ret
