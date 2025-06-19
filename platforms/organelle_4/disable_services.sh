@@ -21,7 +21,6 @@ SERVICES=(
     "apt-daily-upgrade.service"
     "systemd-random-seed.service"
     "systemd-journal-flush"
-    "getty@tty1.service"
     "avahi-daemon"
     "apt-daily.timer"
     "fbrestore"
