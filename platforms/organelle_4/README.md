@@ -74,3 +74,7 @@ disable swap
 run disable_services.sh
 
 copy config.txt and cmdline.txt
+
+## ^OG4_20250618.img
+
+sudo apt-get install iptables

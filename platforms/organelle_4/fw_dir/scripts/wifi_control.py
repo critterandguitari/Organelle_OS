@@ -34,7 +34,7 @@ def run_cmd(cmd) :
     cmd = "sudo " + cmd
     ret = False
     try:
-        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True, text=True)
     except: pass
     return ret
 
@@ -42,7 +42,7 @@ def run_cmd(cmd) :
 def run_cmd_nosudo(cmd) :
     ret = False
     try:
-        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+        ret = subprocess.check_output(['bash', '-c', cmd], close_fds=True, text=True)
     except: pass
     return ret
 
@@ -52,29 +52,29 @@ def run_cmd_check(cmd) :
     cmd = "sudo " + cmd
     ret = False
     try:
-        subprocess.check_output(['bash', '-c', cmd], close_fds=True)
+        subprocess.check_output(['bash', '-c', cmd], close_fds=True, text=True)
         ret = True
     except: pass
     return ret
 
 def start_web_server():
     global web_server_state
-    run_cmd('systemctl start cherrypy')
+#    run_cmd('systemctl start cherrypy')
     web_server_state = WEB_SERVER_RUNNING
 
 def stop_web_server():
     global web_server_state
-    run_cmd('systemctl stop cherrypy')
+#    run_cmd('systemctl stop cherrypy')
     web_server_state = WEB_SERVER_STOPPED
 
 def start_ap_server():
     global ap_state
-    run_cmd('systemctl start createap')
+#    run_cmd('systemctl start createap')
     ap_state = AP_RUNNING
 
 def stop_ap_server():
     global ap_state
-    run_cmd('systemctl stop createap')
+#    run_cmd('systemctl stop createap')
     ap_state = AP_STOPPED
 
 
@@ -83,10 +83,10 @@ def stop_ap_server():
 def wifi_connected():
     global ap_state,ip_address, current_net
     ret = False
-    if ap_state == AP_RUNNING :
-        ip_address = "192.168.12.1"
-        current_net = "AP Mode"
-        return True
+    #if ap_state == AP_RUNNING :
+    #    ip_address = "192.168.12.1"
+    #    current_net = "AP Mode"
+    #    return True
 
     try :
         wifi_info = run_cmd('wpa_cli -i wlan0 status').splitlines()
@@ -115,12 +115,12 @@ def initialize_state():
     else : state = NOT_CONNECTED
 
     # web server state on startup
-    if (run_cmd_check('systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
-    else : web_server_state = WEB_SERVER_STOPPED
+ #   if (run_cmd_check('systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
+ #   else : web_server_state = WEB_SERVER_STOPPED
 
     # ap state on startup
-    if (run_cmd_check('systemctl status createap')) : ap_state = AP_RUNNING
-    else : ap_state = AP_STOPPED
+ #   if (run_cmd_check('systemctl status createap')) : ap_state = AP_RUNNING
+ #   else : ap_state = AP_STOPPED
 
 # assume this is called 1 / sec from the bg thread
 def update_state() :
@@ -142,20 +142,20 @@ def update_state() :
     #elif (state == CONNECTION_ERROR):  do nothing
 
     # web server states
-    if (run_cmd_check('systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
-    else : web_server_state = WEB_SERVER_STOPPED
+    #if (run_cmd_check('systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
+    #else : web_server_state = WEB_SERVER_STOPPED
 
     # ap statu=e
-    if (run_cmd_check('systemctl status createap')) : ap_state =  AP_RUNNING
-    else : ap_state = AP_STOPPED
+    #if (run_cmd_check('systemctl status createap')) : ap_state =  AP_RUNNING
+    #else : ap_state = AP_STOPPED
 
 
 # shut everything off
 def disconnect_all() :
     global state
     state = DISCONNECTING
-    run_cmd("wpa_cli -i wlan0 terminate >> "+log_file+" 2>&1")
-    run_cmd("dhcpcd -b -x wlan0 >> "+log_file+" 2>&1")
+   # run_cmd("wpa_cli -i wlan0 terminate >> "+log_file+" 2>&1")
+   # run_cmd("dhcpcd -b -x wlan0 >> "+log_file+" 2>&1")
     stop_ap_server()
     stop_web_server()
 
@@ -174,10 +174,10 @@ def connect(ssid, pw) :
     current_net = ssid
 
     stop_ap_server()
-    run_cmd("ip link set wlan0 up >> "+log_file+" 2>&1")
-    run_cmd("rm /tmp/wpa.conf") 
-    run_cmd_nosudo("cat <(echo ctrl_interface=/var/run/wpa_supplicant) <(wpa_passphrase \""+ssid+"\" \""+pw+"\") > /tmp/wpa.conf") 
-    run_cmd("wpa_supplicant -B -D nl80211,wext -i wlan0 -c /tmp/wpa.conf >> "+log_file+" 2>&1") 
-    run_cmd("dhcpcd -b wlan0 >> "+log_file+" 2>&1")
+   # run_cmd("ip link set wlan0 up >> "+log_file+" 2>&1")
+   # run_cmd("rm /tmp/wpa.conf") 
+   # run_cmd_nosudo("cat <(echo ctrl_interface=/var/run/wpa_supplicant) <(wpa_passphrase \""+ssid+"\" \""+pw+"\") > /tmp/wpa.conf") 
+   # run_cmd("wpa_supplicant -B -D nl80211,wext -i wlan0 -c /tmp/wpa.conf >> "+log_file+" 2>&1") 
+   # run_cmd("dhcpcd -b wlan0 >> "+log_file+" 2>&1")
 
 

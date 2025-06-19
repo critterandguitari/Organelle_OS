@@ -11,16 +11,11 @@
 #
 # By default this script does nothing.
 
-# disable output from this script
-exec 2> /dev/null
-exec 1>&2
-set -x
-
 # keep it fast
-echo -n performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo -n performance | tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
 # disable status led after bootup
-echo none > /sys/class/leds/led0/trigger
+echo none | tee /sys/class/leds/ACT/trigger
 
 # set organelle fw dir
 export FW_DIR=/home/music/fw_dir
