@@ -39,7 +39,6 @@
 #define ENCS 16
 #define INT0 26
 #define INT1 27
-#define PWR_STATUS 13
 #define MIC_SEL 4
 
 #define PCA555_0 0x20
@@ -163,9 +162,7 @@ void CM4OG4::init(){
     digitalWrite(LEDB, HIGH);
 
     // GPIO for power status 
-    pinMode(PWR_STATUS, INPUT);
-    pullUpDnControl(PWR_STATUS, PUD_OFF);
-    pwrStatus = digitalRead(PWR_STATUS);
+    pwrStatus = 0; 
 
 /*
     // keys

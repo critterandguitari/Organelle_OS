@@ -35,7 +35,7 @@ organelle_m : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS
 organelle_m : $(objects) hw_interfaces/CM3GPIO.o
 	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/CM3GPIO.o -l wiringPi
 
-organelle_4 : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH 
+organelle_4 : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DPWR_SWITCH 
 organelle_4 : $(objects) hw_interfaces/CM4OG4.o
 	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/CM4OG4.o -l wiringPi
 
