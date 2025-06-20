@@ -25,6 +25,7 @@ export FW_DIR=/home/music/fw_dir
 
 # monitor wifi connection
 python $FW_DIR/scripts/wifi_monitor.py & 
+python $FW_DIR/scripts/power_switch_monitor.py & 
 
 # redirect 80 to 8080 for the web server
 iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-ports 8080
