@@ -77,4 +77,4 @@ copy config.txt and cmdline.txt
 
 ## ^OG4_20250618.img
 
-sudo apt-get install iptables
+sudo apt-get install iptables python3-psutil

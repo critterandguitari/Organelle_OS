@@ -88,6 +88,7 @@ organelle_4_deploy : organelle_4
 	rm -fr /home/music/fw_dir
 	mkdir /home/music/fw_dir
 	cp -fr fw_dir/* /home/music/fw_dir
+	rm -fr /home/music/fw_dir/web
 	@echo "copying platform fw files"
 	cp -fr platforms/organelle_4/fw_dir/* /home/music/fw_dir
 	chown -R music:music /home/music/fw_dir
