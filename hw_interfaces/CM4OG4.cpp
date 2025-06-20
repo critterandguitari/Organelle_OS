@@ -164,21 +164,6 @@ void CM4OG4::init(){
     // GPIO for power status 
     pwrStatus = 0; 
 
-/*
-    // keys
-    keyStatesLast = 0;
-
-    // get initial pin states
-    shiftRegRead();
-    pinValuesLast = pinValues;
-    micSelSwitch = (pinValues >> 3) & 1;
-
-    // set 
-    batteryVoltage = 5;
-    batteryBars = 5;
-    lowBatteryShutdown = false;
- 
-*/
 }
 
 void CM4OG4::clearFlags() {
@@ -190,21 +175,6 @@ void CM4OG4::clearFlags() {
 }
 
 void CM4OG4::poll(){
-/*
-    // read keys (updates pinValues)
-    shiftRegRead();
-
-    // get key values if a key pin changed (ignore the encoder pins)
-    if ((pinValues & 0xFFFFFF80) != (pinValuesLast & 0xFFFFFF80)) {
-//        displayPinValues();
-        getKeys();
-        keyFlag = 1;
-    }
-    pinValuesLast = pinValues;
-
-    micSelSwitch = (pinValues >> 3) & 1;
-    
-  */  
     // check mic switch
     micSelSwitch = digitalRead(MIC_SEL);
 
