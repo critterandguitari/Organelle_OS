@@ -622,7 +622,7 @@ void MainMenu::buildMenu(signed mm_pos) {
         addMenuItem(numMenuEntries++, "Eject", "Eject", &MainMenu::runEject);
         addMenuItem(numMenuEntries++, "Reload", "Reload", &MainMenu::runReload);
         addMenuItem(numMenuEntries++, "Save", "save-patch.sh", &MainMenu::runScriptCommand);
-        addMenuItem(numMenuEntries++, "Save New", "save-new-patch.sh", &MainMenu::runScriptCommand);
+        /*addMenuItem(numMenuEntries++, "Save New", "save-new-patch.sh", &MainMenu::runScriptCommand);*/
         addMenuItem(numMenuEntries++, "<-- System", MM_STR[MenuMode::M_MAIN], &MainMenu::runCdMenu);
         break;
     }

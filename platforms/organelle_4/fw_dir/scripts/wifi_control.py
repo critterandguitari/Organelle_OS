@@ -83,16 +83,17 @@ def stop_ap_server():
 def wifi_connected():
     global ap_state,ip_address, current_net
     ret = False
-    #if ap_state == AP_RUNNING :
-    #    ip_address = "192.168.12.1"
-    #    current_net = "AP Mode"
-    #    return True
-
     try :
-        wifi_info = run_cmd('wpa_cli -i wlan0 status').splitlines()
-        if (any("ip_address" in s for s in wifi_info)):
-            update_network_info(wifi_info)
-            ret = True
+        # Suppress both stdout and stderr, only care if command succeeds
+        result = subprocess.run(['sudo', 'wpa_cli', '-i', 'wlan0', 'status'], 
+                              capture_output=True, 
+                              text=True, 
+                              timeout=5)
+        if result.returncode == 0:
+            wifi_info = result.stdout.splitlines()
+            if (any("ip_address" in s for s in wifi_info)):
+                update_network_info(wifi_info)
+                ret = True
     except : pass
     return ret
 
