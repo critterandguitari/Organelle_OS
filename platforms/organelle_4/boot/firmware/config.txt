@@ -52,7 +52,8 @@ dtoverlay=i2s-mmap
 
 dtoverlay=audioinjector-wm8731-audio
 enable_uart=1
-dtoverlay=miniuart-bt
+#dtoverlay=miniuart-bt
+dtoverlay=disable-bt
 dtoverlay=midi-uart0
 #dtoverlay=dwc2,dr_mode=peripheral
 dtoverlay=disable-wifi

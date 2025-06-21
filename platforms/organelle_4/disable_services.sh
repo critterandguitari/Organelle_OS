@@ -24,6 +24,8 @@ SERVICES=(
     "avahi-daemon"
     "apt-daily.timer"
     "fbrestore"
+    "bluetooth"
+    "hciuart"
     #"ssh.service"
 )
 
