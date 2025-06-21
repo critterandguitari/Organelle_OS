@@ -45,6 +45,14 @@ def println(num, s) :
     #s = truncate_mid(s, 20)
     liblo.send(osc_target, '/oled/gPrintln', 1, 2, num*11 + 2, 8, 1, s[0:20])
 
+def println_right(num, s) :
+    #s = truncate_mid(s, 20)
+    liblo.send(osc_target, '/oled/gPrintln', 1, 90, num*11 + 10, 8, 1, s[0:20])
+
+def println16(num, s) :
+    #s = truncate_mid(s, 20)
+    liblo.send(osc_target, '/oled/gPrintln', 1, 2, num*11 + 2, 16, 1, s[0:20])
+
 def clear_screen() :
     liblo.send(osc_target, '/oled/gClear', 1, 1)
 
@@ -219,5 +227,120 @@ class InfoList :
             if (redraw_flag) :
                 self.draw()
 
+
+class PasswordEntry:
+    def __init__(self, header="Enter Password", max_length=16):
+        self.header = header
+        self.max_length = max_length
+        self.password = ""
+        self.back_flag = False
+        self.done_flag = False
+
+        # Character set for selection (no space, we'll add commands at the end)
+        self.charset = (
+            "abcdefghijklmnopqrstuvwxyz"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "0123456789"
+            "!@#$%^&*()_+-=[]{}|;:,.<>?/~`"
+        )
+
+        # Commands that appear at the end of the character list
+        self.commands = ["Space", "Delete", "Enter"]
+        self.total_options = len(self.charset) + len(self.commands)
+        self.char_index = 0
+
+    def get_current_selection(self):
+        if self.char_index < len(self.charset):
+            return self.charset[self.char_index]
+        else:
+            # Return command name
+            cmd_index = self.char_index - len(self.charset)
+            return self.commands[cmd_index]
+
+    def is_command(self):
+        return self.char_index >= len(self.charset)
+
+    def draw(self):
+        clear_screen()
+
+        # Header
+        println(0, self.header)
+
+        # Current password (always show actual characters)
+        current_selection = f"   {self.get_current_selection()}"
+        pwd_line = f"{self.password}"
+
+        println16(1, current_selection[:20])  # Truncate to screen width
+
+        println(4, pwd_line[:20])  # Truncate to screen width
+
+        # Show current position info
+        pos_info = f"{self.char_index + 1}/{self.total_options}"
+        println_right(1, pos_info)
+
+        flip()
+
+    def enc_up(self):
+        self.char_index = (self.char_index + 1) % self.total_options
+
+    def enc_down(self):
+        self.char_index = (self.char_index - 1) % self.total_options
+
+    def execute_selection(self):
+        if self.is_command():
+            cmd_index = self.char_index - len(self.charset)
+            command = self.commands[cmd_index]
+
+            if command == "Space":
+                if len(self.password) < self.max_length:
+                    self.password += " "
+            elif command == "Delete":
+                if len(self.password) > 0:
+                    self.password = self.password[:-1]
+            elif command == "Enter":
+                self.done_flag = True
+        else:
+            # Regular character
+            if len(self.password) < self.max_length:
+                self.password += self.get_current_selection()
+
+    def back(self):
+        self.back_flag = True
+
+    def done(self):
+        self.done_flag = True
+
+    def perform(self):
+        self.back_flag = False
+        self.done_flag = False
+        self.password = ""
+        self.char_index = 0
+
+        self.draw()
+
+        while True:
+            enc_input()
+
+            if enc_turn_flag:
+                if enc_turn == 0:
+                    self.enc_down()
+                elif enc_turn == 1:
+                    self.enc_up()
+                self.draw()
+
+            if enc_but_flag:
+                if enc_but == 1:  # Button pressed
+                    self.execute_selection()
+                    if self.done_flag:
+                        break
+                    self.draw()
+
+            if redraw_flag:
+                self.draw()
+
+            if self.back_flag:
+                break
+
+        return self.password if self.done_flag else None
 
 
