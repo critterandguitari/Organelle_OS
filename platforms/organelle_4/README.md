@@ -118,4 +118,6 @@ move NetworkManager connection files to /sdcard:
     sudo ln -s /sdcard/system-connections /etc/NetworkManager/system-connections
     sudo chown root:root /sdcard/system-connections
 
+## ^OG4-base-ro-20250622.img
+
  
