@@ -140,7 +140,13 @@ def build_main_menu():
         menu.header = 'Not Connected'
     elif (wifi.state == wifi.CONNECTED) : 
         menu.header = 'Connected ' + wifi.current_net
-        menu.items.append(['Disconnect', disconnect])
+        menu.items.append(['Disconnect', disconnect]) 
+        # Web server control
+        if (wifi.web_server_state == wifi.WEB_SERVER_RUNNING) :
+            menu.items.append(['Stop Web Server', stop_web, {'type':'web_server_control'}])
+        else:
+            menu.items.append(['Start Web Server', start_web, {'type':'web_server_control'}])
+    
     elif (wifi.state == wifi.DISCONNECTING) : 
         menu.header = 'Not Connected'
     elif (wifi.state == wifi.CONNECTION_ERROR) : 
@@ -149,14 +155,7 @@ def build_main_menu():
     else : 
         menu.header = 'Not Connected'
         menu.items.append(['Select Network   >', network_menu_action])
-    
-    # Web server control
-    #if (wifi.web_server_state == wifi.WEB_SERVER_RUNNING) :
-    #    menu.items.append(['Stop Web Server', stop_web, {'type':'web_server_control'}])
-    #else:
-    #    menu.items.append(['Start Web Server', start_web, {'type':'web_server_control'}])
-
-    # VNC control
+       # VNC control
     #if check_vnc():
     #    menu.items.append(['Stop VNC', stop_vnc])
     #else:

@@ -52,12 +52,12 @@ def run_cmd_check(cmd) :
 
 def start_web_server():
     global web_server_state
-#    run_cmd('systemctl start cherrypy')
+    run_cmd('systemctl start ogweb')
     web_server_state = WEB_SERVER_RUNNING
 
 def stop_web_server():
     global web_server_state
-#    run_cmd('systemctl stop cherrypy')
+    run_cmd('systemctl stop ogweb')
     web_server_state = WEB_SERVER_STOPPED
 
 # true or false connected with ip address
@@ -97,8 +97,8 @@ def initialize_state():
     else : state = NOT_CONNECTED
 
     # web server state on startup
- #   if (run_cmd_check('systemctl status cherrypy')) : web_server_state = WEB_SERVER_RUNNING
- #   else : web_server_state = WEB_SERVER_STOPPED
+    if (run_cmd_check('systemctl status ogweb')) : web_server_state = WEB_SERVER_RUNNING
+    else : web_server_state = WEB_SERVER_STOPPED
 
 # shut everything off
 def disconnect_all() :
