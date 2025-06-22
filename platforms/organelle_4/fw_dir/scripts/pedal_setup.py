@@ -19,7 +19,6 @@ og = imp.load_source('og', current_dir + '/og.py')
 
 # UI elements
 menu = og.Menu()
-banner = og.Alert()
 
 # lock for updating menu
 menu_lock = threading.Lock()

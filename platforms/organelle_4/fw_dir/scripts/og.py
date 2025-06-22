@@ -116,13 +116,6 @@ def wait_for_release():
     return enc_but
 
 # UI helpers
-class Alert :
-    msg = "blank"
-    def perform(self):
-        clear_line(0)
-        println(0, self.msg)
-        flip()
-        #wait_for_turn()
 
 class Menu :
     items = None
@@ -163,7 +156,6 @@ class Menu :
             if not (self.menu_offset < 1) : self.menu_offset -= 1
         if not (self.cursor_offset < 1) : self.cursor_offset -= 1
         self.selection = self.cursor_offset + self.menu_offset
-
 
     def perform(self) :
         self.back_flag = False

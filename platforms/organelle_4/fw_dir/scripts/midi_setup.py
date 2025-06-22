@@ -15,7 +15,7 @@ midiDevices = [ ]
 midiDevice = '28:0'
 
 # usb or sd card
-user_dir = os.getenv("USER_DIR", "/usbdrive")
+user_dir = os.getenv("USER_DIR", "/sdcard")
 
 # imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -23,7 +23,6 @@ og = imp.load_source('og', current_dir + '/og.py')
 
 # UI elements
 menu = og.Menu()
-banner = og.Alert()
 
 # lock for updating menu
 menu_lock = threading.Lock()
