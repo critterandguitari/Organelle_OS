@@ -119,7 +119,7 @@ def list_ssids():
             capture_output=True,
             text=True,
             check=True,
-            timeout=5
+            timeout=15
         )
         ssids = {ssid.strip() for ssid in result.stdout.splitlines() if ssid.strip()}
         return sorted(ssids)
@@ -130,11 +130,33 @@ def list_ssids():
         print("Timed out waiting for nmcli to list networks")
         return []
 
+def connect_nopw(ssid) :
+    global state, connecting_timer, current_net
+  
+    # update state
+    state = CONNECTING
+    connecting_timer = 0
+    current_net = ssid
+
+    # restart log
+    run_cmd("echo WIFI LOG > " + log_file)
+    cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=15)
+        # If we reach here, the command succeeded
+        state = CONNECTED
+        print(f"connected {state}")
+        return True
+    except subprocess.CalledProcessError as e:
+        # Command failed
+        state = CONNECTION_ERROR
+        error_output = e.stderr if e.stderr else e.stdout
+        print(f"Error connecting to {ssid}: {error_output}")
+        return False
+
 def connect(ssid, password) :
     global state, connecting_timer, current_net
   
-    password = 'coolmusic'
-
     # update state
     state = CONNECTING
     connecting_timer = 0
@@ -145,16 +167,16 @@ def connect(ssid, password) :
 
     cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=15)
         # If we reach here, the command succeeded
         state = CONNECTED
         print(f"connected {state}")
-        return True, result.stdout
+        return True
     except subprocess.CalledProcessError as e:
         # Command failed
         state = CONNECTION_ERROR
         error_output = e.stderr if e.stderr else e.stdout
         print(f"Error connecting to {ssid}: {error_output}")
-        return False, error_output
+        return False
 
 
