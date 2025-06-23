@@ -131,6 +131,11 @@ class Menu :
     back_flag = False
     header = ''
 
+    def reset(self):
+        self.selection = 0
+        self.menu_offset = 0
+        self.cursor_offset = 0
+    
     def draw(self) :
         clear_screen()
 

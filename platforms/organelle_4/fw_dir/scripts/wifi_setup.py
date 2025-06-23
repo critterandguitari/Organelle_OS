@@ -64,6 +64,7 @@ def scan_and_connect():
        
         # Create menu with available networks
         network_menu.header = "Select Network"
+        network_menu.reset()
         network_menu.items = []
         if not ssids or len(ssids) < 1:
             network_menu.items.append(["No Networks Found", nonf])
