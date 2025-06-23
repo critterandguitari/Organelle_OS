@@ -19,6 +19,12 @@ def loading_screen ():
     os.system('oscsend localhost 4001 /enableauxsub i 1')
     os.system('oscsend localhost 4001 /oled/setscreen i 1')
 
+def alert(s):
+    os.system('oscsend localhost 4001 /oled/gClear ii 1 1')
+    os.system('oscsend localhost 4001 /oled/aux/line/3 s "'+s+'"')
+    os.system('oscsend localhost 4001 /enableauxsub i 1')
+    os.system('oscsend localhost 4001 /oled/setscreen i 1')
+
 # OSC and UI primitives 
 def start_app ():
     loading_screen()
@@ -51,7 +57,7 @@ def println_right(num, s) :
 
 def println16(num, s) :
     #s = truncate_mid(s, 20)
-    liblo.send(osc_target, '/oled/gPrintln', 1, 2, num*11 + 2, 16, 1, s[0:20])
+    liblo.send(osc_target, '/oled/gPrintln', 1, 2, num*11 + 6, 16, 1, s[0:20])
 
 def clear_screen() :
     liblo.send(osc_target, '/oled/gClear', 1, 1)
@@ -237,7 +243,7 @@ class PasswordEntry:
         )
 
         # Commands that appear at the end of the character list
-        self.commands = ["Space", "Delete", "Enter"]
+        self.commands = ["Space", "Delete", "Enter", "Cancel"]
         self.total_options = len(self.charset) + len(self.commands)
         self.char_index = 0
 
@@ -264,7 +270,7 @@ class PasswordEntry:
 
         println16(1, current_selection[:20])  # Truncate to screen width
 
-        println(4, pwd_line[:20])  # Truncate to screen width
+        println16(3, pwd_line[:20])  # Truncate to screen width
 
         # Show current position info
         pos_info = f"{self.char_index + 1}/{self.total_options}"
@@ -291,6 +297,8 @@ class PasswordEntry:
                     self.password = self.password[:-1]
             elif command == "Enter":
                 self.done_flag = True
+            elif command == "Cancel":
+                self.back_flag = True
         else:
             # Regular character
             if len(self.password) < self.max_length:

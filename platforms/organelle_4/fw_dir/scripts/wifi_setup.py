@@ -29,6 +29,7 @@ def nonf():
 
 def disconnect():
     print ("wifi disconnect all")
+    og.alert("Disconnecting...")
     wifi.disconnect_all()
     update_menu()
 
@@ -57,6 +58,7 @@ def stop_web():
 def scan_and_connect():
     """Scan for networks and let user select one to connect to"""
     try:
+        og.alert("Scanning...")
         # Get list of available SSIDs
         ssids = wifi.list_ssids()
        
@@ -75,7 +77,7 @@ def scan_and_connect():
         
         # Show the menu
         network_menu.perform()
-        
+            
     except Exception as e:
         print(f"Failed scan or connect: {str(e)}")
 
@@ -84,7 +86,8 @@ def connect_to_network(ssid):
     
     try:
         print(f"Connecting to {ssid} attempting with no pw...")
-        
+       
+        og.alert("Connecting...")
         success = wifi.connect_nopw(ssid)
         
         if success:
@@ -107,6 +110,7 @@ def connect_to_network(ssid):
         #def do_con():
         print(f"Connecting to {ssid}...")
         
+        og.alert("Connecting...")
         # Attempt to connect
         success = wifi.connect(ssid, password)
         
@@ -194,15 +198,8 @@ og.start_app()
 build_main_menu()
 menu.header='Not Connected'
 
-# bg thread
-menu_updater = threading.Thread(target=check_status)
-menu_updater.daemon = True # stop the thread when we exit
-
 wifi.initialize_state()
 update_menu()
-
-# start thread to update connection status
-#menu_updater.start()
  
 # enter menu
 menu.perform()
