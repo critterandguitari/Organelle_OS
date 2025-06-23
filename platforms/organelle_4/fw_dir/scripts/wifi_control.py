@@ -67,7 +67,7 @@ def wifi_connected():
     ret = False
     try :
         # Suppress both stdout and stderr, only care if command succeeds
-        result = subprocess.run(['sudo', 'wpa_cli', '-i', 'wlan0', 'status'], 
+        result = subprocess.run(['wpa_cli', '-i', 'wlan0', 'status'], 
                               capture_output=True, 
                               text=True, 
                               timeout=5)
