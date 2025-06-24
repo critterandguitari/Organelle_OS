@@ -16,7 +16,6 @@ function getFile(fpath) {
     }, 'text');  // force respose to be treated as text
 }
 
-
 function getAceMode(extension) {
     if (extension === "py") return "python";
     if (extension === "lua") return "lua";
@@ -24,7 +23,6 @@ function getAceMode(extension) {
     // Add more mappings as needed
     return "text";
 }
-
 
 function openFile(path) {
     // Check if the file is already open
@@ -39,7 +37,7 @@ function openFile(path) {
     var extension = path.split('.').pop().toLowerCase();
 
     // List of allowed text-based extensions
-    var textExtensions = ['ck', 'txt', 'md', 'html', 'css', 'js', 'json', 'xml', 'csv', 'log', 'py', 'c', 'cpp', 'java', 'sh'];
+    var textExtensions = ['pd', 'ck', 'txt', 'md', 'html', 'css', 'js', 'json', 'xml', 'csv', 'log', 'py', 'c', 'cpp', 'java', 'sh'];
 
     // List of image extensions
     var imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'];
@@ -614,23 +612,12 @@ function saveMode() {
         alertDialog('No file to save.');
     }
 }
-/*
-function saveMode() {
-  $.post(appBaseURL + "/save", { fpath: currentEditorFile, contents: editor.getValue() })
-	.done(function(data) {
-    console.log(data);
-	});
-}
-*/
-function reloadMode() {
-    if (currentFile) {
-  $.post(appBaseURL + "/reload_mode", { name: currentFile.path })
+
+function refreshPatchlist() {
+  $.post(appBaseURL + "/refresh_patchlist")
   .done(function(data) {
     console.log(data);
   });
-    } else {
-    console.log("no file to load");
-  }
 }
 
 $(function () {
@@ -663,11 +650,11 @@ $(function () {
 	    // Keyboard shortcuts for saving
     $(".ace_text-input").keydown(function(e) {
         // Save & reload on Cmd + P
-        if (e.metaKey && e.which === 80) {
+        /*if (e.metaKey && e.which === 80) {
             e.preventDefault();
             saveMode();
             reloadMode(); // Ensure you have a reloadMode() function
-        }
+        }*/
 
         // Save on Cmd + S
         if (e.metaKey && e.which === 83) {
@@ -675,8 +662,6 @@ $(function () {
             saveMode();
         }
     });
-
-
 
     $('#fileupload').fileupload({
 		// DISABLE drag and drop uploading
@@ -769,24 +754,9 @@ $(function () {
         });
     });
 
-    $("#reload-mode").click(reloadMode);
+    $("#refresh-patchlist").click(refreshPatchlist);
 
     $("#save").click(saveMode);
-
-    $(".ace_text-input").keydown(function(e) {
-      // save & reload on cmd + p
-      if (e.metaKey && e.which === 80) {
-        e.preventDefault();
-        saveMode();
-        reloadMode();
-      }
-
-      // save on cmd + s
-      if (e.metaKey && e.which === 83) {
-        e.preventDefault();
-        saveMode();
-      }
-    });
 
     $("#new-folder-but").click(newFolderDialog);
 

@@ -8,9 +8,9 @@ import mimetypes
 import liblo
 import file_operations
 
-# osc to eyesy app
+# osc to og app
 try:
-	osc_target = liblo.Address(4000)
+	osc_target = liblo.Address(4001)
 except liblo.AddressError as err:
 	print(err)
 	sys.exit()
@@ -20,8 +20,7 @@ app.config['SECRET_KEY'] = 'secret!'
 sock = Sock(app)  # Use Flask-Sock for WebSockets
 
 def background_thread(ws):
- #   cmd = ["journalctl", "-f", "-u", "eyesypy.service", "-o", "cat"]
-    cmd = ["journalctl", "-f", "-o", "cat"]
+    cmd = ["journalctl", "-f", "-o", "cat", "-t", "Organelle"]
     with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
         try:
             for line in iter(p.stdout.readline, b''):
@@ -46,28 +45,24 @@ def test():
 @app.route('/stop_video_engine')
 def stop_video_engine():
     print("stopping video...")
-    os.system("sudo systemctl stop eyesypy")
+    #os.system("sudo systemctl stop eyesypy")
     return "stopping video..."
 
 @app.route('/start_video_engine')
 def start_video_engine():
     print("starting video...")
-    os.system("sudo systemctl start eyesypy")
+    #os.system("sudo systemctl start eyesypy")
     return "starting video..."
 
 @app.route('/')
 def index():
     return send_from_directory(app.static_folder, 'index.html')
 
-@app.route('/reload_mode', methods=['GET', 'POST'])
+@app.route('/refresh_patchlist', methods=['GET', 'POST'])
 def reload_mode():
-    mode = request.form.get('name')
-    print(f"reloading /{mode}")
-    os.system("killall chuck")
-    os.system(f"chuck --dac4 --adc4 --bufsize64 /{mode} 2>&1 | systemd-cat --identifier=chuck &")
-    liblo.send(osc_target, "/set", mode)
-    #liblo.send(osc_target, "/reload", 1)
-    return "reloaded mode"
+    print(f"refreshing")
+    liblo.send(osc_target, "/reload", 1)
+    return "refreshed"
 
 @app.route('/get_file', methods=['GET'])
 def get_file():
