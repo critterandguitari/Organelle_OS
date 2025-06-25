@@ -41,10 +41,13 @@ function openFile(path) {
 
     // List of image extensions
     var imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'];
+    const audioExtensions = ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac', 'wma'];
 
     if (imageExtensions.includes(extension)) {
         // For image files, add a tab that displays the image
         addImageTab(path);
+    } else if (audioExtensions.includes(extension)) {
+        addAudioTab(path); 
     } else if (textExtensions.includes(extension)) {
         // Fetch and display text-based files
         $.get(appBaseURL + '/get_file?fpath=' + encodeURIComponent(path), function(data) {
@@ -149,7 +152,47 @@ function addImageTab(path) {
     switchTab(path);
 }
 
-function switchTab(path) {
+function addAudioTab(path) {
+    console.log('audio file')
+    // Create a new tab element
+    var fileName = path.split('/').pop();
+
+    // Create the tab label
+    var $tab = $('<div class="tab"></div>').text(fileName);
+    $tab.attr('data-file-path', path);
+
+    // Add a close button to the tab
+    var $closeButton = $('<span class="close-tab">&times;</span>');
+    $tab.append($closeButton);
+
+    // Event listeners for tab click and close
+    $tab.on('click', function() {
+        switchTab(path);
+    });
+
+    $closeButton.on('click', function(e) {
+        e.stopPropagation();
+        closeTab(path);
+    });
+
+    // Append the tab to the tabs container
+    $('#tabs-container').append($tab);
+
+    // Create an object representing the image file
+    var fileObj = {
+        path: path,
+        name: fileName,
+        tabElement: $tab,
+        isAudio: true
+    };
+    openFiles.push(fileObj);
+
+    // Switch to the new tab
+    switchTab(path);
+}
+
+
+/*function switchTab(path) {
     // Update the currentFile to the new file
     currentFile = openFiles.find(file => file.path === path);
 
@@ -179,7 +222,45 @@ function switchTab(path) {
         editor.focus();
         $('#editor').show();
     }
+}*/
+
+// Updated switchTab function with audio support
+function switchTab(path) {
+    // Update the currentFile to the new file
+    currentFile = openFiles.find(file => file.path === path);
+    // Update active tab styling
+    $('.tab').removeClass('active');
+    currentFile.tabElement.addClass('active');
+                    
+    // Update the title
+    $("#title").html(path);
+                
+    // Clear all containers
+    $('#editor').hide();
+    $('#image-container').hide();
+    $('#audio-container').hide();
+    
+    if (currentFile.isImage) {
+        // Display the image
+        $('#image-container').empty(); // Clear any previous content
+        
+        // Create the image element
+        var img = $('<img>').attr('src', appBaseURL + '/get_file?fpath=' + encodeURIComponent(currentFile.path));
+        $('#image-container').append(img);
+        
+        $('#image-container').show();
+    } else if (currentFile.isAudio) {
+        // Display the audio player with waveform
+        initAudioPlayer(currentFile.path);
+        $('#audio-container').show();
+    } else {
+        // Display the editor with the file's session
+        editor.setSession(currentFile.editorSession);
+        editor.focus();
+        $('#editor').show();
+    }           
 }
+
 
 function closeTab(path) {
     var index = openFiles.findIndex(file => file.path === path);
@@ -218,6 +299,7 @@ function closeTabConfirmed(path) {
                 editor.setValue('');
                 $('#editor').hide();
                 $('#image-container').hide();
+                $('#audio-container').hide();
                 $("#title").html('...');
             }
         }
@@ -822,8 +904,120 @@ $(function () {
     .fail(function () {
         console.log('oops');
     });    
-    
-
 });
 
+
+// Audio player initialization
+let wavesurfer = null;
+
+function initAudioPlayer(filePath) {
+    // Clear any existing audio player
+    if (wavesurfer) {
+        wavesurfer.destroy();
+    }
+    
+    // Clear the audio container
+    $('#audio-container').empty();
+    
+    // Create audio player HTML structure
+    const audioPlayerHTML = `
+        <div class="audio-player">
+            <div class="audio-info">
+                <h3>${filePath.split('/').pop()}</h3>
+            </div>
+            <div id="waveform"></div>
+            <div class="audio-controls">
+                <button id="play-pause-btn" class="btn btn-primary">
+                    <i class="fas fa-play"></i>
+                </button>
+                <span id="current-time">0:00</span>
+                <input type="range" id="volume-slider" min="0" max="100" value="50" class="volume-slider">
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+    `;
+    
+    $('#audio-container').html(audioPlayerHTML);
+    
+    // Initialize WaveSurfer
+    wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: '#4a90e2',
+        progressColor: '#2c5aa0',
+        cursorColor: '#ffffff',
+        barWidth: 2,
+        barRadius: 3,
+        responsive: true,
+        height: 100,
+        normalize: true,
+        backend: 'WebAudio'
+    });
+    
+    // Load the audio file
+    const audioUrl = appBaseURL + '/get_file?fpath=' + encodeURIComponent(filePath);
+    wavesurfer.load(audioUrl);
+    
+    // Set up event listeners
+    setupAudioEventListeners();
+}
+
+function setupAudioEventListeners() {
+    const playPauseBtn = $('#play-pause-btn');
+    const volumeSlider = $('#volume-slider');
+    const currentTimeSpan = $('#current-time');
+    const durationSpan = $('#duration');
+    
+    // Play/Pause button
+    playPauseBtn.on('click', function() {
+        if (wavesurfer.isPlaying()) {
+            wavesurfer.pause();
+            playPauseBtn.html('<i class="fas fa-play"></i>');
+        } else {
+            wavesurfer.play();
+            playPauseBtn.html('<i class="fas fa-pause"></i>');
+        }
+    });
+    
+    // Volume control
+    volumeSlider.on('input', function() {
+        const volume = $(this).val() / 100;
+        wavesurfer.setVolume(volume);
+    });
+    
+    // WaveSurfer events
+    wavesurfer.on('ready', function() {
+        const duration = wavesurfer.getDuration();
+        durationSpan.text(formatTime(duration));
+        volumeSlider.val(50);
+        wavesurfer.setVolume(0.5);
+    });
+    
+    wavesurfer.on('audioprocess', function() {
+        const currentTime = wavesurfer.getCurrentTime();
+        currentTimeSpan.text(formatTime(currentTime));
+    });
+    
+    wavesurfer.on('seek', function() {
+        const currentTime = wavesurfer.getCurrentTime();
+        currentTimeSpan.text(formatTime(currentTime));
+    });
+    
+    wavesurfer.on('finish', function() {
+        playPauseBtn.html('<i class="fas fa-play"></i>');
+    });
+}
+
+// Helper function to format time
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+// Helper function to determine if a file is an audio file
+function isAudioFile(filename) {
+    const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.flac', '.wma'];
+    const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+    return audioExtensions.includes(extension);
+}
 
