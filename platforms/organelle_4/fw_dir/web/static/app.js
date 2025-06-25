@@ -703,7 +703,9 @@ function refreshPatchlist() {
 }
 
 $(function () {
- 
+
+    console.log('hi');
+
     // this disables page while loading things 
     $(document).ajaxStart (function() { 
             $('body').addClass("loading");
@@ -930,9 +932,8 @@ function initAudioPlayer(filePath) {
                 <button id="play-pause-btn" class="btn btn-primary">
                     <i class="fas fa-play"></i>
                 </button>
-                <span id="current-time">0:00</span>
                 <input type="range" id="volume-slider" min="0" max="100" value="50" class="volume-slider">
-                <span id="duration">0:00</span>
+                <span id="current-time">0:00</span> / <span id="duration">0:00</span>
             </div>
         </div>
     `;
@@ -940,19 +941,19 @@ function initAudioPlayer(filePath) {
     $('#audio-container').html(audioPlayerHTML);
     
     // Initialize WaveSurfer
+   // Update the WaveSurfer.create() call in your initAudioPlayer function:
     wavesurfer = WaveSurfer.create({
         container: '#waveform',
-        waveColor: '#4a90e2',
-        progressColor: '#2c5aa0',
-        cursorColor: '#ffffff',
+        waveColor: '#eee',
+        progressColor: '#aaa',
+        cursorColor: '#333333',  
         barWidth: 2,
         barRadius: 3,
         responsive: true,
         height: 100,
         normalize: true,
         backend: 'WebAudio'
-    });
-    
+    }); 
     // Load the audio file
     const audioUrl = appBaseURL + '/get_file?fpath=' + encodeURIComponent(filePath);
     wavesurfer.load(audioUrl);
