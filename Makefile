@@ -17,6 +17,13 @@ objects =  \
 	OSC/OSCTiming.o \
 	OSC/SimpleWriter.o
 
+# Simplified objects for splash screen (no OSC, networking, or menu)
+splash_objects = \
+	splash.o \
+	AppData.o \
+	Timer.o \
+	OledScreen.o
+
 SDL_CFLAGS := $(shell pkg-config --cflags sdl2)
 SDL_LIBS := $(shell pkg-config --libs sdl2)
 
@@ -39,10 +46,14 @@ organelle_4 : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_MET
 organelle_4 : $(objects) hw_interfaces/CM4OG4.o
 	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/CM4OG4.o -l wiringPi
 
+organelle_4_splash : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DPWR_SWITCH -DMICSEL_SWITCH -DFIX_ABL_LINK
+organelle_4_splash : $(splash_objects) hw_interfaces/CM4OG4.o
+	$(CXX) -o fw_dir/splash $(splash_objects) hw_interfaces/CM4OG4.o -l wiringPi
+
 .PHONY : clean
 
 clean :
-	rm -f main $(objects) fw_dir/mother hw_interfaces/SDLPi.o hw_interfaces/SerialMCU.o hw_interfaces/CM3GPIO.o
+	rm -f main splash $(objects) $(splash_objects) fw_dir/mother hw_interfaces/SDLPi.o hw_interfaces/SerialMCU.o hw_interfaces/CM3GPIO.o hw_interfaces/CM4OG4.o
 
 IMAGE_BUILD_VERSION = $(shell cat fw_dir/version)
 IMAGE_BUILD_TAG = $(shell cat fw_dir/buildtag)
@@ -82,7 +93,7 @@ organelle_m_deploy : organelle_m
 	rm -fr tmp
 	sync
 
-organelle_4_deploy : organelle_4
+organelle_4_deploy : organelle_4 organelle_4_splash
 	@echo "Updating OS to $(IMAGE_VERSION)"
 	@echo "copying common fw files"
 	rm -fr /home/music/fw_dir
@@ -116,6 +127,7 @@ UdpSocket.o: UdpSocket.cpp UdpSocket.h Socket.h
 main.o: main.cpp OSC/OSCMessage.h OSC/OSCData.h OSC/OSCTiming.h \
   OSC/SimpleWriter.h Serial.h UdpSocket.h Socket.h SLIPEncodedSerial.h \
   OledScreen.h MainMenu.h AppData.h Timer.h
+splash.o: splash.cpp OledScreen.h Timer.h AppData.h
 serialdump.o: serialdump.c
 test.o: test.cpp
 OSCData.o: OSC/OSCData.cpp OSC/OSCData.h OSC/OSCTiming.h
