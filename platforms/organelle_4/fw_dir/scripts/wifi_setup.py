@@ -162,7 +162,7 @@ def connect_nopw(ssid):
     
     cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=15)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=20)
         state = CONNECTED
         print(f"Connected to {ssid}")
         return True
@@ -185,7 +185,7 @@ def connect(ssid, password):
 
     cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=15)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=20)
         state = CONNECTED
         print(f"Connected to {ssid}")
         return True
@@ -301,6 +301,8 @@ def connect_to_network(ssid):
         
         if success:
             print(f"Connected to {ssid}")
+            # make sure ip gets updated
+            wifi_connected()
             network_menu.back()
             update_menu()
             return
