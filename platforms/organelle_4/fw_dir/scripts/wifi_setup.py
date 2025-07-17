@@ -115,8 +115,9 @@ def initialize_state():
 
 def disconnect_all():
     """Disconnect from WiFi and stop web server"""
-    global state
+    global state, ip_address
     state = DISCONNECTING
+    ip_address = ""  # Clear IP address
     try:
         subprocess.run(["sudo", "nmcli", "device", "disconnect", "wlan0"], check=True)
     except subprocess.CalledProcessError as e:
@@ -169,6 +170,33 @@ def connect_nopw(ssid):
         state = CONNECTION_ERROR
         error_output = e.stderr if e.stderr else e.stdout
         print(f"Error connecting to {ssid}: {error_output}")
+        return False
+
+def connect(ssid, password):
+    """Connect to WiFi network with password"""
+    global state, connecting_timer, current_net
+    
+    state = CONNECTING
+    connecting_timer = 0
+    current_net = ssid
+
+    # Start log
+    run_cmd("echo WIFI LOG > " + log_file)
+
+    cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=15)
+        state = CONNECTED
+        print(f"Connected to {ssid}")
+        return True
+    except subprocess.CalledProcessError as e:
+        state = CONNECTION_ERROR
+        error_output = e.stderr if e.stderr else e.stdout
+        print(f"Error connecting to {ssid}: {error_output}")
+        return False
+    except subprocess.TimeoutExpired:
+        state = CONNECTION_ERROR
+        print(f"Timeout connecting to {ssid}")
         return False
 
 def start_ap_mode():
@@ -342,6 +370,10 @@ def build_main_menu():
         menu.header = 'Not Connected'
     elif state == CONNECTED:
         menu.header = 'Connected ' + current_net
+        
+        # Show IP address if available
+        if ip_address:
+            menu.items.append([f'IP: {ip_address}', lambda: None])
         menu.items.append(['Disconnect', disconnect])
         
         # Web server control
@@ -351,6 +383,9 @@ def build_main_menu():
             menu.items.append(['Start Web Server', start_web])
     elif state == AP_MODE:
         menu.header = 'AP Mode (ORGANELLE)'
+        
+        # Show AP mode IP (typically 10.42.0.1 for NetworkManager hotspot)
+        menu.items.append(['IP: 10.42.0.1', lambda: None])
         menu.items.append(['Stop AP Mode', disconnect])
         
         # Web server control in AP mode
