@@ -234,25 +234,6 @@ def start_ap_mode():
         return False
     """Connect to WiFi network with password"""
     
-    state = CONNECTING
-    connecting_timer = 0
-    current_net = ssid
-
-    # Start log
-    run_cmd("echo WIFI LOG > " + log_file)
-
-    cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password]
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=15)
-        state = CONNECTED
-        print(f"Connected to {ssid}")
-        return True
-    except subprocess.CalledProcessError as e:
-        state = CONNECTION_ERROR
-        error_output = e.stderr if e.stderr else e.stdout
-        print(f"Error connecting to {ssid}: {error_output}")
-        return False
-
 # === UI Functions ===
 
 def quit():
