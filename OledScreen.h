@@ -36,14 +36,18 @@ class OledScreen
         void println(const char * line, int x, int y, int h, int color);
         void println_8(const char * line, int len, int x, int y);
         void saveSVG(const char * filename);
-        
+               
         void drawInfoBar(int inR, int inL, int outR, int outL, int peaks);
-        void drawInfoBar(int inR, int inL, int outR, int outL, int peaks, int pwrStatus, int batteryLevel, int wifiStatus);
-        void drawNotification(const char * line );
-        void drawNotification(const char * line, int pwrStatus, int batteryLevel, int wifiStatus);
+        void drawInfoBar(int inR, int inL, int outR, int outL, int peaks, int pwrStatus, int batteryLevel, int wifiStatus, const std::string& userDir);
+        void drawNotification(const char * line);
+        void drawNotification(const char * line, int pwrStatus, int batteryLevel, int wifiStatus, const std::string& userDir);
+
         void drawBatteryMeter(int lev);
         void drawWifiMeter(int lev);
         void drawPlug();
+
+        void drawUsbIcon();
+        void drawSdIcon();
 };
 
 

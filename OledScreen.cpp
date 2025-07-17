@@ -456,15 +456,26 @@ void OledScreen::drawNotification(const char * line) {
     println_8(line, len>21 ? 21: len,  2, 0);
 }
 
-void OledScreen::drawNotification(const char * line, int pwrStatus, int batteryLevel, int wifiStatus) {
+void OledScreen::drawNotification(const char * line, int pwrStatus, int batteryLevel, int wifiStatus, const std::string& userDir) {
     int i, len;
 
     // first clear it out
     for (i = 0; i < 128; i++)
         pix_buf[i] = 0;
 
-   if (pwrStatus) drawBatteryMeter(batteryLevel);
-   else drawPlug();
+
+#ifdef STORAGE_INDICATOR
+    if (userDir == "/usbdrive") {
+        drawUsbIcon();
+    } else {
+        drawSdIcon();
+    }
+#else
+    if (pwrStatus) drawBatteryMeter(batteryLevel);
+    else drawPlug();
+#endif
+
+
    drawWifiMeter(wifiStatus);
       
    len = strlen(line);
@@ -493,63 +504,12 @@ void OledScreen::drawPlug(void) {
     int y = 0;
 
     draw_box_filled(113, 1, 5, 11);
-/*
-    put_pixel(1, x + 0, y + 3);
-    put_pixel(1, x + 1, y + 3);
-    put_pixel(1, x + 2, y + 3);
-    put_pixel(1, x + 3, y + 3);
-    put_pixel(1, x + 4, y + 3);
-    put_pixel(1, x + 5, y + 3);
-
-    put_pixel(1, x + 6, y + 2);
-    put_pixel(1, x + 6, y + 3);
-    put_pixel(1, x + 6, y + 4);
-
-    put_pixel(1, x + 6, y + 1);
-    put_pixel(1, x + 6, y + 5);
-
-    put_pixel(1, x + 7, y + 0);
-    put_pixel(1, x + 7, y + 6);
-
-
-    put_pixel(1, x + 8, y + 0);
-    put_pixel(1, x + 8, y + 6);
-
-    put_pixel(1, x + 9, y + 0);
-    put_pixel(1, x + 9, y + 6);
-
-    draw_line(x + 10, y + 0, x + 10, y + 6, 1);
-    draw_line(x + 11, y + 1, x + 13, y + 1, 1);
-    draw_line(x + 11, y + 5, x + 13, y + 5, 1);
-*/
-
 
 }
 
 void OledScreen::drawWifiMeter(int lev) {
     int x = 95;
     int y =0;
-
-/*    if (lev) {
-        put_pixel(1, x + 0, y + 2);
-        put_pixel(1, x + 1, y + 1);
-        put_pixel(1, x + 2, y + 0);
-        put_pixel(1, x + 2, y + 3);
-        put_pixel(1, x + 3, y + 0);
-        put_pixel(1, x + 3, y + 2);
-        put_pixel(1, x + 4, y + 0);
-        put_pixel(1, x + 4, y + 2);
-        put_pixel(1, x + 4, y + 4);
-        put_pixel(1, x + 4, y + 5);
-        put_pixel(1, x + 4, y + 6);
-        put_pixel(1, x + 5, y + 0);
-        put_pixel(1, x + 5, y + 2);
-        put_pixel(1, x + 6, y + 0);
-        put_pixel(1, x + 6, y + 3);
-        put_pixel(1, x + 7, y + 1);
-        put_pixel(1, x + 8, y + 2);
-    }
-*/
 
    if (lev) {
         put_pixel(1, x + 0, y + 0);
@@ -586,7 +546,21 @@ void OledScreen::drawWifiMeter(int lev) {
     }
 }
 
-void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int peaks, int pwrStatus, int batteryLevel, int wifiStatus) {
+void OledScreen::drawUsbIcon(void) {
+    int x = 112;
+    int y = 0;
+
+    put_char_small('U', x, y, 1);
+}
+
+void OledScreen::drawSdIcon(void) {
+    int x = 112;
+    int y = 0;
+    
+    put_char_small('S', x, y, 1);
+}
+
+void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int peaks, int pwrStatus, int batteryLevel, int wifiStatus, const std::string& userDir) {
 
   int i, len;
     
@@ -607,8 +581,17 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int peaks, in
     pix_buf[i] = 0;
   }
 
-  if (pwrStatus) drawBatteryMeter(batteryLevel);
-  else drawPlug();
+#ifdef STORAGE_INDICATOR
+    if (userDir == "/usbdrive") {
+        drawUsbIcon();
+    } else {
+        drawSdIcon();
+    }
+#else
+    if (pwrStatus) drawBatteryMeter(batteryLevel);
+    else drawPlug();
+#endif
+
   drawWifiMeter(wifiStatus);
   
   // draw input output

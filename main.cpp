@@ -334,13 +334,13 @@ int main(int argc, char* argv[]) {
 
 		            if (! (app.isPatchRunning() || app.isPatchLoading()) ) {
 #ifdef BATTERY_METER
-			            app.oled(AppData::MENU).drawNotification("Select patch", controls.pwrStatus, controls.batteryBars, app.wifiStatus);
+			            app.oled(AppData::MENU).drawNotification("Select patch", controls.pwrStatus, controls.batteryBars, app.wifiStatus, app.getUserDir());
 #else
 			            app.oled(AppData::MENU).drawNotification("Select patch");
 #endif
 		            } else {
 #ifdef BATTERY_METER
-                        app.oled(AppData::MENU).drawNotification(app.getCurrentPatch(), controls.pwrStatus, controls.batteryBars, app.wifiStatus);
+                        app.oled(AppData::MENU).drawNotification(app.getCurrentPatch(), controls.pwrStatus, controls.batteryBars, app.wifiStatus, app.getUserDir());
 #else
                         app.oled(AppData::MENU).drawNotification(app.getCurrentPatch());
 #endif
@@ -355,7 +355,7 @@ int main(int argc, char* argv[]) {
                     // check if we should draw info bar on this patch screen
                     if (app.oled((AppData::Screen) app.currentScreen).showInfoBar) {
 #ifdef BATTERY_METER
-                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, app.peaks, controls.pwrStatus, controls.batteryBars, app.wifiStatus);
+                        app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, app.peaks, controls.pwrStatus, controls.batteryBars, app.wifiStatus, app.getUserDir());
 #else
                         app.oled((AppData::Screen) app.currentScreen).drawInfoBar(app.inR, app.inL, app.outR, app.outL, app.peaks);
 #endif

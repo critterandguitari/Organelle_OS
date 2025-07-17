@@ -4,4 +4,5 @@ main
 UpdateOS*.zip
 *.pyc
 fw_dir/mother
+fw_dir/splash
 tmp
