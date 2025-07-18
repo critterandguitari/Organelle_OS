@@ -314,8 +314,14 @@ int main(int argc, char* argv[]) {
         if (screenFpsTimer.getElapsed() > 50.f) {
 #endif
             screenFpsTimer.reset();
+
+            // screen saver screen
+            if (app.currentScreen == AppData::SCREENSAVER) {
+                app.drawScreenSaverFrame();
+                controls.updateOLED(app.oled(AppData::SCREENSAVER));
+            }
             // alert screen
-            if (app.currentScreen == AppData::ALERT) {
+            else if (app.currentScreen == AppData::ALERT) {
                 if (app.oled(AppData::ALERT).newScreen) {
                     app.oled(AppData::ALERT).newScreen = 0;
                     controls.updateOLED(app.oled(AppData::ALERT));
@@ -363,6 +369,7 @@ int main(int argc, char* argv[]) {
                     controls.updateOLED(app.oled(AppData::PATCH));
                 }
             }
+            app.updateScreenSaver();
         }
 
         // every 1 second do slow periodic tasks
@@ -910,6 +917,7 @@ void navRelease(OSCMessage &msg ) {
 // in patch screen, bounce back to menu, unless override is on
 // in aux screen, same
 void encoderInput(void) {
+    app.resetScreenSaver();
     // if encoder is turned, abort shutdown timer
     encoderDownTime = -1;
     if (previousScreen >= 0) {

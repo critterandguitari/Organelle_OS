@@ -63,6 +63,9 @@ AppData::AppData(){
     inL = inR = outL = outR = peaks = 0;
     wifiStatus = 0;
     micLineSelection = 99; // so it gets correct initial value
+
+    oled(SCREENSAVER).showInfoBar = false;
+
 }
 
 bool AppData::isPatchHome() {
@@ -116,3 +119,64 @@ void AppData::setFirmwareDir(const char* path) {
     system(cmd.c_str());
 }
 
+void AppData::resetScreenSaver() {
+    if (currentScreen == SCREENSAVER) {
+        // Restore previous screen
+        currentScreen = previousScreenBeforeSaver;
+        oled((AppData::Screen) currentScreen).newScreen = 1;
+    }
+    screenSaverTimer.reset();
+    screenSaverFrame = 0;
+}
+
+void AppData::updateScreenSaver() {
+    if (currentScreen != SCREENSAVER && screenSaverTimer.getElapsed() > SCREENSAVER_TIMEOUT) {
+        // Save current screen and switch to screensaver
+        previousScreenBeforeSaver = currentScreen;
+        currentScreen = SCREENSAVER;
+        screenSaverFrame = 0;
+        oled(SCREENSAVER).newScreen = 1;
+    }
+}
+
+void AppData::drawScreenSaverFrame() {
+    OledScreen& screen = oled(SCREENSAVER);
+    screen.clear();
+
+    // Static variables to maintain state between calls
+    static int circleX = -1;
+    static int circleY = -1;
+    static int currentRadius = 0;
+    static const int maxRadius = 100;
+    static const int radiusGrowthRate = 1; // pixels per frame
+    static bool growing = true; // true = expanding, false = shrinking
+
+    // Initialize with random position if first time or circle cycle is complete
+    if (circleX == -1 || (currentRadius <= 0 && growing)) {
+        // Simple pseudo-random number generation
+        // Using frame counter as seed for variety
+        circleX = (screenSaverFrame * 17 + 23) % 128; // 0-127 for screen width
+        circleY = (screenSaverFrame * 13 + 37) % 64;  // 0-63 for screen height
+        currentRadius = 0;
+        growing = true;
+    }
+
+    // Always draw the circle - let it wrap around for cool patterns!
+    screen.draw_circle(circleX, circleY, currentRadius, 1);
+
+    // Grow or shrink the circle
+    if (growing) {
+        currentRadius += radiusGrowthRate;
+        if (currentRadius >= maxRadius) {
+            growing = false; // Start shrinking
+        }
+    } else {
+        currentRadius -= radiusGrowthRate;
+        if (currentRadius <= 0) {
+            growing = true; // Will trigger new circle on next frame
+        }
+    }
+
+    screenSaverFrame++;
+    screen.newScreen = 1;
+}

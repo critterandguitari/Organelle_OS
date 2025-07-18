@@ -5,6 +5,7 @@
 #include <string>
 
 #include "OledScreen.h"
+#include "Timer.h"
 
 // the UI provides 3 screens
 
@@ -18,6 +19,7 @@ public:
         MENU,
         PATCH,
         ALERT,
+        SCREENSAVER, 
         SCREEN_MAX,
     };
 
@@ -92,6 +94,11 @@ public:
     int peaks;
 
     int wifiStatus;              // network connection status
+    
+    void resetScreenSaver();
+    bool isScreenSaverActive() { return currentScreen == SCREENSAVER; }
+    void updateScreenSaver();
+    void drawScreenSaverFrame();
 
 private:
     OledScreen oleds_[SCREEN_MAX];
@@ -105,6 +112,11 @@ private:
     std::string user_path;
     std::string system_path;
     std::string firmware_path;
+    
+    Timer screenSaverTimer;
+    int screenSaverFrame;
+    int previousScreenBeforeSaver;
+    static const int SCREENSAVER_TIMEOUT = 10000; // 60 seconds in milliseconds
 };
 
 
