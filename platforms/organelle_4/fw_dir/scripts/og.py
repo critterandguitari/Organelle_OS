@@ -322,13 +322,18 @@ class PasswordEntry:
         # Header
         println(0, self.header)
 
-        # Current password (always show actual characters)
+        # Current password with horizontal scrolling
         current_selection = f"   {self.get_current_selection()}"
-        pwd_line = f"{self.password}"
-
-        println16(1, current_selection[:20])  # Truncate to screen width
-
-        println16(3, pwd_line[:20])  # Truncate to screen width
+        
+        # Handle password scrolling - show last 10 characters if longer than 10
+        if len(self.password) <= 10:
+            pwd_display = self.password
+        else:
+            # Show the last 10 characters (scroll left)
+            pwd_display = self.password[-10:]
+        
+        println16(1, current_selection[:20])  # Current selection
+        println16(3, pwd_display[:20])        # Scrolled password display
 
         # Show current position info
         pos_info = f"{self.char_index + 1}/{self.total_options}"
