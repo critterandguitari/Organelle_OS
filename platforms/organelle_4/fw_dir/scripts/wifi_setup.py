@@ -226,14 +226,23 @@ def start_ap_mode():
     except subprocess.CalledProcessError as e:
         state = CONNECTION_ERROR
         error_output = e.stderr if e.stderr else e.stdout
+        error_msg = f"{error_output[:50]}..." if len(error_output) > 50 else f"{error_output}"
         print(f"Error starting AP mode: {error_output}")
+        
+        # Show error to user for 2 seconds
+        og.alert_long(error_msg)
+        time.sleep(3)
         return False
     except subprocess.TimeoutExpired:
         state = CONNECTION_ERROR
+        error_msg = "AP failed: Timeout"
         print("Timeout starting AP mode")
+        
+        # Show error to user for 2 seconds
+        og.alert_long(error_msg)
+        time.sleep(3)
         return False
-    """Connect to WiFi network with password"""
-    
+
 # === UI Functions ===
 
 def quit():

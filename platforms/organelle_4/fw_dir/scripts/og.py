@@ -25,6 +25,59 @@ def alert(s):
     os.system('oscsend localhost 4001 /enableauxsub i 1')
     os.system('oscsend localhost 4001 /oled/setscreen i 1')
 
+def alert_long(s):
+    """Display a long message across multiple lines (up to 4 lines, 20 chars each)"""
+    os.system('oscsend localhost 4001 /oled/gClear ii 1 1')
+    
+    # Split message into words to avoid breaking words when possible
+    words = s.split()
+    lines = []
+    current_line = ""
+    
+    for word in words:
+        # If adding this word would exceed 20 characters, start a new line
+        if len(current_line + " " + word) > 20 and current_line:
+            lines.append(current_line)
+            current_line = word
+        else:
+            if current_line:
+                current_line += " " + word
+            else:
+                current_line = word
+        
+        # If we have 4 lines already, stop processing
+        if len(lines) >= 4:
+            break
+    
+    # Add the last line if it has content and we have room
+    if current_line and len(lines) < 4:
+        lines.append(current_line)
+    
+    # If any single word is longer than 20 characters, we need to break it
+    final_lines = []
+    for line in lines:
+        if len(line) <= 20:
+            final_lines.append(line)
+        else:
+            # Break long line into 20-character chunks
+            while len(line) > 20 and len(final_lines) < 4:
+                final_lines.append(line[:20])
+                line = line[20:]
+            if len(final_lines) < 4 and line:
+                final_lines.append(line)
+        
+        # Stop if we've reached 4 lines
+        if len(final_lines) >= 4:
+            break
+    
+    # Display each line (lines 1-4, since line 0 might be reserved)
+    for i, line in enumerate(final_lines):
+        line_num = i + 1  # Start from line 1
+        os.system(f'oscsend localhost 4001 /oled/aux/line/{line_num} s "{line}"')
+    
+    os.system('oscsend localhost 4001 /enableauxsub i 1')
+    os.system('oscsend localhost 4001 /oled/setscreen i 1')
+
 # OSC and UI primitives 
 def start_app ():
     loading_screen()
