@@ -1,6 +1,8 @@
 import json
 import os
 import shutil
+import stat
+import pwd
 
 BASE_DIR = "/"
 
@@ -120,18 +122,30 @@ def get_files(rootpath):
     folders = sorted(folders, key=lambda s: s.lower())
     files = sorted(files, key=lambda s: s.lower())
 
+    # Helper function to check if item is owned by root
+    def is_owned_by_root(path):
+        try:
+            file_stat = os.stat(path)
+            return file_stat.st_uid == 0  # UID 0 is root
+        except (OSError, IOError):
+            # If we can't stat the file, exclude it for safety
+            return True
+
     # Add filtered folders to the list
     for folder in folders:
         if not folder.startswith('.') and folder != "__pycache__":
             path = os.path.join(root, folder)
-            contents.append(folder_to_dict(path))
+            # Skip if owned by root
+            if not is_owned_by_root(path):
+                contents.append(folder_to_dict(path))
 
     # Add files (only if not in root, otherwise ignore them)
     if root != "/":
         for ffile in files:
             if not ffile.startswith('.'):
                 path = os.path.join(root, ffile)
-                contents.append(file_to_dict(path))
+                # Skip if owned by root
+                if not is_owned_by_root(path):
+                    contents.append(file_to_dict(path))
 
     return json.dumps(contents, indent=4)
-
