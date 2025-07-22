@@ -83,11 +83,18 @@ def start_app ():
     loading_screen()
     init_osc()
 
-def end_app ():
-    # send this as system call just in case something happend to our liblo sender
+def end_app():
+    # send this as system call just in case something happened to our liblo sender
     os.system('oscsend localhost 4001 /gohome i 1')
     os.system('oscsend localhost 4001 /enableauxsub i 0')
-    osc_server.free()
+    
+    # Safely free the OSC server if it exists
+    if 'osc_server' in globals() and osc_server is not None:
+        try:
+            osc_server.free()
+        except Exception as e:
+            print(f"Warning: Could not free OSC server: {e}")
+    
     exit()
 
 def invert_line(num) :
@@ -118,11 +125,11 @@ def clear_screen() :
 def flip() :
     liblo.send(osc_target, '/oled/gFlip', 1)
 
-def init_osc() :
+def init_osc():
     global osc_server, osc_target
-    print ("config osc target")
+    print("config osc target")
     osc_target = liblo.Address(4001)
-    print ("config osc osc_server")
+    print("config osc osc_server")
     # make sure the port is available... ahh ok
     os.system("fuser -k 4002/udp")
     try:
@@ -130,10 +137,11 @@ def init_osc() :
         osc_server.add_method("/encoder/turn", 'i', enc_turn)
         osc_server.add_method("/encoder/button", 'i', enc_press)
 
-    except (liblo.ServerError, err):
-        print (str(err))
-        sys.exit()
-    print ("done config osc_server")
+    except liblo.ServerError as err:
+        print(str(err))
+        print("problem with osc config, ending app")
+        end_app()
+    print("done config osc_server")
 
 def enc_turn(path, args) :
     global enc_turn_flag, enc_turn
