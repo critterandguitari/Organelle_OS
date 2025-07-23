@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <iostream>
+#include <cmath>
 
 const char* USB_PATCHES="/usbdrive/Patches";
 const char* SD_PATCHES="/sdcard/Patches";
@@ -146,34 +147,47 @@ void AppData::drawScreenSaverFrame() {
     // Static variables to maintain state between calls
     static int circleX = -1;
     static int circleY = -1;
-    static int currentRadius = 0;
+    static float currentRadius = 0.0f;  // Use float for smoother animation
     static const int maxRadius = 100;
-    static const int radiusGrowthRate = 1; // pixels per frame
-    static bool growing = true; // true = expanding, false = shrinking
+    static bool growing = true;
+    static int delayFrames = 0;
+    static const int DELAY_BETWEEN_CIRCLES = 30; // ~0.5 second delay at 60fps
 
-    // Initialize with random position if first time or circle cycle is complete
-    if (circleX == -1 || (currentRadius <= 0 && growing)) {
-        // Simple pseudo-random number generation
-        // Using frame counter as seed for variety
-        circleX = (screenSaverFrame * 17 + 23) % 128; // 0-127 for screen width
-        circleY = (screenSaverFrame * 13 + 37) % 64;  // 0-63 for screen height
-        currentRadius = 0;
-        growing = true;
+    // Handle delay between circles
+    if (currentRadius <= 0 && growing && delayFrames < DELAY_BETWEEN_CIRCLES) {
+        delayFrames++;
+        screenSaverFrame++;
+        screen.newScreen = 1;
+        return; // Don't draw anything during delay
     }
 
-    // Always draw the circle - let it wrap around for cool patterns!
-    screen.draw_circle(circleX, circleY, currentRadius, 1);
+    // Initialize new circle after delay or if first time
+    if (circleX == -1 || (currentRadius <= 0 && growing && delayFrames >= DELAY_BETWEEN_CIRCLES)) {
+        // Simple pseudo-random number generation
+        circleX = (screenSaverFrame * 17 + 23) % 128; // 0-127 for screen width
+        circleY = (screenSaverFrame * 13 + 37) % 64;  // 0-63 for screen height
+        currentRadius = 0.0f;
+        growing = true;
+        delayFrames = 0; // Reset delay counter
+    }
 
-    // Grow or shrink the circle
+    // Draw the circle if radius > 0
+    if (currentRadius > 0) {
+        screen.draw_circle(circleX, circleY, (int)currentRadius, 1);
+    }
+
+    // Calculate growth speed - constant rate like original
     if (growing) {
-        currentRadius += radiusGrowthRate;
+        currentRadius += 1.0f; // Constant growth rate
         if (currentRadius >= maxRadius) {
+            currentRadius = maxRadius;
             growing = false; // Start shrinking
         }
     } else {
-        currentRadius -= radiusGrowthRate;
+        currentRadius -= 1.0f; // Constant shrinking rate
         if (currentRadius <= 0) {
-            growing = true; // Will trigger new circle on next frame
+            currentRadius = 0;
+            growing = true; // Will trigger delay then new circle
         }
     }
 

@@ -1001,6 +1001,7 @@ void knobsInput() {
 }
 
 void keysInput(void) {
+    app.resetScreenSaver();
     for (int i = 0; i < 25; i++){
         if(((controls.keyStates >> i) & 1) != ((controls.keyStatesLast >> i) & 1)){
             OSCMessage msgOut("/key");
@@ -1044,6 +1045,7 @@ void footswitchInput(void) {
 // in patch screen, bounce back to menu, unless override is on
 // in aux screen, same
 void encoderButton(void) {
+    app.resetScreenSaver();
     if ( !  ( (app.currentScreen == AppData::PATCH && app.isPatchScreenEncoderOverride())
               || (app.currentScreen == AppData::AUX && app.isAuxScreenEncoderOverride()))) {
 
