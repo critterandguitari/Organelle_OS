@@ -121,3 +121,14 @@ move NetworkManager connection files to /sdcard:
 ## ^OG4-base-ro-20250622.img
 
 run resize.sh on the OG4-base-ro-20250622.img file to ensure partition doesn't exceed 7360 * 1024 * 1024 bytes. (that is bs=1m count=7360 for dd, so it fits on any "8" GB card)
+
+pull and make deploy Organelle_OS
+
+clean up
+
+    sudo mount -o remount,rw /
+    git config --global user.email "..."
+    git config --global user.name "..."
+    cd ~
+    rm .viminfo
+    cat /dev/null > ~/.bash_history && history -c
