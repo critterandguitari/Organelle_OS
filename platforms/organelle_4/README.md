@@ -71,7 +71,7 @@ disable swap
     sudo dphys-swapfile uninstall
     sudo update-rc.d dphys-swapfile remove
 
-run disable_services.sh
+run helpers/disable_services.sh
 
 copy config.txt and cmdline.txt
 
@@ -120,4 +120,4 @@ move NetworkManager connection files to /sdcard:
 
 ## ^OG4-base-ro-20250622.img
 
- 
+run resize.sh on the OG4-base-ro-20250622.img file to ensure partition doesn't exceed 7360 * 1024 * 1024 bytes. (that is bs=1m count=7360 for dd, so it fits on any "8" GB card)
