@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     app.oled(AppData::MENU).clear();
     
     // Display "hello" message
-    app.oled(AppData::MENU).setLine(3, "hello");
+    app.oled(AppData::MENU).setLine(3, "Welcome to Organelle");
     app.oled(AppData::MENU).newScreen = 1;
     
     // Update the OLED display

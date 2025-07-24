@@ -20,6 +20,9 @@ echo none | tee /sys/class/leds/ACT/trigger
 # set organelle fw dir
 export FW_DIR=/home/music/fw_dir
 
+# display splash
+/home/music/fw_dir/splash &
+
 # start ttymidi
 /home/music/fw_dir/scripts/ttymidi -s /dev/ttyAMA0 -b 38400 &
 
