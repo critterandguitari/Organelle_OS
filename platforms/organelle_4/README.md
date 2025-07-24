@@ -132,3 +132,16 @@ clean up
     cd ~
     rm .viminfo
     cat /dev/null > ~/.bash_history && history -c
+
+remove all /sdcard/system-connections except music network
+
+run fsck from another machine. 
+    
+    sudo fsck /dev/mmcblk0p1
+    sudo fsck /dev/mmcblk0p2
+    sudo fsck /dev/mmcblk0p3
+    sudo dd if=/dev/mmcblk0 of=OG4_v4.3_beta1.img bs=1M count=7360
+    zip OG4_v4.3_beta1.img.zip OG4_v4.3_beta1.img
+
+## ^OG4_v4.3_beta1.img
+
