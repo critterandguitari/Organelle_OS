@@ -351,6 +351,44 @@ def network_menu_action():
     if state != CONNECTED:
         scan_and_connect()
 
+def forget_saved_networks():
+    """Function to handle forgetting all saved networks"""
+    import subprocess
+    import os
+    import glob
+    
+    try:
+        # Method 1: Use glob to expand the pattern first
+        connections_path = "/sdcard/system-connections/*"
+        files_to_remove = glob.glob(connections_path)
+        
+        if files_to_remove:
+            # Remove each file/directory found
+            for item in files_to_remove:
+                subprocess.run(["sudo", "rm", "-fr", item], check=True)
+            og.alert("Saved nets cleared")
+        else:
+            og.alert("No nets to clear")
+        time.sleep(2)
+        
+    except subprocess.CalledProcessError as e:
+        og.alert("Error clearing nets")
+        time.sleep(2)
+    except Exception as e:
+        og.alert("Failed to clear")
+        time.sleep(2)
+
+def show_forget_confirmation():
+    """Show confirmation menu for forgetting saved networks"""
+    forget_menu = og.Menu()
+    forget_menu.header = "Forget Saved Nets"
+    forget_menu.items = [
+        ("Yes", lambda: [forget_saved_networks(), forget_menu.back()]),
+        ("Cancel", lambda: forget_menu.back())
+    ]
+    forget_menu.enc_up() # set on Cancel by default
+    forget_menu.perform()
+
 def build_main_menu():
     """Build the main menu based on current state"""
     menu.items = []
@@ -397,6 +435,7 @@ def build_main_menu():
         menu.items.append(['Start AP Mode', start_ap])
     
     # Home/quit
+    menu.items.append(["Forget Saved Nets", show_forget_confirmation])
     menu.items.append(['< Home', quit])
 
 def update_menu():

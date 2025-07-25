@@ -217,16 +217,28 @@ class Menu :
     def enter(self) :
         self.perform()
 
-    def enc_up(self) :
-        if (self.cursor_offset == 3) :
-            if not (self.menu_offset >= (len(self.items) - 4)) : self.menu_offset +=1
-        if not (self.cursor_offset >= 3) : self.cursor_offset += 1
+    def enc_up(self):
+        # Don't scroll if we're already at the last item
+        if self.selection >= len(self.items) - 1:
+            return
+            
+        if (self.cursor_offset == 3):
+            if not (self.menu_offset >= (len(self.items) - 4)): 
+                self.menu_offset += 1
+        if not (self.cursor_offset >= 3) and not (self.cursor_offset >= len(self.items) - 1 - self.menu_offset): 
+            self.cursor_offset += 1
         self.selection = self.cursor_offset + self.menu_offset
 
-    def enc_down(self) :
-        if (self.cursor_offset == 0) :
-            if not (self.menu_offset < 1) : self.menu_offset -= 1
-        if not (self.cursor_offset < 1) : self.cursor_offset -= 1
+    def enc_down(self):
+        # Don't scroll if we're already at the first item
+        if self.selection <= 0:
+            return
+            
+        if (self.cursor_offset == 0):
+            if not (self.menu_offset < 1): 
+                self.menu_offset -= 1
+        if not (self.cursor_offset < 1): 
+            self.cursor_offset -= 1
         self.selection = self.cursor_offset + self.menu_offset
 
     def perform(self) :
