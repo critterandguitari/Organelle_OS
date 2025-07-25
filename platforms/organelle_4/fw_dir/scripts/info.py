@@ -123,7 +123,7 @@ ogmodel = run_cmd("cat " + fw_dir + "/ogmodel", timeout=2)
 build_tag = run_cmd("cat " + fw_dir + "/buildtag", timeout=2)
 version = "Version: " + version + build_tag
 ogmodel = "Model: " + ogmodel
-patch_dir = "  " + patch_dir.split(user_dir + "/", 1).pop()
+patch_dir = "  " + patch_dir
 user_dir = "  " + user_dir
 patch = "  " + run_cmd("ls /tmp/curpatchname", timeout=2)
 
