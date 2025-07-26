@@ -113,10 +113,10 @@ private:
     std::string system_path;
     std::string firmware_path;
     
-    Timer screenSaverTimer;
+    int screenSaverTimer;
     int screenSaverFrame;
     int previousScreenBeforeSaver;
-    static const int SCREENSAVER_TIMEOUT = 600000; // 600 seconds in milliseconds
+    static const int SCREENSAVER_TIMEOUT = 600; // 600 seconds in milliseconds
 };
 
 

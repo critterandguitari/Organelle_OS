@@ -369,11 +369,11 @@ int main(int argc, char* argv[]) {
                     controls.updateOLED(app.oled(AppData::PATCH));
                 }
             }
-            app.updateScreenSaver();
         }
 
         // every 1 second do slow periodic tasks
         if (pingTimer.getElapsed() > 1000.f) {
+            app.updateScreenSaver();
             // printf("pinged the MCU at %f ms.\n", upTime.getElapsed());
             // send a ping in case MCU resets
             pingTimer.reset();
@@ -740,8 +740,11 @@ void vuMeter(OSCMessage &msg) {
 }
 
 void setScreen(OSCMessage &msg) {
-    if (msg.isInt(0)) app.currentScreen = msg.getInt(0) - 1;
-    app.oled( (AppData::Screen) app.currentScreen).newScreen = 1;
+    if (msg.isInt(0)) {
+        app.resetScreenSaver();
+        app.currentScreen = gScreen(msg.getInt(0));
+        app.oled((AppData::Screen) app.currentScreen).newScreen = 1;
+    }
 }
 
 void reload(OSCMessage &msg) {

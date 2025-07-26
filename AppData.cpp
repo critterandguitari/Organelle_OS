@@ -64,6 +64,7 @@ AppData::AppData(){
     inL = inR = outL = outR = peaks = 0;
     wifiStatus = 0;
     micLineSelection = 99; // so it gets correct initial value
+    screenSaverTimer = 0;
 
     oled(SCREENSAVER).showInfoBar = false;
 
@@ -126,17 +127,18 @@ void AppData::resetScreenSaver() {
         currentScreen = previousScreenBeforeSaver;
         oled((AppData::Screen) currentScreen).newScreen = 1;
     }
-    screenSaverTimer.reset();
+    screenSaverTimer = 0;
     screenSaverFrame = 0;
 }
 
 void AppData::updateScreenSaver() {
-    if (currentScreen != SCREENSAVER && screenSaverTimer.getElapsed() > SCREENSAVER_TIMEOUT) {
+    screenSaverTimer++;
+    if (currentScreen != SCREENSAVER && screenSaverTimer > SCREENSAVER_TIMEOUT) {
         // Save current screen and switch to screensaver
         previousScreenBeforeSaver = currentScreen;
         currentScreen = SCREENSAVER;
-        screenSaverFrame = 0;
         oled(SCREENSAVER).newScreen = 1;
+        screenSaverTimer = SCREENSAVER_TIMEOUT;
     }
 }
 
@@ -162,10 +164,10 @@ void AppData::drawScreenSaverFrame() {
     }
 
     // Initialize new circle after delay or if first time
-    if (circleX == -1 || (currentRadius <= 0 && growing && delayFrames >= DELAY_BETWEEN_CIRCLES)) {
+    if (screenSaverFrame == 0 || (currentRadius <= 0 && growing && delayFrames >= DELAY_BETWEEN_CIRCLES)) {
         // Simple pseudo-random number generation
-        circleX = (screenSaverFrame * 17 + 23) % 128; // 0-127 for screen width
-        circleY = (screenSaverFrame * 13 + 37) % 64;  // 0-63 for screen height
+        circleX = rand() % 128; // 0-127 for screen width
+        circleY = rand() % 64;  // 0-63 for screen height
         currentRadius = 0.0f;
         growing = true;
         delayFrames = 0; // Reset delay counter

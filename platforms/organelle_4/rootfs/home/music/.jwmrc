@@ -13,7 +13,6 @@
     <!-- The root menu. -->
     <RootMenu onroot="12">
         <Program icon="terminal.png" label="Terminal">lxterminal</Program>
-        <Exit label="Exit" confirm="false" icon="quit.png"/>
     </RootMenu>
 
     <!-- Options for program groups. -->
