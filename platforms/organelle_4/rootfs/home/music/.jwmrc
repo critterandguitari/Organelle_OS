@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
 <JWM>
 
-     <StartupCommand>
-       pcmanfm --desktop
-    </StartupCommand>
 
      <StartupCommand>
        /home/music/fw_dir/scripts/start-mother.sh
@@ -13,30 +10,9 @@
        conky -c /home/music/conkyrc
     </StartupCommand>
 
-
-
     <!-- The root menu. -->
     <RootMenu onroot="12">
-        <Program icon="terminal.png" label="Terminal">xterm</Program>
-        <Menu icon="folder.png" label="Applications">
-            <Program icon="music.png" label="Audacious">audacious</Program>
-            <Program icon="calculator.png" label="Calculator">xcalc</Program>
-            <Program icon="gimp.png" label="Gimp">gimp</Program>
-            <Program icon="www.png" label="Iceweasel">iceweasel</Program>
-            <Program icon="editor.png" label="XEdit">xedit</Program>
-        </Menu>
-        <Menu icon="folder.png" label="Utilities">
-            <Program icon="font.png" label="Fonts">xfontsel</Program>
-            <Program icon="window.png" label="Window Properties">
-                xprop | xmessage -file -
-            </Program>
-        </Menu>
-        <Separator/>
-        <Program icon="lock.png" label="Lock">
-            xscreensaver-command -lock
-        </Program>
-        <Separator/>
-        <Restart label="Restart" icon="restart.png"/>
+        <Program icon="terminal.png" label="Terminal">lxterminal</Program>
         <Exit label="Exit" confirm="false" icon="quit.png"/>
     </RootMenu>
 
@@ -76,6 +52,8 @@
 
         <!--TrayButton label="Menu">root:1</TrayButton-->
         <TrayButton icon="/usr/share/icons/Adwaita/32x32/legacy/utilities-terminal-symbolic.symbolic.png">exec:lxterminal</TrayButton>
+        <TrayButton icon="/usr/share/icons/Adwaita/32x32/devices/media-flash-symbolic.symbolic.png">exec:pcmanfm -n /sdcard</TrayButton>
+        <TrayButton icon="/usr/share/icons/Adwaita/32x32/devices/media-removable-symbolic.symbolic.png">exec:pcmanfm -n /usbdrive</TrayButton>
         <!--TrayButton label="_">showdesktop</TrayButton-->
 
         <!-- Pager labeled="true"/ -->
