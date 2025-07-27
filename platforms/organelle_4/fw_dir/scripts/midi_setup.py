@@ -3,7 +3,6 @@ import subprocess
 import imp
 import sys
 import time
-import threading
 
 #vars
 midiIn = 0
@@ -24,10 +23,6 @@ og = imp.load_source('og', current_dir + '/og.py')
 # UI elements
 menu = og.Menu()
 
-# lock for updating menu
-menu_lock = threading.Lock()
-
-
 def run_cmd(cmd) :
     ret = False
     try:
@@ -36,32 +31,8 @@ def run_cmd(cmd) :
         pass
     return ret
 
-
 def quit():
     og.end_app()
-
-
-def update_menu():
-    menu_lock.acquire()
-    try :
-        pass
-    finally :
-        menu_lock.release()
-
-# bg connection checker
-def check_status():
-    while True:
-        time.sleep(1)
-        update_menu()
-        og.redraw_flag = True
-
-
-# build main menu
-menu.items = []
-menu.header='MIDI Setup'
-
-# start it up
-og.start_app()
 
 def getStrVal(key, dval) :
     s = run_cmd("grep '# " + key +",' < "+user_dir+"/patch_loaded.sh| awk -F, ' { print $2 }'").strip()
@@ -74,12 +45,6 @@ def getIntVal(key, dval) :
     if(len(s)>0) :
         return int(s)
     return dval
-
-midiIn=getIntVal('midiIn',0)
-midiOut=getIntVal('midiOut',1)
-midiInGate=getIntVal('midiInGate',1)
-midiOutGate=getIntVal('midiOutGate',1)
-midiDevice=getStrVal('midiDevice',"28:0")
 
 def midiInGateSelect():
         global midiInGate
@@ -131,7 +96,6 @@ def midiOutGateSelect():
                 menu.items[menu.selection][0] = 'MIDI Out : ' + ("Enabled" if midiOutGate>0 else "Disabled"); 
                 break
 
-
 def midiInSelect():
         global midiIn
         og.clear_screen()
@@ -180,7 +144,6 @@ def midiOutSelect():
                 menu.items[menu.selection][0] = 'MIDI Out Ch.: ' + (str(midiOut))
                 break
 
-
 def midiDeviceSelect():
     global midiDevice,midiDeviceIdx,midiDevices
     devices = run_cmd("aplaymidi -l")
@@ -225,64 +188,113 @@ def midiDeviceSelect():
             else : menu.items[menu.selection][0] = 'Device: ' + midiDevice
             break
 
-
 def save():
-    og.clear_screen()
-    og.flip()
-    f = open(user_dir + "/patch_loaded.sh", "w")
-    # write parameters for possible reading
-    f.write("# MIDI PARAMETERS:START\n")
-    f.write("# midiIn," + str(midiIn) + "\n")
-    f.write("# midiOut," + str(midiOut) + "\n")
-    f.write("# midiInGate,"  + str(midiInGate) +"\n")
-    f.write("# midiOutGate," + str(midiOutGate) +"\n")
-    f.write("# midiDevice," + str(midiDevice) + "\n")
-    f.write("# MIDI PARAMETERS:END\n")
-    # write script to be executed
-    f.write("oscsend localhost 4000 /midiInCh i " + str(midiIn) + "\n")
-    f.write("oscsend localhost 4000 /midiOutCh i " + str(midiOut) + "\n")
-    f.write("oscsend localhost 4000 /midiInGate i " + str(midiInGate) + "\n")
-    f.write("oscsend localhost 4000 /midiOutGate i " + str(midiOutGate) + "\n")
-    f.write("aconnect \"" + str(midiDevice) + "\" \"Pure Data:0\"\n")
-    f.write("aconnect \"Pure Data:1\" \"" + str(midiDevice) + "\"\n")
-    # connect hardware uart midi (ttymidi)
-    f.write("aconnect \"ttymidi:0\" \"Pure Data:0\"\n")
-    f.write("aconnect \"Pure Data:1\" \"ttymidi:1\"\n")
+    try:
+        og.clear_screen()
+        og.flip()
+        
+        # Check if user_dir exists and is writable
+        if not os.path.exists(user_dir):
+            og.clear_screen()
+            og.println(1,"Error:")
+            og.println(2,"Storage not found")
+            og.flip()
+            time.sleep(2)
+            return
+            
+        if not os.access(user_dir, os.W_OK):
+            og.clear_screen()
+            og.println(1,"Error:")
+            og.println(2,"Storage read-only")
+            og.flip()
+            time.sleep(2)
+            return
+        
+        f = open(user_dir + "/patch_loaded.sh", "w")
+        # write parameters for possible reading
+        f.write("# MIDI PARAMETERS:START\n")
+        f.write("# midiIn," + str(midiIn) + "\n")
+        f.write("# midiOut," + str(midiOut) + "\n")
+        f.write("# midiInGate,"  + str(midiInGate) +"\n")
+        f.write("# midiOutGate," + str(midiOutGate) +"\n")
+        f.write("# midiDevice," + str(midiDevice) + "\n")
+        f.write("# MIDI PARAMETERS:END\n")
+        # write script to be executed
+        f.write("oscsend localhost 4000 /midiInCh i " + str(midiIn) + "\n")
+        f.write("oscsend localhost 4000 /midiOutCh i " + str(midiOut) + "\n")
+        f.write("oscsend localhost 4000 /midiInGate i " + str(midiInGate) + "\n")
+        f.write("oscsend localhost 4000 /midiOutGate i " + str(midiOutGate) + "\n")
+        f.write("aconnect \"" + str(midiDevice) + "\" \"Pure Data:0\"\n")
+        f.write("aconnect \"Pure Data:1\" \"" + str(midiDevice) + "\"\n")
+        # connect hardware uart midi (ttymidi)
+        f.write("aconnect \"ttymidi:0\" \"Pure Data:0\"\n")
+        f.write("aconnect \"Pure Data:1\" \"ttymidi:1\"\n")
 
-    f.close()
-    os.system("aconnect -x")
-    os.system("chmod +x "+user_dir+"/patch_loaded.sh")
-    og.clear_screen()
-    og.println(1,"MIDI configuration")
-    og.println(2,"SAVED")
-    og.flip()
-    os.system('oscsend localhost 4001 /midiConfig i 1')
-    time.sleep(0.5)
-    pass
+        f.close()
+        os.system("aconnect -x")
+        os.system("chmod +x "+user_dir+"/patch_loaded.sh")
+        og.clear_screen()
+        og.println(1,"MIDI configuration")
+        og.println(2,"SAVED")
+        og.flip()
+        os.system('oscsend localhost 4001 /midiConfig i 1')
+        time.sleep(0.5)
+    except Exception as e:
+        og.clear_screen()
+        og.println(1,"Save Error:")
+        og.println(2,str(e)[:20])  # Truncate error message to fit screen
+        og.flip()
+        time.sleep(2)
 
+# MAIN EXECUTION WITH FAILSAFE
+def main():
+    global midiIn, midiOut, midiInGate, midiOutGate, midiDevice
+    
+    # build main menu
+    menu.items = []
+    menu.header='MIDI Setup'
 
+    # start it up
+    og.start_app()
 
-menu.items.append(['MIDI In : ' + ("Enabled" if midiInGate>0 else "Disabled") , midiInGateSelect])
-menu.items.append(['MIDI In Ch.: ' + (str(midiIn) if midiIn>0 else "Omni") , midiInSelect])
-menu.items.append(['MIDI Out : ' + ("Enabled" if midiOutGate>0 else "Disabled") , midiOutGateSelect])
-menu.items.append(['MIDI Out Ch.: ' + (str(midiOut)) , midiOutSelect])
-if midiDevice == "28:0" : menu.items.append(['Device: None', midiDeviceSelect])
-else : menu.items.append(['Device: ' + midiDevice, midiDeviceSelect])
-menu.items.append(['Save', save])
-menu.items.append(['< Home', quit])
-menu.selection = 0
+    midiIn=getIntVal('midiIn',0)
+    midiOut=getIntVal('midiOut',1)
+    midiInGate=getIntVal('midiInGate',1)
+    midiOutGate=getIntVal('midiOutGate',1)
+    midiDevice=getStrVal('midiDevice',"28:0")
 
-# bg thread
-menu_updater = threading.Thread(target=check_status)
-menu_updater.daemon = True # stop the thread when we exit
+    menu.items.append(['MIDI In : ' + ("Enabled" if midiInGate>0 else "Disabled") , midiInGateSelect])
+    menu.items.append(['MIDI In Ch.: ' + (str(midiIn) if midiIn>0 else "Omni") , midiInSelect])
+    menu.items.append(['MIDI Out : ' + ("Enabled" if midiOutGate>0 else "Disabled") , midiOutGateSelect])
+    menu.items.append(['MIDI Out Ch.: ' + (str(midiOut)) , midiOutSelect])
+    if midiDevice == "28:0" : menu.items.append(['Device: None', midiDeviceSelect])
+    else : menu.items.append(['Device: ' + midiDevice, midiDeviceSelect])
+    menu.items.append(['Save', save])
+    menu.items.append(['< Home', quit])
+    menu.selection = 0
 
-og.redraw_flag = True
+    og.redraw_flag = True
 
-# start thread to update connection status
-menu_updater.start()
+    # enter menu
+    menu.perform()
 
-# enter menu
-menu.perform()
-
-
-
+# Execute with failsafe
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        # Log error if possible (could write to stderr or a log file)
+        try:
+            og.clear_screen()
+            og.println(1,"System Error")
+            og.println(2,"Exiting...")
+            og.flip()
+            time.sleep(1)
+        except:
+            pass  # Even error display failed, just exit cleanly
+    finally:
+        # ALWAYS call og.end_app() no matter what happens
+        try:
+            og.end_app()
+        except:
+            pass  # If og.end_app() itself fails, we've done our best

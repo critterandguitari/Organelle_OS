@@ -3,7 +3,6 @@ import subprocess
 import imp
 import sys
 import time
-import threading
 
 #vars
 exprMin=0
@@ -20,9 +19,6 @@ og = imp.load_source('og', current_dir + '/og.py')
 # UI elements
 menu = og.Menu()
 
-# lock for updating menu
-menu_lock = threading.Lock()
-
 def run_cmd(cmd) :
     ret = False
     try:
@@ -34,20 +30,6 @@ def run_cmd(cmd) :
 def quit():
     og.end_app()
 
-def update_menu():
-    menu_lock.acquire()
-    try :
-        pass
-    finally :
-        menu_lock.release()
-
-# bg connection checker
-def check_status():
-    while True:
-        time.sleep(1)
-        update_menu()
-        og.redraw_flag = True
-
 # build main menu
 menu.items = []
 menu.header='Pedal Setup'
@@ -56,9 +38,6 @@ switchtypes=["Patch","Favourites"]
 
 def switchType(i) :
     return switchtypes[i]
-
-# start it up
-og.start_app()
 
 def getStrVal(key, dval) :
     s = run_cmd("grep '# " + key +",' < "+user_dir+"/pedal_cfg.sh| awk -F, ' { print $2 }'").strip()
@@ -71,10 +50,6 @@ def getIntVal(key, dval) :
     if(len(s)>0) :
         return int(s)
     return dval
-
-exprMin=getIntVal('exprMin',0)
-exprMax=getIntVal('exprMax',1023)
-switchMode=getIntVal('switchMode',0)
 
 def ExprMinSelect():
         global exprMin
@@ -143,48 +118,94 @@ def SwitchModeSelect():
                 break
 
 def save():
-    og.clear_screen()
-    og.flip()
-    f = open(user_dir + "/pedal_cfg.sh", "w")
-    # write parameters for possible reading
-    f.write("# PEDAL PARAMETERS:START\n")
-    f.write("# exprMin," + str(exprMin) + "\n")
-    f.write("# exprMax," + str(exprMax) + "\n")
-    f.write("# switchMode," + str(switchMode) + "\n")
-    f.write("# PEDAL PARAMETERS:END\n")
-    # write script to be executed
-    f.write("oscsend localhost 4001 /pedal/exprMin i " + str(exprMin) + "\n")
-    f.write("oscsend localhost 4001 /pedal/exprMax i " + str(exprMax) + "\n")
-    f.write("oscsend localhost 4001 /pedal/switchMode i " + str(switchMode) + "\n")
-    f.close()
-    os.system("chmod +x "+user_dir+"/pedal_cfg.sh")
-    os.system(user_dir+"/pedal_cfg.sh")
-    og.clear_screen()
-    og.println(1,"Pedal configuration")
-    og.println(2,"SAVED")
-    og.flip()
-    os.system('oscsend localhost 4001 /pedalConfig i 1')
-    time.sleep(0.5)    
-    pass
+    try:
+        og.clear_screen()
+        og.flip()
+        
+        # Check if user_dir exists and is writable
+        if not os.path.exists(user_dir):
+            og.clear_screen()
+            og.println(1,"Error:")
+            og.println(2,"Storage not found")
+            og.flip()
+            time.sleep(2)
+            return
+            
+        if not os.access(user_dir, os.W_OK):
+            og.clear_screen()
+            og.println(1,"Error:")
+            og.println(2,"Storage read-only")
+            og.flip()
+            time.sleep(2)
+            return
+        
+        f = open(user_dir + "/pedal_cfg.sh", "w")
+        # write parameters for possible reading
+        f.write("# PEDAL PARAMETERS:START\n")
+        f.write("# exprMin," + str(exprMin) + "\n")
+        f.write("# exprMax," + str(exprMax) + "\n")
+        f.write("# switchMode," + str(switchMode) + "\n")
+        f.write("# PEDAL PARAMETERS:END\n")
+        # write script to be executed
+        f.write("oscsend localhost 4001 /pedal/exprMin i " + str(exprMin) + "\n")
+        f.write("oscsend localhost 4001 /pedal/exprMax i " + str(exprMax) + "\n")
+        f.write("oscsend localhost 4001 /pedal/switchMode i " + str(switchMode) + "\n")
+        f.close()
+        os.system("chmod +x "+user_dir+"/pedal_cfg.sh")
+        os.system(user_dir+"/pedal_cfg.sh")
+        og.clear_screen()
+        og.println(1,"Pedal configuration")
+        og.println(2,"SAVED")
+        og.flip()
+        os.system('oscsend localhost 4001 /pedalConfig i 1')
+        time.sleep(0.5)    
+    except Exception as e:
+        og.clear_screen()
+        og.println(1,"Save Error:")
+        og.println(2,str(e)[:20])  # Truncate error message to fit screen
+        og.flip()
+        time.sleep(2)
 
-menu.items.append(['Expr Min : ' + str(exprMin) , ExprMinSelect])
-menu.items.append(['Expr Max : ' + str(exprMax) , ExprMaxSelect])
-menu.items.append(['Switch : ' + switchType(switchMode) , SwitchModeSelect])
-menu.items.append(['Save', save])
-menu.items.append(['< Home', quit])
-menu.selection = 0
+# MAIN EXECUTION WITH FAILSAFE
+def main():
+    global exprMin, exprMax, switchMode
+    
+    # start it up
+    og.start_app()
 
-# bg thread
-menu_updater = threading.Thread(target=check_status)
-menu_updater.daemon = True # stop the thread when we exit
+    exprMin=getIntVal('exprMin',0)
+    exprMax=getIntVal('exprMax',1023)
+    switchMode=getIntVal('switchMode',0)
 
-og.redraw_flag = True
+    menu.items.append(['Expr Min : ' + str(exprMin) , ExprMinSelect])
+    menu.items.append(['Expr Max : ' + str(exprMax) , ExprMaxSelect])
+    menu.items.append(['Switch : ' + switchType(switchMode) , SwitchModeSelect])
+    menu.items.append(['Save', save])
+    menu.items.append(['< Home', quit])
+    menu.selection = 0
 
-# start thread to update connection status
-menu_updater.start()
+    og.redraw_flag = True
 
-# enter menu
-menu.perform()
+    # enter menu
+    menu.perform()
 
-
-
+# Execute with failsafe
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        # Log error if possible (could write to stderr or a log file)
+        try:
+            og.clear_screen()
+            og.println(1,"System Error")
+            og.println(2,"Exiting...")
+            og.flip()
+            time.sleep(1)
+        except:
+            pass  # Even error display failed, just exit cleanly
+    finally:
+        # ALWAYS call og.end_app() no matter what happens
+        try:
+            og.end_app()
+        except:
+            pass  # If og.end_app() itself fails, we've done our best
