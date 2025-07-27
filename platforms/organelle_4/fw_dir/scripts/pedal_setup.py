@@ -158,7 +158,7 @@ def save():
         og.println(2,"SAVED")
         og.flip()
         os.system('oscsend localhost 4001 /pedalConfig i 1')
-        time.sleep(0.5)    
+        time.sleep(2)    
     except Exception as e:
         og.clear_screen()
         og.println(1,"Save Error:")
@@ -200,7 +200,7 @@ if __name__ == "__main__":
             og.println(1,"System Error")
             og.println(2,"Exiting...")
             og.flip()
-            time.sleep(1)
+            time.sleep(2)
         except:
             pass  # Even error display failed, just exit cleanly
     finally:
