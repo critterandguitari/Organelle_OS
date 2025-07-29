@@ -238,7 +238,7 @@ def save():
         og.println(2,"SAVED")
         og.flip()
         os.system('oscsend localhost 4001 /midiConfig i 1')
-        time.sleep(2)
+        time.sleep(1)
     except Exception as e:
         og.clear_screen()
         og.println(1,"Save Error:")

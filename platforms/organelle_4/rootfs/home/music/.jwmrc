@@ -11,9 +11,9 @@
     </StartupCommand>
 
     <!-- The root menu. -->
-    <RootMenu onroot="12">
+    <!--RootMenu onroot="12">
         <Program icon="terminal.png" label="Terminal">lxterminal</Program>
-    </RootMenu>
+    </RootMenu-->
 
     <!-- Options for program groups. -->
     <Group>
@@ -50,9 +50,9 @@
     <Tray x="0" y="-1" height="32" autohide="false">
 
         <!--TrayButton label="Menu">root:1</TrayButton-->
-        <TrayButton icon="/usr/share/icons/Adwaita/32x32/legacy/utilities-terminal-symbolic.symbolic.png">exec:lxterminal</TrayButton>
-        <TrayButton icon="/usr/share/icons/Adwaita/32x32/devices/media-flash-symbolic.symbolic.png">exec:pcmanfm -n /sdcard</TrayButton>
-        <TrayButton icon="/usr/share/icons/Adwaita/32x32/devices/media-removable-symbolic.symbolic.png">exec:pcmanfm -n /usbdrive</TrayButton>
+        <TrayButton icon="/usr/share/icons/Adwaita/32x32/legacy/utilities-terminal-symbolic.symbolic.png" popup="Open Terminal">exec:lxterminal</TrayButton>
+        <TrayButton icon="/usr/share/icons/Adwaita/32x32/devices/media-flash-symbolic.symbolic.png" popup="Open SD Card">exec:pcmanfm -n /sdcard</TrayButton>
+        <TrayButton icon="/usr/share/icons/Adwaita/32x32/devices/media-removable-symbolic.symbolic.png" popup="Open USB Drive">exec:pcmanfm -n /usbdrive</TrayButton>
         <!--TrayButton label="_">showdesktop</TrayButton-->
 
         <!-- Pager labeled="true"/ -->

@@ -116,7 +116,7 @@ private:
     int screenSaverTimer;
     int screenSaverFrame;
     int previousScreenBeforeSaver;
-    static const int SCREENSAVER_TIMEOUT = 600; // 600 seconds in milliseconds
+    static const int SCREENSAVER_TIMEOUT = 600; // seconds 
 };
 
 
