@@ -218,6 +218,9 @@ void CM4OG4::pollKnobs(){
     adcs[4] = adcRead(4);
     adcs[5] = adcRead(5);
     
+    checkFootSwitch();
+
+
     knobFlag = 1;
 }
 
@@ -424,7 +427,7 @@ void CM4OG4::displayPinValues(void)
 }
 
 void CM4OG4::checkFootSwitch (void) {
-/*    static uint8_t foot_last = 0;
+    static uint8_t foot_last = 0;
     uint8_t tmp;
 
     if (adcs[5] < 100) tmp = 0;
@@ -434,5 +437,5 @@ void CM4OG4::checkFootSwitch (void) {
         footswitch = tmp;
         foot_last = tmp;
         footswitchFlag = 1;
-    }*/
+    }
 }
