@@ -150,7 +150,7 @@ sudo fw_dir/scripts/remount-rw.sh && cd Organelle_OS/ && git pull && make clean 
 
 do deploy stuff
 
-## ^OG4_v4.3.img
+## ^OGS2_v4.3.img
 
 
 ## deploy stuff
@@ -173,7 +173,7 @@ run fsck from another machine.
     sudo fsck /dev/mmcblk0p1
     sudo fsck /dev/mmcblk0p2
     sudo fsck /dev/mmcblk0p3
-    sudo dd if=/dev/mmcblk0 of=OG4_v4.3_beta1.img bs=1M count=7360
-    zip OG4_v4.3_beta1.img.zip OG4_v4.3_beta1.img
+    sudo dd if=/dev/mmcblk0 of=OGS2_v4.3.img bs=1M count=7360
+    zip OGS2_v4.3.img.zip OGS2_v4.3.img
 
 
