@@ -124,6 +124,39 @@ run resize.sh on the OG4-base-ro-20250622.img file to ensure partition doesn't e
 
 pull and make deploy Organelle_OS
 
+do deploy stuff
+
+## ^OG4_v4.3_beta1.img
+
+pull and make deploy Organelle_OS
+install new patchesi
+
+    sudo fw_dir/scripts/remount-rw.sh 
+    cd Organelle_OS/
+    git pull
+    make clean
+    sudo make organelle_4_deploy 
+    rm /sdcard/pedal_cfg.sh 
+    rm -r /sdcard/Patches
+    cd /sdcard/
+    wget https://github.com/critterandguitari/Organelle_Patches/archive/refs/tags/OSv4.3.zip
+    unzip OSv4.3.zip 
+    mv Organelle_Patches-OSv4.3 Patches
+    rm OSv4.3.zip 
+
+or :
+
+sudo fw_dir/scripts/remount-rw.sh && cd Organelle_OS/ && git pull && make clean && sudo make organelle_4_deploy && rm /sdcard/pedal_cfg.sh && rm -r /sdcard/Patches && cd /sdcard/ && wget https://github.com/critterandguitari/Organelle_Patches/archive/refs/tags/OSv4.3.zip && unzip OSv4.3.zip && mv Organelle_Patches-OSv4.3 Patches && rm OSv4.3.zip
+
+do deploy stuff
+
+## ^OG4_v4.3.img
+
+
+## deploy stuff
+
+common stuff before making disk image
+
 clean up
 
     sudo mount -o remount,rw /
@@ -143,5 +176,4 @@ run fsck from another machine.
     sudo dd if=/dev/mmcblk0 of=OG4_v4.3_beta1.img bs=1M count=7360
     zip OG4_v4.3_beta1.img.zip OG4_v4.3_beta1.img
 
-## ^OG4_v4.3_beta1.img
 
