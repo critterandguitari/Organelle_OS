@@ -152,6 +152,13 @@ do deploy stuff
 
 ## ^OGS2_v4.3.img
 
+update software, disable ssh
+
+sudo fw_dir/scripts/remount-rw.sh && cd Organelle_OS/ && git pull && make clean && sudo make organelle_4_deploy && sudo systemctl disable ssh.service
+
+do deploy stuff
+
+## ^OGS2_v4.4.img
 
 ## deploy stuff
 
