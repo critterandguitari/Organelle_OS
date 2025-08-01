@@ -112,6 +112,9 @@ organelle_4_deploy : organelle_4 organelle_4_splash
 	chown -R music:music tmp/rootfs/home/music
 	cp -fr --preserve=mode,ownership tmp/rootfs/* /
 	rm -fr tmp
+	@echo "copying test patch"
+	cp -r platforms/organelle_4/Test-S2 /sdcard/Patches/Utilities/
+	chown -R music:music /sdcard/Patches/Utilities/Test-S2
 	sync
 
 # Generate with g++ -MM *.c* OSC/*.* 
