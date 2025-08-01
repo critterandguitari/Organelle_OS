@@ -465,7 +465,7 @@ void OledScreen::drawNotification(const char * line, int pwrStatus, int batteryL
 
 
 #ifdef STORAGE_INDICATOR
-    if (userDir == "/usbdrive/Patches") {
+    if (userDir.substr(0,9) == "/usbdrive") {
         drawUsbIcon();
     } else {
         drawSdIcon();
@@ -582,7 +582,7 @@ void OledScreen::drawInfoBar(int inR, int inL, int outR, int outL, int peaks, in
   }
 
 #ifdef STORAGE_INDICATOR
-    if (userDir == "/usbdrive") {
+    if (userDir.substr(0,9) == "/usbdrive") {
         drawUsbIcon();
     } else {
         drawSdIcon();
