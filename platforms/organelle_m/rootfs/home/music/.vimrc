@@ -13,4 +13,7 @@ set autoindent
 set smartindent
 syntax on
 
-set viminfo=""
+set viminfo='100,<50,s10,h,f1
+
+" Jump to last position when reopening a file
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif

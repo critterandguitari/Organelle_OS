@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
 <JWM>
 
-     <StartupCommand>
-       pcmanfm --desktop
-    </StartupCommand>
 
      <StartupCommand>
        /home/music/fw_dir/scripts/start-mother.sh
@@ -13,32 +10,10 @@
        conky -c /home/music/conkyrc
     </StartupCommand>
 
-
-
     <!-- The root menu. -->
-    <RootMenu onroot="12">
-        <Program icon="terminal.png" label="Terminal">xterm</Program>
-        <Menu icon="folder.png" label="Applications">
-            <Program icon="music.png" label="Audacious">audacious</Program>
-            <Program icon="calculator.png" label="Calculator">xcalc</Program>
-            <Program icon="gimp.png" label="Gimp">gimp</Program>
-            <Program icon="www.png" label="Iceweasel">iceweasel</Program>
-            <Program icon="editor.png" label="XEdit">xedit</Program>
-        </Menu>
-        <Menu icon="folder.png" label="Utilities">
-            <Program icon="font.png" label="Fonts">xfontsel</Program>
-            <Program icon="window.png" label="Window Properties">
-                xprop | xmessage -file -
-            </Program>
-        </Menu>
-        <Separator/>
-        <Program icon="lock.png" label="Lock">
-            xscreensaver-command -lock
-        </Program>
-        <Separator/>
-        <Restart label="Restart" icon="restart.png"/>
-        <Exit label="Exit" confirm="false" icon="quit.png"/>
-    </RootMenu>
+    <!--RootMenu onroot="12">
+        <Program icon="terminal.png" label="Terminal">lxterminal</Program>
+    </RootMenu-->
 
     <!-- Options for program groups. -->
     <Group>
@@ -75,7 +50,9 @@
     <Tray x="0" y="-1" height="32" autohide="false">
 
         <!--TrayButton label="Menu">root:1</TrayButton-->
-        <TrayButton icon="/usr/share/icons/Adwaita/32x32/apps/utilities-terminal.png">exec:lxterminal</TrayButton>
+        <TrayButton icon="/usr/share/icons/Adwaita/32x32/legacy/utilities-terminal-symbolic.symbolic.png" popup="Open Terminal">exec:lxterminal</TrayButton>
+        <TrayButton icon="/usr/share/icons/Adwaita/32x32/devices/media-flash-symbolic.symbolic.png" popup="Open SD Card">exec:pcmanfm -n /sdcard</TrayButton>
+        <TrayButton icon="/usr/share/icons/Adwaita/32x32/devices/media-removable-symbolic.symbolic.png" popup="Open USB Drive">exec:pcmanfm -n /usbdrive</TrayButton>
         <!--TrayButton label="_">showdesktop</TrayButton-->
 
         <!-- Pager labeled="true"/ -->
@@ -83,8 +60,8 @@
         <TaskList maxwidth="256"/>
 
         <Dock/>
-        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/emotes/face-uncertain.png" popup="Reset Menu">exec:/home/music/fw_dir/scripts/restart-mother.sh</TrayButton>
-        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/actions/process-stop.png" popup="Exit Gui">exec:/home/music/fw_dir/scripts/stop-gui.sh</TrayButton>
+        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/emotes/face-uncertain-symbolic.symbolic.png" popup="Restart OG Menu">exec:/home/music/fw_dir/scripts/restart-mother.sh</TrayButton>
+        <TrayButton confirm="false" icon="/usr/share/icons/Adwaita/32x32/actions/process-stop-symbolic.symbolic.png" popup="Exit Gui">exec:/home/music/fw_dir/scripts/stop-gui.sh</TrayButton>
         <!--Clock>xclock</Clock-->
 
     </Tray>
@@ -109,7 +86,7 @@
     </WindowStyle>
     <TrayStyle>
         <Font>Sans-9</Font>
-        <Background>#111111</Background>
+        <Background>#555555</Background>
         <Foreground>#FFFFFF</Foreground>
         <Opacity>0.75</Opacity>
     </TrayStyle>

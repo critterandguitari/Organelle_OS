@@ -5,6 +5,39 @@
 FW_DIR=${FW_DIR:="$HOME/fw_dir"}
 # SCRIPTS_DIR=$FW_DIR/scripts
 
+# Function to check and clean up stale mounts
+cleanup_stale_mounts() {
+    # Check if /usbdrive is mounted but the device doesn't exist
+    if grep -qs " /usbdrive " /proc/mounts; then
+        # Get the device that's supposedly mounted at /usbdrive
+        MOUNTED_DEVICE=$(grep " /usbdrive " /proc/mounts | awk '{print $1}')
+        
+        # Check if the device actually exists
+        if [ ! -e "$MOUNTED_DEVICE" ]; then
+            echo "Warning: Found stale mount - $MOUNTED_DEVICE is mounted but device doesn't exist"
+            echo "Attempting to unmount stale mount..."
+            
+            # Force unmount since device is gone
+            sudo umount -f /usbdrive
+            if [ $? -eq 0 ]; then
+                echo "Successfully cleaned up stale mount"
+            else
+                echo "Failed to unmount stale mount, trying lazy unmount..."
+                sudo umount -l /usbdrive
+                if [ $? -eq 0 ]; then
+                    echo "Lazy unmount successful"
+                else
+                    echo "Error: Could not clean up stale mount"
+                    exit 1
+                fi
+            fi
+        fi
+    fi
+}
+
+# Clean up any stale mounts first
+cleanup_stale_mounts
+
 # this returns the most recently plugged usb block device suitable for mounting
 devices=(/dev/sd*)
 if [ -e ${devices[-1]} ]; then 
@@ -21,13 +54,11 @@ if grep -qs "$DEVICE " /proc/mounts; then
    exit 1
 fi
 
-# also test /usbdrive isn't mounted
-# this should warn to eject or something..
+# also test /usbdrive isn't mounted (should be clean after cleanup_stale_mounts)
 if grep -qs " /usbdrive" /proc/mounts; then
    echo "/usbdrive is already mounted"
    exit 1
 fi
-
 
 # pull in useful variables from vol_id, quote everything Just In Case
 eval `/sbin/blkid -o udev ${DEVICE} | sed 's/^/export /; s/=/="/; s/$/"/'`
@@ -72,4 +103,3 @@ esac
 
 # all done here, return successful
 exit 0
-

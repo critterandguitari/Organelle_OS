@@ -11,28 +11,24 @@
 #
 # By default this script does nothing.
 
-# disable output from this script
-exec 2> /dev/null
-exec 1>&2
-set -x
-
 # keep it fast
-echo -n performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo -n performance | tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
 # disable status led after bootup
-echo none > /sys/class/leds/led0/trigger
+echo none | tee /sys/class/leds/ACT/trigger
 
 # set organelle fw dir
 export FW_DIR=/home/music/fw_dir
 
-# start ttymidi
-$FW_DIR/scripts/ttymidi -s /dev/ttyAMA0 -b 38400 &
+# display splash
+/home/music/fw_dir/splash &
 
-# monitor power switch
-python $FW_DIR/scripts/power_switch_monitor.py &
+# start ttymidi
+/home/music/fw_dir/scripts/ttymidi -s /dev/ttyAMA0 -b 38400 &
 
 # monitor wifi connection
 python $FW_DIR/scripts/wifi_monitor.py & 
+python $FW_DIR/scripts/power_switch_monitor.py & 
 
 # redirect 80 to 8080 for the web server
 iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-ports 8080

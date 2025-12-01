@@ -38,5 +38,5 @@ then
         export FW_DIR="/sdcard/Firmware"
     fi
 fi
-echo running $M_DIR/mother with scripts $FW_DIR/scripts
-$M_DIR/mother &
+echo running $M_DIR/mother with scripts $FW_DIR/scripts | systemd-cat --identifier=Organelle
+$M_DIR/mother 2>&1 | systemd-cat --identifier=Organelle &

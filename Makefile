@@ -79,6 +79,7 @@ organelle_m_deploy : organelle_m
 	rm -fr /home/music/fw_dir
 	mkdir /home/music/fw_dir
 	cp -fr fw_dir/* /home/music/fw_dir
+	rm -fr /home/music/fw_dir/web
 	@echo "copying platform fw files"
 	cp -fr platforms/organelle_m/fw_dir/* /home/music/fw_dir
 	chown -R music:music /home/music/fw_dir
@@ -91,6 +92,9 @@ organelle_m_deploy : organelle_m
 	chown -R music:music tmp/rootfs/home/music
 	cp -fr --preserve=mode,ownership tmp/rootfs/* /
 	rm -fr tmp
+	@echo "copying test patch"
+	cp -r platforms/organelle_m/Test-S2 /sdcard/Patches/Utilities/
+	chown -R music:music /sdcard/Patches/Utilities/Test-S2
 	sync
 
 organelle_4_deploy : organelle_4 organelle_4_splash
