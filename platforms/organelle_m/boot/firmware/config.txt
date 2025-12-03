@@ -20,7 +20,7 @@ camera_auto_detect=1
 # display_auto_detect=1
 
 # Automatically load initramfs files, if found
-auto_initramfs=1
+# auto_initramfs=1
 
 # Enable DRM VC4 V3D driver
 dtoverlay=vc4-kms-v3d
@@ -47,25 +47,12 @@ dtoverlay=dwc2,dr_mode=host
 
 [all]
 enable_uart=1
+
 dtoverlay=wm8731-spi
 dtoverlay=gpio-poweroff,gpiopin=12,active_low="y"
 dtoverlay=pi3-miniuart-bt
 dtoverlay=midi-uart0
 dtoverlay=pi3-act-led,gpio=24,activelow=on
 gpu_mem=128
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
