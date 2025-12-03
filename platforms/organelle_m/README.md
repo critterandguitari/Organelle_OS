@@ -72,7 +72,7 @@ copy config.txt and cmdline.txt
 
 in raspi-config, set to auto-login console
 
-clone Organelle_OS and make organelle_m_deploy, restart
+clone Organelle_OS and make organelle_m_deploy, copy restart
 
 make changes for read only
 clean up
@@ -111,5 +111,11 @@ move NetworkManager connection files to /sdcard:
     sudo mv /etc/NetworkManager/system-connections /sdcard/system-connections
     sudo ln -s /sdcard/system-connections /etc/NetworkManager/system-connections
     sudo chown root:root /sdcard/system-connections
+
+copy config and cmdline
+
+sudo cp platforms/organelle_m/boot/firmware/cmdline.txt /boot/firmware/cmdline.txt
+sudo cp platforms/organelle_m/boot/firmware/config.txt /boot/firmware/config.txt
+
 
 
