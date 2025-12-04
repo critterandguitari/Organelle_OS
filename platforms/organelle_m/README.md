@@ -117,5 +117,8 @@ copy config and cmdline
 sudo cp platforms/organelle_m/boot/firmware/cmdline.txt /boot/firmware/cmdline.txt
 sudo cp platforms/organelle_m/boot/firmware/config.txt /boot/firmware/config.txt
 
+adjust alsa settings to match organelle S2 save
+
+    sudo alsactl store
 
 

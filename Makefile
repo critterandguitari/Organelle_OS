@@ -50,6 +50,11 @@ organelle_4_splash : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATT
 organelle_4_splash : $(splash_objects) hw_interfaces/CM4OG4.o
 	$(CXX) -o fw_dir/splash $(splash_objects) hw_interfaces/CM4OG4.o -l wiringPi
 
+organelle_m_splash : CXXFLAGS += -DCM3GPIO_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DPWR_SWITCH -DMICSEL_SWITCH -DFIX_ABL_LINK
+organelle_m_splash : $(splash_objects) hw_interfaces/CM3GPIO.o
+	$(CXX) -o fw_dir/splash $(splash_objects) hw_interfaces/CM3GPIO.o -l wiringPi
+
+
 .PHONY : clean
 
 clean :
@@ -73,7 +78,7 @@ organelle_deploy : organelle
 	cp -fr platforms/organelle/rootfs/* /
 	sync
 
-organelle_m_deploy : organelle_m
+organelle_m_deploy : organelle_m organelle_m_splash
 	@echo "Updating OS to $(IMAGE_VERSION)"
 	@echo "copying common fw files"
 	rm -fr /home/music/fw_dir
