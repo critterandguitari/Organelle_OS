@@ -180,4 +180,9 @@ adjust alsa settings to match organelle S2 save
 
     sudo alsactl store
 
+## ^OGMS-v4.4.beta1.img
 
+install lua
+
+   sudo apt update
+   sudo apt install lua5.4 liblua5.4-dev

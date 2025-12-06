@@ -8,6 +8,10 @@ export XAUTHORITY=/var/tmp/.Xauthority_$USER
 
 export FW_DIR=/home/music/fw_dir
 
+startx() {
+    command startx -- -logfile /tmp/Xorg.log "$@"
+}
+
 ps cax | grep mother > /dev/null
 if [ $? -eq 0 ]; then
     echo "Welcome to Organelle."

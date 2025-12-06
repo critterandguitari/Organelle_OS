@@ -37,7 +37,7 @@ function openFile(path) {
     var extension = path.split('.').pop().toLowerCase();
 
     // List of allowed text-based extensions
-    var textExtensions = ['pd', 'ck', 'txt', 'md', 'html', 'css', 'js', 'json', 'xml', 'csv', 'log', 'py', 'c', 'cpp', 'java', 'sh'];
+    var textExtensions = ['pd', 'ck', 'txt', 'md', 'html', 'css', 'js', 'json', 'xml', 'csv', 'log', 'py', 'c', 'cpp', 'java', 'sh', 'lua', 'dsp'];
 
     // List of image extensions
     var imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'];
