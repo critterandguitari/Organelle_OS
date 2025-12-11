@@ -75,6 +75,13 @@ def delete(src):
         shutil.rmtree(src)
     return '{"ok":"ok"}'
 
+def create_file(dst, name):
+    dst = BASE_DIR + dst + '/' + name
+    dst = check_and_inc_name(dst)
+    # Create an empty file
+    open(dst, 'a').close()
+    return '{"ok":"ok"}'
+
 def get_node(fpath):
     if fpath == '#' :
         return get_files(BASE_DIR)

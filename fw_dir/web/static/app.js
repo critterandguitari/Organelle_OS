@@ -533,6 +533,28 @@ function closeFileConfirmDialog(path){
     showModal();
 }
 
+function newFileDialog() {
+    newModal('New File');
+    addModalBody('<input type="text" id="new-file-name" value="untitled.txt"></input>');
+    addModalButton('Cancel', hideModal);
+    addModalButton('Create', function(){
+        hideModal();
+        var fileName = $('#new-file-name').val();
+        $.get(fsurl+'?operation=create_file', { 'path' : workingDir, 'name' : fileName })
+        .done(function () {
+            console.log('created file');
+            refreshWorkingDir();
+            // Open the newly created file in a tab
+            var newFilePath = (workingDir === '/' ? '/' : workingDir + '/') + fileName;
+            openFile(newFilePath);
+        })
+        .fail(function () {
+            console.log('problem creating file');
+        });
+    });
+    showModal();
+}
+
 function deleteDialog(){
     var selectedNodes = getSelectedNodes(); 
     
@@ -879,6 +901,8 @@ $(function () {
     $("#zip-but").click(zipDialog);
 
     $("#unzip-but").click(unzipDialog);
+
+    $("#new-file-but").click(newFileDialog);
 
     // Clear console when trash icon is clicked
     $('#clear-console').click(function() {

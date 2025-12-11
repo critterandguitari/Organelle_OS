@@ -130,6 +130,7 @@ def save():
     print("SAVED " + fpath)
     return "SAVED " + fpath
 
+
 @app.route('/fmdata', methods=['GET', 'POST'])
 def fmdata():
 
@@ -140,6 +141,8 @@ def fmdata():
             return jsonify(file_operations.get_node(data['path']))
         elif data['operation'] == 'create_node':
             return jsonify(file_operations.create(data['path'], data['name']))
+        elif data['operation'] == 'create_file':
+            return jsonify(file_operations.create_file(data['path'], data['name']))
         elif data['operation'] == 'rename_node':
             return jsonify(file_operations.rename(data['path'], data['name']))
         elif data['operation'] == 'delete_node':
