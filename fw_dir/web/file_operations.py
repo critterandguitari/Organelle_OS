@@ -45,15 +45,15 @@ def move(src, dst):
 
 def unzip(zip_path):
     zip_path = BASE_DIR + zip_path
-    zip_parent_folder =os.path.dirname(zip_path)
-    os.system("unzip -o \""+zip_path+"\" -d \""+zip_parent_folder+"\" -x '__MACOSX/*'")
+    zip_parent_folder = os.path.dirname(zip_path)
+    os.system("unzip -o \""+zip_path+"\" -d \""+zip_parent_folder+"\" -x '__MACOSX/*' 2>&1 | systemd-cat --identifier=Organelle")
     return '{"ok":"ok"}'
 
 def zip(folder):
     folder = BASE_DIR + folder
     zipname = os.path.basename(folder)+".zip"
-    if os.path.isdir(folder) :
-        os.system("cd \""+os.path.dirname(folder)+"\" && zip -r \""+zipname+"\" \""+os.path.basename(folder)+"\"")
+    if os.path.isdir(folder):
+        os.system("cd \""+os.path.dirname(folder)+"\" && zip -r \""+zipname+"\" \""+os.path.basename(folder)+"\" 2>&1 | systemd-cat --identifier=Organelle")
     return '{"ok":"ok"}'
 
 def copy(src, dst):
