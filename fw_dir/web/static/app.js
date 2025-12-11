@@ -725,6 +725,24 @@ function saveMode() {
     }
 }
 
+function reloadPatch() {
+    var currentDir = '/' + getWorkingDir();
+
+    // Check if we're in a patch folder
+    if (!currentDir.startsWith('/usbdrive/Patches') && !currentDir.startsWith('/sdcard/Patches')) {
+        appendLogMessage( currentDir + 'not a patch folder\n');
+        return;
+    }
+
+    $.post(appBaseURL + "/reload_patch", { path: currentDir })
+    .done(function(data) {
+        appendLogMessage(data + '\n');
+    })
+    .fail(function() {
+        appendLogMessage('error reloading patch\n');
+    });
+}
+
 function refreshPatchlist() {
   $.post(appBaseURL + "/refresh_patchlist")
   .done(function(data) {
@@ -868,7 +886,7 @@ $(function () {
         });
     });
 
-    $("#refresh-patchlist").click(refreshPatchlist);
+    $("#reload-patch").click(reloadPatch);
 
     $("#save").click(saveMode);
 

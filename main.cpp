@@ -137,6 +137,7 @@ void auxScreenClear(OSCMessage &msg);
 
 // system message
 void loadPatch(OSCMessage &msg);
+void loadPatchPath(OSCMessage &msg);
 void midiConfig(OSCMessage &msg);
 void pedalConfig(OSCMessage &msg);
 void patchLoaded(OSCMessage &msg);
@@ -264,6 +265,7 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/enablepatchsub", enablePatchSubMenu, 0)
                     || msgIn.dispatch("/enableauxsub", enableAuxSubMenu, 0)
                     || msgIn.dispatch("/loadPatch", loadPatch, 0)
+                    || msgIn.dispatch("/loadPatchPath", loadPatchPath, 0)
                     || msgIn.dispatch("/midiConfig", midiConfig, 0)
                     || msgIn.dispatch("/patchLoaded", patchLoaded, 0)
                     || msgIn.dispatch("/pedalConfig", pedalConfig, 0)
@@ -765,6 +767,16 @@ void loadPatch(OSCMessage &msg) {
     if (msg.isString(0)) {
         msg.getString(0, patchName, 256);
         menu.loadPatch(patchName);
+    }
+}
+
+void loadPatchPath(OSCMessage &msg) {
+    char patchPath[512];
+    
+    if (msg.isString(0)) {
+        msg.getString(0, patchPath, 512);
+        printf("Loading patch from path: %s\n", patchPath);
+        menu.loadPatchPath(patchPath);
     }
 }
 

@@ -64,6 +64,15 @@ def reload_mode():
     liblo.send(osc_target, "/reload", 1)
     return "refreshed"
 
+@app.route('/reload_patch', methods=['GET', 'POST'])
+def reload_patch():
+    patch_path = request.args.get('path') or request.form.get('path')
+    if patch_path:
+        print(f"reloading patch: {patch_path}")
+        liblo.send(osc_target, "/loadPatchPath", patch_path)
+        return f"reloading patch: {patch_path}"
+    return "no path provided", 400
+
 @app.route('/get_file', methods=['GET'])
 def get_file():
     fpath = request.args.get('fpath')

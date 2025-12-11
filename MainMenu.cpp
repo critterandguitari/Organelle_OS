@@ -896,6 +896,31 @@ void MainMenu::runInstaller(const char*, const char* arg) {
     system(buf);
 }
 
+bool MainMenu::loadPatchPath(const char* fullPath) {
+    std::string pathStr(fullPath);
+    
+    // Find the last slash to split directory from patch name
+    size_t lastSlash = pathStr.find_last_of('/');
+    
+    if (lastSlash == std::string::npos) {
+        std::cerr << "Invalid patch path: " << fullPath << std::endl;
+        return false;
+    }
+    
+    // Extract parent directory and patch name
+    std::string parentDir = pathStr.substr(0, lastSlash);
+    std::string patchName = pathStr.substr(lastSlash + 1);
+    
+    std::cout << "Loading patch '" << patchName << "' from directory '" << parentDir << "'" << std::endl;
+    
+    // Set the patch directory
+    app.setPatchDir(parentDir.c_str());
+    
+    // Load the patch
+    runPatch(patchName.c_str(), patchName.c_str());
+    
+    return true;
+}
 
 bool MainMenu::loadPatch(const char* patchName) {
     runPatch(patchName, patchName);
