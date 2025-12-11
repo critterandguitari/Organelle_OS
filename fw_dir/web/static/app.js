@@ -20,6 +20,9 @@ function getAceMode(extension) {
     if (extension === "py") return "python";
     if (extension === "lua") return "lua";
     if (extension === "ck") return "chuck";
+    if (extension === "lib") return "faust";
+    if (extension === "dsp") return "faust";
+    if (extension === "md") return "markdown";
     // Add more mappings as needed
     return "text";
 }
