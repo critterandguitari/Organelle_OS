@@ -4,6 +4,15 @@ import shutil
 import stat
 import pwd
 
+import liblo
+
+# Set up OSC target for organelle app
+try:
+    osc_target = liblo.Address(4001)
+except liblo.AddressError as err:
+    print(err)
+    osc_target = None
+
 BASE_DIR = "/"
 
 def check_path(path) :
@@ -28,25 +37,8 @@ def rename(old, new):
     if src != dst :
         dst = check_and_inc_name(dst)
         os.rename(src, dst)
-    return '{"ok":"ok"}'
-
-def create(dst, name):
-    dst = BASE_DIR + dst + '/' + name
-    dst = check_and_inc_name(dst)
-    os.mkdir(dst)
-    return '{"ok":"ok"}'
-
-def move(src, dst):
-    src = BASE_DIR + src
-    dst = BASE_DIR + dst + '/' + os.path.basename(src)  
-    dst = check_and_inc_name(dst)
-    shutil.move(src, dst)
-    return '{"ok":"ok"}'
-
-def unzip(zip_path):
-    zip_path = BASE_DIR + zip_path
-    zip_parent_folder = os.path.dirname(zip_path)
-    os.system("unzip -o \""+zip_path+"\" -d \""+zip_parent_folder+"\" -x '__MACOSX/*' 2>&1 | systemd-cat --identifier=Organelle")
+    if osc_target:
+        liblo.send(osc_target, "/reload", 1)
     return '{"ok":"ok"}'
 
 def zip(folder):
@@ -54,6 +46,31 @@ def zip(folder):
     zipname = os.path.basename(folder)+".zip"
     if os.path.isdir(folder):
         os.system("cd \""+os.path.dirname(folder)+"\" && zip -r \""+zipname+"\" \""+os.path.basename(folder)+"\" 2>&1 | systemd-cat --identifier=Organelle")
+    return '{"ok":"ok"}'
+
+def create(dst, name):
+    dst = BASE_DIR + dst + '/' + name
+    dst = check_and_inc_name(dst)
+    os.mkdir(dst)
+    if osc_target:
+        liblo.send(osc_target, "/reload", 1)
+    return '{"ok":"ok"}'
+
+def move(src, dst):
+    src = BASE_DIR + src
+    dst = BASE_DIR + dst + '/' + os.path.basename(src)  
+    dst = check_and_inc_name(dst)
+    shutil.move(src, dst)
+    if osc_target:
+        liblo.send(osc_target, "/reload", 1)
+    return '{"ok":"ok"}'
+
+def unzip(zip_path):
+    zip_path = BASE_DIR + zip_path
+    zip_parent_folder = os.path.dirname(zip_path)
+    os.system("unzip -o \""+zip_path+"\" -d \""+zip_parent_folder+"\" -x '__MACOSX/*' 2>&1 | systemd-cat --identifier=Organelle")
+    if osc_target:
+        liblo.send(osc_target, "/reload", 1)
     return '{"ok":"ok"}'
 
 def copy(src, dst):
@@ -65,6 +82,8 @@ def copy(src, dst):
         shutil.copy(src, dst)
     if os.path.isdir(src) :
         shutil.copytree(src, dst)
+    if osc_target:
+        liblo.send(osc_target, "/reload", 1)
     return '{"ok":"ok"}'
 
 def delete(src):
@@ -73,6 +92,8 @@ def delete(src):
         os.remove(src)
     if os.path.isdir(src) :
         shutil.rmtree(src)
+    if osc_target:
+        liblo.send(osc_target, "/reload", 1)
     return '{"ok":"ok"}'
 
 def create_file(dst, name):

@@ -811,11 +811,11 @@ void MainMenu::buildMenu(signed mm_pos) {
         // end patches
 
         for (i = 0; i < numMenuEntries; i++) {
-            std::cout <<  "patch[" << i << "] " << menuItems[i].arg << std::endl;
+        //    std::cout <<  "patch[" << i << "] " << menuItems[i].arg << std::endl;
         }
 
-        std::cout << "num patches " <<  numPatches << std::endl;
-        std::cout << "patch menu offset " << patchMenuOffset << std::endl;
+        //std::cout << "num patches " <<  numPatches << std::endl;
+        //std::cout << "patch menu offset " << patchMenuOffset << std::endl;
 
         std::cout << "patch path: " << app.getPatchDir() << std::endl;
 
@@ -896,8 +896,14 @@ void MainMenu::runInstaller(const char*, const char* arg) {
     system(buf);
 }
 
+
 bool MainMenu::loadPatchPath(const char* fullPath) {
     std::string pathStr(fullPath);
+    
+    // Remove trailing slash if present
+    if (!pathStr.empty() && pathStr.back() == '/') {
+        pathStr.pop_back();
+    }
     
     // Find the last slash to split directory from patch name
     size_t lastSlash = pathStr.find_last_of('/');

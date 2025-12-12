@@ -730,7 +730,7 @@ function reloadPatch() {
 
     // Check if we're in a patch folder
     if (!currentDir.startsWith('/usbdrive/Patches') && !currentDir.startsWith('/sdcard/Patches')) {
-        appendLogMessage( currentDir + 'not a patch folder\n');
+        appendLogMessage( currentDir + ' Not a patch folder\n');
         return;
     }
 
@@ -740,6 +740,18 @@ function reloadPatch() {
     })
     .fail(function() {
         appendLogMessage('error reloading patch\n');
+    });
+}
+
+function compileWorkingDir() {
+    var currentDir = getWorkingDir();
+    
+    $.post(appBaseURL + "/compile", { path: currentDir })
+    .done(function(data) {
+        appendLogMessage(data + '\n');
+    })
+    .fail(function() {
+        appendLogMessage('error running compile\n');
     });
 }
 
@@ -831,6 +843,8 @@ $(function () {
 	$(document).bind('drop dragover', function (e) {
 		e.preventDefault();
 	});
+
+    $("#compile").click(compileWorkingDir);
 
     $("#show-settings").click(function(){
 	if ( $("#settings-container").is(":hidden") ){

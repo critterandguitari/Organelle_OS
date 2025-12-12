@@ -110,6 +110,9 @@ def upload():
 
     print(f"Saved file, size: {size}")
 
+    # Send reload message to update patch list
+    liblo.send(osc_target, "/reload", 1)
+
     response = {
         "files": [
             {
@@ -123,6 +126,28 @@ def upload():
         ]
     }
     return jsonify(response)
+
+@app.route('/compile', methods=['POST'])
+def compile_patch():
+    patch_path = request.form.get('path')
+    if not patch_path:
+        return "no path provided", 400
+    
+    # Convert to absolute path
+    abs_path = os.path.join(file_operations.BASE_DIR, patch_path.lstrip('/'))
+    compile_script = os.path.join(abs_path, 'compile.sh')
+    
+    # Check if compile.sh exists
+    if not os.path.isfile(compile_script):
+        return f"no compile.sh found in {patch_path}"
+    
+    print(f"compiling: {patch_path}")
+    
+    # Run compile.sh and pipe output to systemd-cat
+    cmd = f'cd "{abs_path}" && bash compile.sh 2>&1 | systemd-cat --identifier=Organelle'
+    os.system(cmd)
+    
+    return f"compiling: {patch_path}"
 
 @app.route('/save', methods=['POST'])
 def save():
