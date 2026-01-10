@@ -1,8 +1,11 @@
 .DS_Store
+obj/
 *.o
 main
 UpdateOS*.zip
 *.pyc
 fw_dir/mother
+fw_dir/mother_cm4
+fw_dir/mother_cm3
 fw_dir/splash
 tmp

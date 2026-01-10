@@ -30,123 +30,90 @@ SDL_LIBS := $(shell pkg-config --libs sdl2)
 default :
 	@echo "platform not specified"
 
+# Pattern rules for building into obj directories
+obj/cm3/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+obj/cm3/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+obj/cm4/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+obj/cm4/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+obj/splash/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+obj/splash/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+obj/sdlpi/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+# Convert object list to cm3 paths
+cm3_objects = $(addprefix obj/cm3/, $(objects))
+cm4_objects = $(addprefix obj/cm4/, $(objects))
+splash_cm_objects = $(addprefix obj/splash/, $(splash_objects))
+sdlpi_objects = $(addprefix obj/sdlpi/, $(objects))
+
 sdlpi : CXXFLAGS += $(SDL_CFLAGS) -DSDLPI_HW -DORGANELLE_HW_WIDTH=800 -DORGANELLE_HW_HEIGHT=600
-sdlpi : $(objects) hw_interfaces/SDLPi.o
-	$(CXX) $(SDL_LIBS) -o fw_dir/mother $(objects) hw_interfaces/SDLPi.o
+sdlpi : $(sdlpi_objects) obj/sdlpi/hw_interfaces/SDLPi.o
+	@mkdir -p fw_dir
+	$(CXX) $(SDL_LIBS) -o fw_dir/mother $(sdlpi_objects) obj/sdlpi/hw_interfaces/SDLPi.o
 
-organelle : CXXFLAGS += -DSERIAL_HW
-organelle : $(objects) hw_interfaces/SerialMCU.o
-	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/SerialMCU.o
+organelle_cm3 : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER -DFIX_ABL_LINK
+organelle_cm3 : $(cm3_objects) obj/cm3/hw_interfaces/CM3GPIO.o
+	@mkdir -p fw_dir
+	$(CXX) -o fw_dir/mother_cm3 $(cm3_objects) obj/cm3/hw_interfaces/CM3GPIO.o -l wiringPi
 
-organelle_m : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER -DFIX_ABL_LINK
-organelle_m : $(objects) hw_interfaces/CM3GPIO.o
-	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/CM3GPIO.o -l wiringPi
+organelle_cm4 : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DSTORAGE_INDICATOR -DPWR_SWITCH -DMICSEL_SWITCH -DFIX_ABL_LINK
+organelle_cm4 : $(cm4_objects) obj/cm4/hw_interfaces/CM4OG4.o
+	@mkdir -p fw_dir
+	$(CXX) -o fw_dir/mother_cm4 $(cm4_objects) obj/cm4/hw_interfaces/CM4OG4.o -l wiringPi
 
-organelle_4 : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DSTORAGE_INDICATOR -DPWR_SWITCH -DMICSEL_SWITCH -DFIX_ABL_LINK
-organelle_4 : $(objects) hw_interfaces/CM4OG4.o
-	$(CXX) -o fw_dir/mother $(objects) hw_interfaces/CM4OG4.o -l wiringPi
-
-organelle_4_splash : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DPWR_SWITCH -DMICSEL_SWITCH -DFIX_ABL_LINK
-organelle_4_splash : $(splash_objects) hw_interfaces/CM4OG4.o
-	$(CXX) -o fw_dir/splash $(splash_objects) hw_interfaces/CM4OG4.o -l wiringPi
-
-organelle_m_splash : CXXFLAGS += -DCM3GPIO_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DPWR_SWITCH -DMICSEL_SWITCH -DFIX_ABL_LINK
-organelle_m_splash : $(splash_objects) hw_interfaces/CM3GPIO.o
-	$(CXX) -o fw_dir/splash $(splash_objects) hw_interfaces/CM3GPIO.o -l wiringPi
-
+organelle_cm_splash : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DPWR_SWITCH -DMICSEL_SWITCH -DFIX_ABL_LINK
+organelle_cm_splash : $(splash_cm_objects) obj/splash/hw_interfaces/CM4OG4.o
+	@mkdir -p fw_dir
+	$(CXX) -o fw_dir/splash $(splash_cm_objects) obj/splash/hw_interfaces/CM4OG4.o -l wiringPi
 
 .PHONY : clean
 
 clean :
-	rm -f main splash $(objects) $(splash_objects) fw_dir/mother hw_interfaces/SDLPi.o hw_interfaces/SerialMCU.o hw_interfaces/CM3GPIO.o hw_interfaces/CM4OG4.o
+	rm -rf obj fw_dir/splash fw_dir/mother_cm3 fw_dir/mother_cm4 fw_dir/mother
 
 IMAGE_BUILD_VERSION = $(shell cat fw_dir/version)
 IMAGE_BUILD_TAG = $(shell cat fw_dir/buildtag)
 IMAGE_VERSION = $(IMAGE_BUILD_VERSION)$(IMAGE_BUILD_TAG)
 IMAGE_DIR = UpdateOS-$(IMAGE_VERSION)
 
-organelle_deploy : organelle
-	@echo "Updating OS to $(IMAGE_VERSION)"
-	fw_dir/scripts/remount-rw.sh
-	@echo "copying fw files to /root"
-	rm -fr /root/fw_dir
-	mkdir /root/fw_dir
-	cp -fr fw_dir/* /root/fw_dir
-	@echo "copying version file to root for backwards compatiblility"
-	cp -fr fw_dir/version /root
-	@echo "copying system files"
-	cp -fr platforms/organelle/rootfs/* /
-	sync
-
-organelle_m_deploy : organelle_m organelle_m_splash
+organelle_cm_deploy : organelle_cm3 organelle_cm4 organelle_cm_splash
 	@echo "Updating OS to $(IMAGE_VERSION)"
 	@echo "copying common fw files"
 	rm -fr /home/music/fw_dir
 	mkdir /home/music/fw_dir
 	cp -fr fw_dir/* /home/music/fw_dir
 	@echo "copying platform fw files"
-	cp -fr platforms/organelle_m/fw_dir/* /home/music/fw_dir
+	cp -fr platforms/organelle_cm/fw_dir/* /home/music/fw_dir
 	chown -R music:music /home/music/fw_dir
 	@echo "copying version file to root for backwards compatiblility"
 	cp -fr fw_dir/version /root
 	@echo "copying systems files"
 	mkdir tmp
-	cp -r platforms/organelle_m/rootfs tmp/
+	cp -r platforms/organelle_cm/rootfs tmp/
 	chown -R root:root tmp/rootfs
 	chown -R music:music tmp/rootfs/home/music
 	cp -fr --preserve=mode,ownership tmp/rootfs/* /
 	rm -fr tmp
 	@echo "copying test patch"
-	cp -r platforms/organelle_m/Test-S2 /sdcard/Patches/Utilities/
-	chown -R music:music /sdcard/Patches/Utilities/Test-S2
+	cp -r platforms/organelle_cm/Test-CM /sdcard/Patches/Utilities/
+	chown -R music:music /sdcard/Patches/Utilities/Test-CM
 	sync
-
-organelle_4_deploy : organelle_4 organelle_4_splash
-	@echo "Updating OS to $(IMAGE_VERSION)"
-	@echo "copying common fw files"
-	rm -fr /home/music/fw_dir
-	mkdir /home/music/fw_dir
-	cp -fr fw_dir/* /home/music/fw_dir
-	@echo "copying platform fw files"
-	cp -fr platforms/organelle_4/fw_dir/* /home/music/fw_dir
-	chown -R music:music /home/music/fw_dir
-	@echo "copying version file to root for backwards compatiblility"
-	cp -fr fw_dir/version /root
-	@echo "copying systems files"
-	mkdir tmp
-	cp -r platforms/organelle_4/rootfs tmp/
-	chown -R root:root tmp/rootfs
-	chown -R music:music tmp/rootfs/home/music
-	cp -fr --preserve=mode,ownership tmp/rootfs/* /
-	rm -fr tmp
-	@echo "copying test patch"
-	cp -r platforms/organelle_4/Test-S2 /sdcard/Patches/Utilities/
-	chown -R music:music /sdcard/Patches/Utilities/Test-S2
-	sync
-
-# Generate with g++ -MM *.c* OSC/*.* 
-AppData.o: AppData.cpp AppData.h OledScreen.h
-MainMenu.o: MainMenu.cpp MainMenu.h AppData.h OledScreen.h
-OledScreen.o: OledScreen.cpp OledScreen.h fonts.h simple_svg_1.0.0.hpp
-SLIPEncodedSerial.o: SLIPEncodedSerial.cpp SLIPEncodedSerial.h Serial.h \
-  UdpSocket.h Socket.h
-Serial.o: Serial.cpp Serial.h
-Socket.o: Socket.cpp Socket.h
-Timer.o: Timer.cpp Timer.h
-UdpSocket.o: UdpSocket.cpp UdpSocket.h Socket.h
-main.o: main.cpp OSC/OSCMessage.h OSC/OSCData.h OSC/OSCTiming.h \
-  OSC/SimpleWriter.h Serial.h UdpSocket.h Socket.h SLIPEncodedSerial.h \
-  OledScreen.h MainMenu.h AppData.h Timer.h
-splash.o: splash.cpp OledScreen.h Timer.h AppData.h
-serialdump.o: serialdump.c
-test.o: test.cpp
-OSCData.o: OSC/OSCData.cpp OSC/OSCData.h OSC/OSCTiming.h
-OSCMatch.o: OSC/OSCMatch.c OSC/OSCMatch.h
-OSCMessage.o: OSC/OSCMessage.cpp OSC/OSCMessage.h OSC/OSCData.h \
-  OSC/OSCTiming.h OSC/SimpleWriter.h OSC/OSCMatch.h
-OSCTiming.o: OSC/OSCTiming.cpp OSC/OSCTiming.h
-SimpleWriter.o: OSC/SimpleWriter.cpp OSC/SimpleWriter.h
-SerialMCU.o: hardwares/SerialMCU.cpp hardwares/SerialMCU.h \
- hardwares/../OledScreen.h
-SDLPi.o: hardwares/SDLPi.cpp hardwares/SDLPi.h \
- hardwares/../OledScreen.h
