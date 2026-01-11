@@ -114,6 +114,6 @@ organelle_cm_deploy : organelle_cm3 organelle_cm4 organelle_cm_splash
 	cp -fr --preserve=mode,ownership tmp/rootfs/* /
 	rm -fr tmp
 	@echo "copying test patch"
-	cp -r platforms/organelle_cm/Test-CM /sdcard/Patches/Utilities/
+	cp -r platforms/organelle_cm/Test /sdcard/Patches/Utilities/
 	chown -R music:music /sdcard/Patches/Utilities/Test-CM
 	sync
