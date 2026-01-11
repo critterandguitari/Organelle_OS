@@ -115,5 +115,5 @@ organelle_cm_deploy : organelle_cm3 organelle_cm4 organelle_cm_splash
 	rm -fr tmp
 	@echo "copying test patch"
 	cp -r platforms/organelle_cm/Test /sdcard/Patches/Utilities/
-	chown -R music:music /sdcard/Patches/Utilities/Test-CM
+	chown -R music:music /sdcard/Patches/Utilities/Test
 	sync
