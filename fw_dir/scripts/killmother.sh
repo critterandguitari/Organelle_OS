@@ -19,10 +19,9 @@ kill  `cat /tmp/webserver.pid`
 sleep .1
 kill -9 `cat /tmp/webserver.pid`
 
-# kill SIGTERM 
-killall mother
+# kill SIGTERM
+killall mother mother_cm3 mother_cm4
 sleep .1
 
-# and kill SIGKILL 
-killall -s 9 mother
-
+# and kill SIGKILL
+killall -s 9 mother mother_cm3 mother_cm4

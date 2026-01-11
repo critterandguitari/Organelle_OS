@@ -8,7 +8,7 @@ clear
 $SCRIPTS_DIR/killmother.sh
 $SCRIPTS_DIR/setup.sh
 #$SCRIPTS_DIR/check-for-usb-drive.sh
-$SCRIPTS_DIR/mount.sh 
+$SCRIPTS_DIR/mount.sh
 
 mkdir -p /tmp/pids
 
@@ -24,19 +24,29 @@ then
     M_DIR=/usbdrive/System
 
 elif [ -f /usbdrive/Firmware/mother ]
-then 
+then
     M_DIR=/usbdrive/Firmware
     if [ -d /usbdrive/Firmware/scripts ]
     then
         export FW_DIR="/usbdrive/Firmware"
     fi
 elif [ -f /sdcard/Firmware/mother ]
-then 
+then
     M_DIR=/sdcard/Firmware
     if [ -d /sdcard/Firmware/scripts ]
     then
         export FW_DIR="/sdcard/Firmware"
     fi
 fi
-echo running $M_DIR/mother with scripts $FW_DIR/scripts | systemd-cat --identifier=Organelle
-$M_DIR/mother 2>&1 | systemd-cat --identifier=Organelle &
+
+# Detect platform and select appropriate binary
+PLATFORM=$(cat /proc/device-tree/model)
+if echo "$PLATFORM" | grep -q "Compute Module 4"; then
+    MOTHER_BIN="mother_cm4"
+else
+    MOTHER_BIN="mother_cm3"
+fi
+
+echo running $M_DIR/$MOTHER_BIN with scripts $FW_DIR/scripts | systemd-cat --identifier=Organelle
+$M_DIR/$MOTHER_BIN 2>&1 | systemd-cat --identifier=Organelle &
+
