@@ -1,4 +1,4 @@
-[cm3]
+[pi3]
 dtparam=i2c_arm=on
 dtparam=spi=on
 camera_auto_detect=1
@@ -38,4 +38,3 @@ dtoverlay=midi-uart0
 dtoverlay=disable-wifi
 dtoverlay=gpio-poweroff,gpiopin=12,active_low="y"
 dtoverlay=pi3-act-led,gpio=24,activelow=on
-
