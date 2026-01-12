@@ -15,7 +15,7 @@ dtoverlay=midi-uart0
 dtoverlay=pi3-act-led,gpio=24,activelow=on
 gpu_mem=128
 
-[cm4]
+[pi4]
 disable_splash=1
 boot_delay=0
 arm_freq=1800
@@ -38,3 +38,4 @@ dtoverlay=midi-uart0
 dtoverlay=disable-wifi
 dtoverlay=gpio-poweroff,gpiopin=12,active_low="y"
 dtoverlay=pi3-act-led,gpio=24,activelow=on
+[all]

@@ -23,6 +23,10 @@ if [ ! -f "$MANIFEST" ]; then
     exit 1
 fi
 
+# Convert to absolute paths before we change directories
+ARCHIVE="$(readlink -f "$ARCHIVE")"
+MANIFEST="$(readlink -f "$MANIFEST")"
+
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then
     echo "Error: This script must be run as root (use sudo)"
@@ -88,12 +92,14 @@ while IFS= read -r line; do
     parent_dir=$(dirname "$filepath")
     mkdir -p "$parent_dir"
     
-    # Copy file preserving permissions
-    if cp -a "$relpath" "$filepath" 2>/dev/null; then
+    # Copy file (will be owned by root since running with sudo)
+    if cp "$relpath" "$filepath" 2>/tmp/cp_error.txt; then
         echo "COPIED: $filepath"
         ((COPY_SUCCESS++))
     else
+        ERROR_MSG=$(cat /tmp/cp_error.txt 2>/dev/null)
         echo "FAILED: $filepath"
+        echo "  Error: $ERROR_MSG"
         ((COPY_FAILED++))
     fi
 done < "$MANIFEST"
