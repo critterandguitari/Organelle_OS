@@ -296,32 +296,51 @@ body {
     width:      100%;
     background: rgba( 255, 255, 255, .25 ) ;
 }
+
 #modal-dialog-contents {
     margin: auto;
     padding: 8px;
     max-width:500px;
     margin-top: 32px;
     background-color: #222;
+    font-size: 16px; /* Add this - increases base font size */
 }
+
 #modal-dialog-title {
     margin-bottom: 10px;
     background-color: #333;
-    font-weight: bold;
     padding:4px;
+    font-size: 18px; /* Add this - makes title larger */
 }
+
 #modal-dialog-body {
     margin-bottom: 10px;
-    padding-left: 10px;
+    padding-left: 4px;
+    font-size: 16px; /* Add this - increases body text */
 }
+
+/* Add this new rule for input fields in modals */
+#modal-dialog-body input[type="text"] {
+    font-size: 16px;
+    padding: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+}
+
 .modal-button {
     cursor: pointer;
     text-decoration: none;
     background-color: #444;
-    padding: 4px;
+    padding: 6px 8px; /* Slightly increase padding */
     margin: 2px 10px 2px 2px;
     overflow: hidden;
     float:left;
+    font-size: 16px; /* Add this - makes button text larger */
 }
+
 .modal-button:hover {background-color:#666;}
 
 /* When the body has the loading class, we turn
