@@ -81,6 +81,9 @@ def start_vnc():
     output = run_cmd("vncserver-virtual -geometry 1920x1080 2>&1 | systemd-cat --identifier=Organelle")
     
     quit()  # quit when it starts, bc this will get killed
+    
+    time.sleep(1)
+    
 
 
 def toggle_action():
@@ -89,27 +92,48 @@ def toggle_action():
         stop_vnc()
     else:
         start_vnc()
-
+       
 def show_status():
     """Show VNC server status"""
     og.clear_screen()
-    og.println(1, "VNC Server Status")
     
     if is_vnc_running():
-        og.println(2, "Running")
-        og.println(3, "Port: 5901")
+        og.println(1, "VNC Running")
+        # Get IP address using the same method as info.py
+        try:
+            # Import wifi_control from scripts directory
+            wifi = imp.load_source('wifi_control', fw_dir + '/scripts/wifi_control.py')
+            wifi.initialize_state()
+            
+            if wifi.wifi_connected():
+                ip = wifi.ip_address
+                if ip and ip != "not connected":
+                    og.println(2, f"{ip}:5901")
+                else:
+                    og.println(2, "Port: 5901")
+            else:
+                og.println(2, "Port: 5901")
+        except:
+            # Fallback if wifi module fails
+            og.println(2, "Port: 5901")
     else:
         og.println(2, "Stopped")
-    
+
+    og.println(4, "< Back")
+    og.invert_line(4)
+
     og.flip()
     og.enc_but_flag = False
+    og.enc_turn_flag = False
     
-    # Wait for encoder button press to return
+    # Wait for encoder button press or turn to return
     while True:
         og.enc_input()
-        if og.enc_but_flag and og.enc_but == 1:
+        if (og.enc_but_flag and og.enc_but == 1) or og.enc_turn_flag:
             break
 
+
+        
 def quit():
     og.end_app()
 
