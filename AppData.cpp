@@ -86,20 +86,6 @@ void AppData::setPatchDir(const char* path) {
     }
 }
 
-void AppData::setUserDir(const char* path) {
-    if(path==NULL) {
-        //strncpy(usercmds_path,"/sdcard/System",256);
-        user_path=getDefaultUserDir();
-    } else {
-        user_path=path;
-    }
-    system_path = getDefaultSystemDir(user_path);
-    
-    // stash the user dir in a tmp file for other parts of the system to use (like web apps)
-    std::string cmd = std::string("echo ") + user_path + " > /tmp/user_dir";
-    system(cmd.c_str());
-}
-
 void  AppData::setSystemDir(const char* path) {
     if(path==NULL) {
         system_path=getDefaultSystemDir(user_path);
@@ -108,6 +94,21 @@ void  AppData::setSystemDir(const char* path) {
     }
 }
 
+void AppData::setUserDir(const char* path) {
+    if(path==NULL) {
+        user_path=getDefaultUserDir();
+    } else {
+        user_path=path;
+    }
+    system_path = getDefaultSystemDir(user_path);
+    
+    // stash for other parts of system to use
+    std::ofstream f("/tmp/user_dir", std::ios::trunc);
+    if(f.is_open()) {
+        f << user_path << std::endl;
+        f.close();
+    }
+}
 
 void AppData::setFirmwareDir(const char* path) {
     if(path==NULL) {
@@ -116,9 +117,13 @@ void AppData::setFirmwareDir(const char* path) {
     } else {
         firmware_path=path;
     }
-    // stash the fw dir in a tmp file for other parts of the system to use (like web apps)
-    std::string cmd = std::string("echo ") + firmware_path + " > /tmp/fw_dir";
-    system(cmd.c_str());
+    
+    // stash for other parts of system to use
+    std::ofstream f("/tmp/fw_dir", std::ios::trunc);
+    if(f.is_open()) {
+        f << firmware_path << std::endl;
+        f.close();
+    }
 }
 
 void AppData::resetScreenSaver() {
