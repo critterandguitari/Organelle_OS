@@ -119,10 +119,8 @@ usbdrive = "USB Drive: " + run_cmd("grep usbdrive /proc/mounts | awk '{print $1}
 midi_dev = run_cmd("aplaymidi -l | awk '{if (NR==2) print $2}'", timeout=3)
 if (midi_dev == "" or midi_dev == "None"): midi_dev = 'None'
 version = run_cmd("cat " + fw_dir + "/version", timeout=2)
-ogmodel = run_cmd("cat " + fw_dir + "/ogmodel", timeout=2)
 build_tag = run_cmd("cat " + fw_dir + "/buildtag", timeout=2)
 version = "Version: " + version + build_tag
-ogmodel = "Model: " + ogmodel
 patch_dir = "  " + patch_dir
 user_dir = "  " + user_dir
 patch = "  " + run_cmd("ls /tmp/curpatchname", timeout=2)
@@ -152,7 +150,6 @@ patch_dir,
 "User Root:", 
 user_dir, 
 version, 
-ogmodel, 
 ]
 
 info.header='INFO press to exit.'
