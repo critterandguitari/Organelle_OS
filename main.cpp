@@ -982,6 +982,10 @@ void knobsInput() {
     // knob 1-4 + volume + expr , all 0-1023
     for(unsigned i = 0; i < MAX_KNOBS;i++) {
         int v = controls.adcs[i];
+        
+        // clamp to valid range in case of hardware glitches
+        if(v < 0) v = 0;
+        if(v > 1023) v = 1023;
 
         if(i==EXPR_KNOB && exprScaling) {
             v = ( pedalExprMin_ <= pedalExprMax_ 
