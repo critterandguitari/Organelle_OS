@@ -160,6 +160,21 @@ do deploy stuff
 
 ## ^OGS2_v4.4.img
 
+sudo apt-get update
+sudo apt-get install faust chuck lua5.4 liblua5.4-dev libsdl2-dev realvnc-vnc-server
+rm fw_dir/ogmodel
+cd Organelle_OS/
+make clean
+git pull
+cd platforms/organelle_cm/cm3_kernel/
+sudo ./install_from_archive.sh stuff2.tar.gz manifest.txt 
+./verify_archive.sh stuff2.tar.gz 
+make clean
+sudo make organelle_cm_deploy 
+
+
+## ^OGSMS2_v5.0_beta1.img
+
 ## deploy stuff
 
 common stuff before making disk image
