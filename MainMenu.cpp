@@ -201,13 +201,16 @@ void MainMenu::runPatch(const char* name, const char* arg) {
 
     std::string patchlocation = app.getPatchDir() + "/" + arg;
     std::string pdfile = patchlocation + "/main.pd";
+    std::string pdmotherfile = patchlocation + "/mother.pd";
     std::string scfile = patchlocation + "/main.scd";
     std::string pyfile = patchlocation + "/main.py";
     std::string shellfile = patchlocation + "/run.sh";
     std::cout << "Checking for patch Files  : " << patchlocation << std::endl;
 
     // note this is the order of precedence
-    bool isPD = checkFileExists(pdfile);
+    bool hasMainPd = checkFileExists(pdfile);
+    bool hasMotherPd = checkFileExists(pdmotherfile);
+    bool isPD = hasMainPd || hasMotherPd;
     bool isSC = checkFileExists(scfile);
     bool isPy = checkFileExists(pyfile);
     bool isShell = checkFileExists(shellfile);
@@ -296,9 +299,16 @@ void MainMenu::runPatch(const char* name, const char* arg) {
             args += opts;
 
             // prepare cmd line
-            sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" main.pd )&",
-                    args.c_str(),
-                    mother.c_str());
+            if (hasMainPd) {
+                sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" main.pd )&",
+                        args.c_str(),
+                        mother.c_str());
+            } else {
+                // patch has mother.pd but no main.pd
+                sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" )&",
+                        args.c_str(),
+                        mother.c_str());
+            }
 
             // start pure data with mother and patch
             std::cout << "starting Pure Data : " << buf << std::endl;
@@ -751,10 +761,12 @@ void MainMenu::buildMenu(signed mm_pos) {
                     case DT_DIR : {
                         std::string patchlocation = app.getPatchDir() + "/" + fname;
                         std::string mainpd = patchlocation + "/main.pd";
+                        std::string motherpd = patchlocation + "/mother.pd";
                         std::string scfile = patchlocation + "/main.scd";
                         std::string pyfile = patchlocation + "/main.py";
                         std::string shellfile = patchlocation + "/run.sh";
                         if (     checkFileExists(mainpd)
+                                 ||  checkFileExists(motherpd)
                                  ||  checkFileExists(scfile)
                                  ||  checkFileExists(pyfile)
                                  ||  checkFileExists(shellfile)
