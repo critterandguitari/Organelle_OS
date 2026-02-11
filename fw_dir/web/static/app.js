@@ -7,6 +7,7 @@ var clipboard = {};
 var editor = null
 var openFiles = []; // Array to hold open files and their editor sessions
 var currentFile = null; // Currently active file
+var markdownPreviewMode = false; // Track if we're showing markdown preview
 
 function getFile(fpath) {
     $.get(appBaseURL + '/get_file?fpath='+encodeURIComponent(fpath), function(data) {
@@ -239,23 +240,29 @@ function switchTab(path) {
     // Update active tab styling
     $('.tab').removeClass('active');
     currentFile.tabElement.addClass('active');
-                    
+
     // Update the title
     $("#title").html(path);
-                
+
     // Clear all containers
     $('#editor').hide();
     $('#image-container').hide();
     $('#audio-container').hide();
-    
+    $('#markdown-container').hide();
+    $('#md-toggle').hide();
+
+    // Reset markdown preview mode when switching tabs
+    markdownPreviewMode = false;
+    $('#md-toggle span').text('visibility');
+
     if (currentFile.isImage) {
         // Display the image
         $('#image-container').empty(); // Clear any previous content
-        
+
         // Create the image element
         var img = $('<img>').attr('src', appBaseURL + '/get_file?fpath=' + encodeURIComponent(currentFile.path));
         $('#image-container').append(img);
-        
+
         $('#image-container').show();
     } else if (currentFile.isAudio) {
         // Display the audio player with waveform
@@ -266,7 +273,41 @@ function switchTab(path) {
         editor.setSession(currentFile.editorSession);
         editor.focus();
         $('#editor').show();
-    }           
+
+        // Show markdown toggle for .md files
+        var extension = path.split('.').pop().toLowerCase();
+        if (extension === 'md') {
+            $('#md-toggle').show();
+        }
+    }
+}
+
+// Toggle markdown preview
+function toggleMarkdownPreview() {
+    if (!currentFile) return;
+
+    var extension = currentFile.path.split('.').pop().toLowerCase();
+    if (extension !== 'md') return;
+
+    markdownPreviewMode = !markdownPreviewMode;
+
+    if (markdownPreviewMode) {
+        // Show rendered markdown
+        var content = editor.getValue();
+        var html = marked.parse(content);
+        $('#markdown-container').html(html);
+        $('#editor').hide();
+        $('#markdown-container').show();
+        $('#md-toggle span').text('edit');
+        $('#md-toggle').attr('title', 'Edit Markdown');
+    } else {
+        // Show editor
+        $('#markdown-container').hide();
+        $('#editor').show();
+        editor.focus();
+        $('#md-toggle span').text('visibility');
+        $('#md-toggle').attr('title', 'Preview Markdown');
+    }
 }
 
 
@@ -903,6 +944,8 @@ $(function () {
     $("#reload-patch").click(reloadPatch);
 
     $("#save").click(saveMode);
+
+    $("#md-toggle").click(toggleMarkdownPreview);
 
     $("#new-folder-but").click(newFolderDialog);
 

@@ -478,3 +478,104 @@ body.dialog .modal-dialog { display: block;}
     color: #ccc;
     min-width: 40px;
 }
+
+/* MARKDOWN CONTAINER */
+#markdown-container {
+    flex: 1 1 auto;
+    overflow: auto;
+    min-height: 0;
+    padding: 20px;
+    background-color: #1a1a1a;
+    color: #ddd;
+    line-height: 1.6;
+}
+
+#markdown-container h1,
+#markdown-container h2,
+#markdown-container h3,
+#markdown-container h4,
+#markdown-container h5,
+#markdown-container h6 {
+    color: #fff;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.3em;
+}
+
+#markdown-container h1 { font-size: 2em; }
+#markdown-container h2 { font-size: 1.5em; }
+#markdown-container h3 { font-size: 1.25em; }
+
+#markdown-container p {
+    margin: 1em 0;
+}
+
+#markdown-container code {
+    background-color: #333;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+#markdown-container pre {
+    background-color: #333;
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+#markdown-container pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+#markdown-container blockquote {
+    border-left: 4px solid #666;
+    margin: 1em 0;
+    padding-left: 1em;
+    color: #aaa;
+}
+
+#markdown-container ul,
+#markdown-container ol {
+    margin: 1em 0;
+    padding-left: 2em;
+}
+
+#markdown-container li {
+    margin: 0.5em 0;
+}
+
+#markdown-container a {
+    color: #6ca0dc;
+}
+
+#markdown-container a:hover {
+    color: #8cc0fc;
+}
+
+#markdown-container table {
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+
+#markdown-container th,
+#markdown-container td {
+    border: 1px solid #444;
+    padding: 8px 12px;
+}
+
+#markdown-container th {
+    background-color: #333;
+}
+
+#markdown-container hr {
+    border: none;
+    border-top: 1px solid #444;
+    margin: 2em 0;
+}
+
+#markdown-container img {
+    max-width: 100%;
+}

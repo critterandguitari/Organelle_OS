@@ -7,6 +7,7 @@
     <script src="/static/assets/jquery.min.js"></script>
     <script src="/static/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="/static/assets/wavesurfer.js"></script>
+    <script src="/static/assets/marked.min.js"></script>
     <script src="/static/app.js"></script>
     <script src="/static/assets/jquery.ui.widget.js"></script>
     <script src="/static/assets/jquery.fileupload.js"></script>
@@ -56,6 +57,9 @@
             <div id="save" class="icon-button" title="Save">
                 <span class="material-icons">save</span>
             </div>
+            <div id="md-toggle" class="icon-button" title="Toggle Markdown Preview" style="display: none;">
+                <span class="material-icons">visibility</span>
+            </div>
             <div id="compile" class="icon-button" title="Compile">
                 <span class="material-icons">build</span>
             </div>
@@ -88,7 +92,8 @@
         <div id="editor-container">
             <div id="editor"></div>
             <div id="image-container" style="display: none;"></div>
-            <div id="audio-container" style="display: none; padding: 20px;"></div> 
+            <div id="audio-container" style="display: none; padding: 20px;"></div>
+            <div id="markdown-container" style="display: none;"></div>
         </div>
         <div id="vconsole-container" style="overflow-y: auto; ">
             <div id="vconsole-title-bar">
