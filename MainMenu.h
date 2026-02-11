@@ -47,7 +47,6 @@ private:
     int  execPython(const std::string& pyscript, const std::string& wd);
 
     void setEnv(const std::string& workdir);
-    bool isMotherPdCompatible(const std::string& motherpd);
 
     void addMenuItem(int i, const char* name, const char* arg, void (MainMenu::* func) (const char*, const char*));
     std::string getCmdOptions(const std::string& file);

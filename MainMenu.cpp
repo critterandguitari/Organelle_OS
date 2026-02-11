@@ -66,13 +66,6 @@ MainMenu::MainMenu() {
     currentMenu = MenuMode::M_MAIN;
 }
 
-static const std::string MOTHER_PD_VERSION ="1.2";
-
-bool MainMenu::isMotherPdCompatible(const std::string& motherpd) {
-    std::string cmd = std::string ("check-mother-pd.sh \"") + motherpd + "\" " + MOTHER_PD_VERSION; 
-    return ! execScript(cmd);
-}
-
 int MainMenu::checkFileExists (const std::string& filename) {
     struct stat st;
     int result = stat(filename.c_str(), &st);
@@ -274,10 +267,6 @@ void MainMenu::runPatch(const char* name, const char* arg) {
             std::string mother = getSystemFile(paths, "mother.pd");
             if (mother.length() == 0) {
                 mother = app.getFirmwareDir() + "/mother.pd";
-            } else if (isMotherPdCompatible(mother) == false) {
-                std::cerr << mother << " incompatible please review, using system mother.pd";
-                sprintf(buf2, "mv %s %s.review", mother.c_str(), mother.c_str());
-                system(buf2);
             }
 
             std::string optsfile = getSystemFile(paths, "pd-opts.txt");
