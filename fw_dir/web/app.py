@@ -222,6 +222,7 @@ def terminal(ws):
     if pid == 0:
         # Child process - spawn bash shell
         os.chdir(os.path.expanduser('~'))
+        os.environ['TERM'] = 'xterm-256color'
         os.execvp('/bin/bash', ['/bin/bash'])
     else:
         # Parent process - relay between WebSocket and PTY
