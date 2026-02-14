@@ -579,3 +579,25 @@ body.dialog .modal-dialog { display: block;}
 #markdown-container img {
     max-width: 100%;
 }
+
+/* TERMINAL */
+#terminal-container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    background-color: #1a1a1a;
+    padding: 4px;
+    min-height: 0;
+}
+
+#terminal-container .xterm {
+    height: 100%;
+}
+
+#terminal-container .xterm-viewport {
+    overflow-y: auto;
+}
+
+#terminal-toggle.active {
+    background-color: #666;
+}

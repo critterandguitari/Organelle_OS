@@ -34,6 +34,11 @@ function getAceMode(extension) {
 }
 
 function openFile(path) {
+    // If terminal is visible, switch back to editor view
+    if ($('#terminal-container').is(':visible')) {
+        toggleTerminal();
+    }
+
     // Check if the file is already open
     var existingFile = openFiles.find(file => file.path === path);
     if (existingFile) {

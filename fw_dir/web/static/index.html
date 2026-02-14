@@ -16,6 +16,9 @@
     <!--link rel="stylesheet" href="/static/assets/fonts/font-awesome/6.4.0/css/all.min.css"-->
     <link href="/static/assets/fonts/iconfont.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <link rel="stylesheet" href="/static/assets/xterm.css">
+    <script src="/static/assets/xterm.min.js"></script>
+    <script src="/static/assets/xterm-addon-fit.min.js"></script>
 
   </head>
   <body>
@@ -66,6 +69,9 @@
             <div id="reload-patch" class="icon-button" title="Reload Patch">
                 <span class="material-icons">refresh</span>
             </div>
+            <div id="terminal-toggle" class="icon-button" title="Toggle Terminal">
+                <span class="material-icons">terminal</span>
+            </div>
 	        <div style="clear:left;"></div>
             <ul class="breadcrumb" id="fsbreadcrumb">
         </div>
@@ -95,6 +101,7 @@
             <div id="audio-container" style="display: none; padding: 20px;"></div>
             <div id="markdown-container" style="display: none;"></div>
         </div>
+        <div id="terminal-container" style="display: none;"></div>
         <div id="vconsole-container" style="overflow-y: auto; ">
             <div id="vconsole-title-bar">
                 <span>Console</span>
@@ -164,6 +171,123 @@
         ws.onerror = function(error) {
             console.error("WebSocket error:", error);
         };
+
+        // Terminal functionality
+        let term = null;
+        let terminalWs = null;
+        let fitAddon = null;
+        let terminalActive = false;
+
+        function initTerminal() {
+            if (term) return; // Already initialized
+
+            term = new Terminal({
+                cursorBlink: true,
+                fontSize: 14,
+                fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+                theme: {
+                    background: '#1a1a1a',
+                    foreground: '#ddd',
+                    cursor: '#fff',
+                    selection: 'rgba(255, 255, 255, 0.3)'
+                }
+            });
+
+            fitAddon = new FitAddon.FitAddon();
+            term.loadAddon(fitAddon);
+            term.open(document.getElementById('terminal-container'));
+            fitAddon.fit();
+
+            // Connect to terminal WebSocket
+            terminalWs = new WebSocket(location.origin.replace(/^http/, 'ws') + "/terminal");
+
+            terminalWs.onopen = function() {
+                console.log("Terminal WebSocket connected");
+                // Send initial size
+                const dims = fitAddon.proposeDimensions();
+                if (dims) {
+                    terminalWs.send('\x1b[8;' + dims.rows + ';' + dims.cols + 't');
+                }
+            };
+
+            terminalWs.onmessage = function(event) {
+                term.write(event.data);
+            };
+
+            terminalWs.onclose = function() {
+                console.log("Terminal WebSocket disconnected");
+                term.write('\r\n\x1b[31m[Terminal disconnected]\x1b[0m\r\n');
+            };
+
+            terminalWs.onerror = function(error) {
+                console.error("Terminal WebSocket error:", error);
+            };
+
+            // Send user input to the server
+            term.onData(function(data) {
+                if (terminalWs && terminalWs.readyState === WebSocket.OPEN) {
+                    terminalWs.send(data);
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (terminalActive && fitAddon) {
+                    fitAddon.fit();
+                    const dims = fitAddon.proposeDimensions();
+                    if (dims && terminalWs && terminalWs.readyState === WebSocket.OPEN) {
+                        terminalWs.send('\x1b[8;' + dims.rows + ';' + dims.cols + 't');
+                    }
+                }
+            });
+        }
+
+        function destroyTerminal() {
+            if (terminalWs) {
+                terminalWs.close();
+                terminalWs = null;
+            }
+            if (term) {
+                term.dispose();
+                term = null;
+                fitAddon = null;
+            }
+        }
+
+        function toggleTerminal() {
+            const editorContainer = document.getElementById('editor-container');
+            const terminalContainer = document.getElementById('terminal-container');
+            const titleBar = document.getElementById('title-bar');
+            const toggleBtn = document.getElementById('terminal-toggle');
+
+            terminalActive = !terminalActive;
+
+            if (terminalActive) {
+                // Show terminal, hide editor
+                editorContainer.style.display = 'none';
+                titleBar.style.display = 'none';
+                terminalContainer.style.display = 'flex';
+                toggleBtn.style.backgroundColor = '#666';
+                // Only create terminal on first toggle
+                initTerminal();
+                setTimeout(() => {
+                    if (fitAddon) fitAddon.fit();
+                    if (term) term.focus();
+                }, 100);
+            } else {
+                // Show editor, hide terminal (but keep session alive)
+                terminalContainer.style.display = 'none';
+                editorContainer.style.display = 'flex';
+                titleBar.style.display = 'block';
+                toggleBtn.style.backgroundColor = '#444';
+                // Don't destroy terminal - keep session alive
+            }
+        }
+
+        // Set up terminal toggle button
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('terminal-toggle').addEventListener('click', toggleTerminal);
+        });
 
     </script>
     </body>

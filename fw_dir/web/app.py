@@ -1,4 +1,10 @@
 import os
+import pty
+import select
+import struct
+import fcntl
+import termios
+import signal
 from flask import Flask, request, make_response, jsonify, send_from_directory, send_file
 from flask_sock import Sock
 import subprocess
@@ -207,6 +213,63 @@ def fmdata():
 @sock.route('/log_stream')
 def log_stream(ws):
     background_thread(ws)  # Start sending logs to the WebSocket client
+
+@sock.route('/terminal')
+def terminal(ws):
+    """WebSocket endpoint for interactive terminal"""
+    pid, fd = pty.fork()
+
+    if pid == 0:
+        # Child process - spawn bash shell
+        os.chdir(os.path.expanduser('~'))
+        os.execvp('/bin/bash', ['/bin/bash'])
+    else:
+        # Parent process - relay between WebSocket and PTY
+        # Set non-blocking mode on the PTY
+        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
+        try:
+            while True:
+                # Check if there's data from the terminal
+                r, _, _ = select.select([fd], [], [], 0.01)
+                if fd in r:
+                    try:
+                        output = os.read(fd, 4096)
+                        if output:
+                            ws.send(output.decode('utf-8', errors='replace'))
+                    except OSError:
+                        break
+
+                # Check for input from WebSocket (non-blocking)
+                try:
+                    data = ws.receive(timeout=0.01)
+                    if data:
+                        # Handle resize command
+                        if data.startswith('\x1b[8;'):
+                            # Parse resize: \x1b[8;rows;colst
+                            try:
+                                parts = data[4:-1].split(';')
+                                rows, cols = int(parts[0]), int(parts[1])
+                                winsize = struct.pack('HHHH', rows, cols, 0, 0)
+                                fcntl.ioctl(fd, termios.TIOCSWINSZ, winsize)
+                            except:
+                                pass
+                        else:
+                            os.write(fd, data.encode('utf-8'))
+                except:
+                    pass
+        except Exception as e:
+            print(f"Terminal error: {e}")
+        finally:
+            # Clean up
+            os.close(fd)
+            try:
+                os.kill(pid, signal.SIGTERM)
+                os.waitpid(pid, 0)
+            except:
+                pass
+            print("Terminal session ended")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=False, port=8080)
