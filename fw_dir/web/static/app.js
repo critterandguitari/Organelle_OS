@@ -354,6 +354,9 @@ function closeTabConfirmed(path) {
                 $('#editor').hide();
                 $('#image-container').hide();
                 $('#audio-container').hide();
+                $('#markdown-container').hide();
+                $('#md-toggle').hide();
+                markdownPreviewMode = false;
                 $("#title").html('...');
             }
         }
