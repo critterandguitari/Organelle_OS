@@ -101,8 +101,8 @@ organelle_cm_deploy : organelle_cm3 organelle_cm4 organelle_cm_splash
 	rm -fr /home/music/fw_dir
 	mkdir /home/music/fw_dir
 	cp -fr fw_dir/* /home/music/fw_dir
-	@echo "copying platform fw files"
-	cp -fr platforms/organelle_cm/fw_dir/* /home/music/fw_dir
+	#@echo "copying platform fw files"
+	#cp -fr platforms/organelle_cm/fw_dir/* /home/music/fw_dir
 	chown -R music:music /home/music/fw_dir
 	@echo "copying version file to root for backwards compatiblility"
 	cp -fr fw_dir/version /root

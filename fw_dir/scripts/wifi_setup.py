@@ -35,6 +35,10 @@ web_server_state = WEB_SERVER_STOPPED
 # Log file
 log_file = user_dir + "/wifi_log.txt"
 
+# Ethernet state
+ethernet_connected = False
+ethernet_ip = ''
+
 # UI elements
 menu = og.Menu()
 network_menu = og.Menu()
@@ -97,15 +101,45 @@ def update_network_info(info):
     except:
         pass
 
+def check_ethernet():
+    """Check if Ethernet is connected and get IP"""
+    global ethernet_connected, ethernet_ip
+    try:
+        result = subprocess.check_output(
+            ['hostname', '-I'],
+            text=True, timeout=2).strip()
+        if result:
+            ethernet_ip = result.split()[0]
+            ethernet_connected = True
+            return True
+    except:
+        pass
+    ethernet_connected = False
+    ethernet_ip = ''
+    return False
+
+def has_wifi_adapter():
+    """Check if wlan0 interface exists"""
+    try:
+        result = subprocess.run(
+            ['ip', 'link', 'show', 'wlan0'],
+            capture_output=True, timeout=2)
+        return result.returncode == 0
+    except:
+        return False
+
 def initialize_state():
     """Initialize WiFi and web server states on startup"""
     global state, web_server_state
-    
+
     # Check initial WiFi state
     if wifi_connected():
         state = CONNECTED
     else:
         state = NOT_CONNECTED
+
+    # Check Ethernet state
+    check_ethernet()
 
     # Check initial web server state
     if run_cmd_check('systemctl status ogweb'):
@@ -392,6 +426,7 @@ def show_forget_confirmation():
 def build_main_menu():
     """Build the main menu based on current state"""
     menu.items = []
+    menu.reset()
     
     print(f"Build menu state: {state} web server state: {web_server_state}")
     
@@ -427,13 +462,27 @@ def build_main_menu():
         menu.header = 'Not Connected'
     elif state == CONNECTION_ERROR:
         menu.header = 'Problem Connecting'
-        menu.items.append(['Select Network   >', network_menu_action])
-        menu.items.append(['Start AP Mode', start_ap])
+        if has_wifi_adapter():
+            menu.items.append(['Select Network   >', network_menu_action])
+            menu.items.append(['Start AP Mode', start_ap])
     else:
-        menu.header = 'Not Connected'
-        menu.items.append(['Select Network   >', network_menu_action])
-        menu.items.append(['Start AP Mode', start_ap])
-    
+        # Check for Ethernet connection
+        check_ethernet()
+        if ethernet_connected:
+            menu.header = 'Ethernet Connected'
+            menu.items.append([f'IP: {ethernet_ip}', lambda: None])
+            # Web server control for Ethernet
+            if web_server_state == WEB_SERVER_RUNNING:
+                menu.items.append(['Stop Web Server', stop_web])
+            else:
+                menu.items.append(['Start Web Server', start_web])
+        else:
+            menu.header = 'Not Connected'
+        # Only show WiFi options if adapter present
+        if has_wifi_adapter():
+            menu.items.append(['Select Network   >', network_menu_action])
+            menu.items.append(['Start AP Mode', start_ap])
+
     # Home/quit
     menu.items.append(["Forget Saved Nets", show_forget_confirmation])
     menu.items.append(['< Home', quit])

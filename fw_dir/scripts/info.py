@@ -22,6 +22,19 @@ wifi = imp.load_source('wifi_control', current_dir + '/wifi_control.py')
 ssid = "not connected"
 ip_address = "not connected"
 
+def get_non_wifi_ip():
+    try:
+        # Get all IPs using hostname -I (space-separated list)
+        result = subprocess.check_output(
+            ['hostname', '-I'],
+            text=True, timeout=2).strip()
+        if result:
+            # Return first IP (usually the primary one)
+            return result.split()[0]
+    except:
+        pass
+    return None
+
 wifi.initialize_state()
 
 def get_cpu_temp():
@@ -42,6 +55,15 @@ def check_wifi():
         if wifi.wifi_connected():
             ssid = wifi.current_net
             ip_address = wifi.ip_address
+        else:
+            # Check for Ethernet connection as fallback
+            eth_ip = get_non_wifi_ip()
+            if eth_ip:
+                ssid = "Ethernet"
+                ip_address = eth_ip
+            else:
+                ssid = "not connected"
+                ip_address = "not connected"
     except Exception as e:
         print(f"WiFi check error: {e}")
         ssid = "error"
