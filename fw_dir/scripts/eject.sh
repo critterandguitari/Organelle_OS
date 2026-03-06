@@ -12,8 +12,8 @@ oscsend localhost 4001 /oled/setscreen i 1
 $SCRIPTS_DIR/killpatch.sh
 
 if grep -qs " /usbdrive" /proc/mounts; then
-    fuser -km /usbdrive/
-    umount /usbdrive
+    sudo fuser -km /usbdrive/
+    sudo umount /usbdrive
 fi
 
 echo "done"

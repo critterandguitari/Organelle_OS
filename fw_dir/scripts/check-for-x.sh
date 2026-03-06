@@ -5,10 +5,12 @@
 # FW_DIR=${FW_DIR:="$HOME/fw_dir"}
 # SCRIPTS_DIR=$FW_DIR/scripts
 
-if xprop -root &> /dev/null; then
-    echo "X server found..."
-    exit 1
-else
+if ! xset q > /dev/null; then
     echo "X server not found..."
     exit 0
+else
+    echo "X server found..."
+    exit 1
 fi
+
+

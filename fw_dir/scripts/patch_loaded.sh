@@ -11,3 +11,5 @@ oscsend localhost 4000 /midiInGate i 1
 oscsend localhost 4000 /midiOutGate i 1
 aconnect "28:0" "Pure Data:0"
 aconnect "Pure Data:1" "28:0"
+aconnect "ttymidi:0" "Pure Data:0"
+aconnect "Pure Data:1" "ttymidi:1"

@@ -5,15 +5,12 @@
 FW_DIR=${FW_DIR:="$HOME/fw_dir"}
 SCRIPTS_DIR=$FW_DIR/scripts
 
+oscsend localhost 4001 /oled/gClear ii 4 1
+oscsend localhost 4001 /oled/gPrintln iiiiis 4 10 10 8 1 "Shutting Down"
+oscsend localhost 4001 /oled/gFlip ii 4 1
+oscsend localhost 4001 /oled/setscreen i 4
 
-oscsend localhost 4001 /shutdown i 1
 $SCRIPTS_DIR/killpatch.sh
 $SCRIPTS_DIR/killmother.sh
 
-# shutdown wifi
-wpa_cli -i wlan0 terminate
-dhcpcd -b -x wlan0 
-$SCRIPTS_DIR/create_ap --stop wlan0 
-
 shutdown -h now
-#echo "shutting down"

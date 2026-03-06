@@ -6,3 +6,4 @@
 # SCRIPTS_DIR=$FW_DIR/scripts
 
 mount / -o remount,ro
+mount /boot/firmware -o remount,ro
