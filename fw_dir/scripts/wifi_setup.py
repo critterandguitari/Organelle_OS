@@ -32,8 +32,6 @@ WEB_SERVER_STOPPED = 0
 WEB_SERVER_RUNNING = 1
 web_server_state = WEB_SERVER_STOPPED
 
-# Log file
-log_file = user_dir + "/wifi_log.txt"
 
 # Ethernet state
 ethernet_connected = False
@@ -191,8 +189,6 @@ def connect_nopw(ssid):
     connecting_timer = 0
     current_net = ssid
 
-    # Start log
-    run_cmd("echo WIFI LOG > " + log_file)
     
     cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid]
     try:
@@ -214,8 +210,6 @@ def connect(ssid, password):
     connecting_timer = 0
     current_net = ssid
 
-    # Start log
-    run_cmd("echo WIFI LOG > " + log_file)
 
     cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password]
     try:

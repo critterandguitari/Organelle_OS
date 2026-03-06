@@ -1,7 +1,6 @@
 import os
 import subprocess
 
-log_file = os.getenv("USER_DIR", "/sdcard") + "/wifi_log.txt"
 
 # states
 NOT_CONNECTED = 0
@@ -138,8 +137,6 @@ def connect_nopw(ssid) :
     connecting_timer = 0
     current_net = ssid
 
-    # restart log
-    run_cmd("echo WIFI LOG > " + log_file)
     cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=15)
@@ -162,8 +159,6 @@ def connect(ssid, password) :
     connecting_timer = 0
     current_net = ssid
 
-    # restart log
-    run_cmd("echo WIFI LOG > " + log_file)
 
     cmd = ["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password]
     try:
