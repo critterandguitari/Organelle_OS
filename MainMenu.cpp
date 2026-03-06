@@ -901,32 +901,48 @@ void MainMenu::runInstaller(const char*, const char* arg) {
 
 bool MainMenu::loadPatchPath(const char* fullPath) {
     std::string pathStr(fullPath);
-    
+
     // Remove trailing slash if present
     if (!pathStr.empty() && pathStr.back() == '/') {
         pathStr.pop_back();
     }
-    
+
     // Find the last slash to split directory from patch name
     size_t lastSlash = pathStr.find_last_of('/');
-    
+
     if (lastSlash == std::string::npos) {
         std::cerr << "Invalid patch path: " << fullPath << std::endl;
         return false;
     }
-    
+
+    // Check if fullPath is a valid patch directory before modifying state
+    std::string pdfile = pathStr + "/main.pd";
+    std::string pdmotherfile = pathStr + "/mother.pd";
+    std::string scfile = pathStr + "/main.scd";
+    std::string pyfile = pathStr + "/main.py";
+    std::string shellfile = pathStr + "/run.sh";
+
+    bool isPatch = checkFileExists(pdfile) || checkFileExists(pdmotherfile) ||
+                   checkFileExists(scfile) || checkFileExists(pyfile) ||
+                   checkFileExists(shellfile);
+
+    if (!isPatch) {
+        std::cerr << "No patch found: " << fullPath << std::endl;
+        return false;
+    }
+
     // Extract parent directory and patch name
     std::string parentDir = pathStr.substr(0, lastSlash);
     std::string patchName = pathStr.substr(lastSlash + 1);
-    
+
     std::cout << "Loading patch '" << patchName << "' from directory '" << parentDir << "'" << std::endl;
-    
+
     // Set the patch directory
     app.setPatchDir(parentDir.c_str());
-    
+
     // Load the patch
     runPatch(patchName.c_str(), patchName.c_str());
-    
+
     return true;
 }
 
