@@ -1,20 +1,22 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include <sys/time.h>
+#include <time.h>
 
 /*
 
-Timer 
+Timer
 
 (c) 2016 Owen Osborn, Critter & Guitari
+
+Uses CLOCK_MONOTONIC to be immune to system time changes.
 
 */
 
 class Timer
 {
  public:
-  
+
   Timer ();
 
   // destructor
@@ -22,9 +24,9 @@ class Timer
 
    void reset(void);
 
-   float getElapsed(void); 
-    
-   struct timeval start, stop;
+   float getElapsed(void);
+
+   struct timespec start, stop;
 
 };
 

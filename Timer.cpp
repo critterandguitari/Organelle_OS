@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 Timer::Timer() {
-    gettimeofday(&start, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &start);
 }
 
 Timer::~Timer() {
@@ -10,15 +10,15 @@ Timer::~Timer() {
 }
 
 void Timer::reset(void) {
-    gettimeofday(&start, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &start);
 }
 
 
 // time in ms
-float Timer::getElapsed(void) {  
-    gettimeofday(&stop, NULL);
+float Timer::getElapsed(void) {
+    clock_gettime(CLOCK_MONOTONIC, &stop);
     long elapsed_sec = stop.tv_sec - start.tv_sec;
-    long elapsed_usec = stop.tv_usec - start.tv_usec;
-    float e = (float)elapsed_sec + (float)elapsed_usec / 1000000.f;
+    long elapsed_nsec = stop.tv_nsec - start.tv_nsec;
+    float e = (float)elapsed_sec + (float)elapsed_nsec / 1000000000.f;
     return e * 1000.f;
 }
