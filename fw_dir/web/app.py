@@ -221,7 +221,7 @@ def terminal(ws):
 
     if pid == 0:
         # Child process - spawn bash shell
-        os.chdir(os.path.expanduser('~'))
+        os.chdir('/sdcard/')
         os.environ['TERM'] = 'xterm-256color'
         os.execvp('/bin/bash', ['/bin/bash'])
     else:
