@@ -42,8 +42,15 @@ function openFile(path) {
     // Check if the file is already open
     var existingFile = openFiles.find(file => file.path === path);
     if (existingFile) {
-        // Switch to this tab
+        // Switch to this tab first
         switchTab(path);
+        // If file has unsaved changes, ask before reloading
+        if (existingFile.unsaved) {
+            reloadFileConfirmDialog(path);
+        } else {
+            // Reload file content from server
+            reloadFileContent(path);
+        }
         return;
     }
 
@@ -573,13 +580,51 @@ function pasteMoveDialog(){
 
 function closeFileConfirmDialog(path){
     newModal('Close?');
-    addModalBody('This file has unsaved changes. Close anyway?');   
+    addModalBody('This file has unsaved changes. Close anyway?');
     addModalButton('Cancel', hideModal);
     addModalButton('Yes', function() {
         hideModal();
         closeTabConfirmed(path);
     });
     showModal();
+}
+
+function reloadFileConfirmDialog(path){
+    newModal('Reload?');
+    addModalBody('This file has unsaved changes. Reload from disk and lose changes?');
+    addModalButton('Cancel', hideModal);
+    addModalButton('Reload', function() {
+        hideModal();
+        reloadFileContent(path);
+    });
+    showModal();
+}
+
+function reloadFileContent(path) {
+    var fileObj = openFiles.find(file => file.path === path);
+    if (!fileObj) return;
+
+    // For text files, reload content from server
+    if (fileObj.editorSession) {
+        $.get(appBaseURL + '/get_file?fpath=' + encodeURIComponent(path), function(data) {
+            // Update the editor session with new content
+            fileObj.editorSession.setValue(data);
+            // Reset unsaved state
+            fileObj.unsaved = false;
+            fileObj.tabElement.removeClass('unsaved');
+            // Move cursor to beginning
+            editor.gotoLine(1);
+        }, 'text');
+    } else if (fileObj.isImage) {
+        // For images, force reload by updating the image src with a cache-busting param
+        var img = $('#image-container img');
+        if (img.length) {
+            img.attr('src', appBaseURL + '/get_file?fpath=' + encodeURIComponent(path) + '&_=' + Date.now());
+        }
+    } else if (fileObj.isAudio) {
+        // For audio, reinitialize the player
+        initAudioPlayer(path);
+    }
 }
 
 function newFileDialog() {
