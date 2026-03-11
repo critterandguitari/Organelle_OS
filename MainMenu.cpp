@@ -937,8 +937,9 @@ bool MainMenu::loadPatchPath(const char* fullPath) {
 
     std::cout << "Loading patch '" << patchName << "' from directory '" << parentDir << "'" << std::endl;
 
-    // Set the patch directory
+    // Set the patch directory and rebuild menu to match
     app.setPatchDir(parentDir.c_str());
+    buildMenu();
 
     // Load the patch
     runPatch(patchName.c_str(), patchName.c_str());
