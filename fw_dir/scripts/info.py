@@ -143,6 +143,13 @@ if (midi_dev == "" or midi_dev == "None"): midi_dev = 'None'
 version = run_cmd("cat " + fw_dir + "/version", timeout=2)
 build_tag = run_cmd("cat " + fw_dir + "/buildtag", timeout=2)
 version = "Version: " + version + build_tag
+
+# Detect machine type
+platform = run_cmd("cat /proc/device-tree/model", timeout=2)
+if "Compute Module 4" in platform:
+    machine = "Machine: OG S2"
+else:
+    machine = "Machine: OG M / S"
 patch_dir = "  " + patch_dir
 user_dir = "  " + user_dir
 patch = "  " + run_cmd("ls /tmp/curpatchname", timeout=2)
@@ -169,9 +176,10 @@ vnc_server,
 patch,
 "Patch Folder:", 
 patch_dir, 
-"User Root:", 
-user_dir, 
-version, 
+"User Root:",
+user_dir,
+version,
+machine,
 ]
 
 info.header='INFO press to exit.'
