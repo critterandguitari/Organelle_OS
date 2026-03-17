@@ -100,7 +100,141 @@ static unsigned char oled_poscode[] = {
 };
 
 CM4OG4::CM4OG4() {
+#ifdef HDMI_MIRROR
+    fbFd = -1;
+    fbMem = NULL;
+    fbSize = 0;
+    fbScale = 1;
+    fbOffsetX = 0;
+    fbOffsetY = 0;
+    fbRowBuf = NULL;
+    memset(prevPixBuf, 0xFF, 1024); // Init to non-zero so first frame always draws
+#endif
 }
+
+#ifdef HDMI_MIRROR
+void CM4OG4::initHDMIMirror() {
+    // Open framebuffer device
+    fbFd = open("/dev/fb0", O_RDWR);
+    if (fbFd < 0) {
+        printf("HDMI Mirror: Cannot open /dev/fb0\n");
+        return;
+    }
+
+    // Get variable screen info
+    if (ioctl(fbFd, FBIOGET_VSCREENINFO, &fbVarInfo) < 0) {
+        printf("HDMI Mirror: Cannot get variable screen info\n");
+        close(fbFd);
+        fbFd = -1;
+        return;
+    }
+
+    // Get fixed screen info
+    if (ioctl(fbFd, FBIOGET_FSCREENINFO, &fbFixInfo) < 0) {
+        printf("HDMI Mirror: Cannot get fixed screen info\n");
+        close(fbFd);
+        fbFd = -1;
+        return;
+    }
+
+    fbSize = fbFixInfo.smem_len;
+
+    // Memory map the framebuffer
+    fbMem = (uint8_t *)mmap(NULL, fbSize, PROT_READ | PROT_WRITE, MAP_SHARED, fbFd, 0);
+    if (fbMem == MAP_FAILED) {
+        printf("HDMI Mirror: Cannot mmap framebuffer\n");
+        close(fbFd);
+        fbFd = -1;
+        fbMem = NULL;
+        return;
+    }
+
+    // Calculate scale factor to fit OLED (128x64) on screen
+    int scaleX = fbVarInfo.xres / 128;
+    int scaleY = fbVarInfo.yres / 64;
+    fbScale = (scaleX < scaleY) ? scaleX : scaleY;
+    if (fbScale < 1) fbScale = 1;
+
+    // Pre-calculate offsets for centering
+    fbOffsetX = (fbVarInfo.xres - 128 * fbScale) / 2;
+    fbOffsetY = (fbVarInfo.yres - 64 * fbScale) / 2;
+
+    // Allocate row buffer for scaled rendering
+    int bpp = fbVarInfo.bits_per_pixel / 8;
+    fbRowBuf = (uint8_t *)malloc(128 * fbScale * bpp);
+    if (!fbRowBuf) {
+        printf("HDMI Mirror: Cannot allocate row buffer\n");
+        munmap(fbMem, fbSize);
+        close(fbFd);
+        fbFd = -1;
+        fbMem = NULL;
+        return;
+    }
+
+    // Clear framebuffer to black
+    memset(fbMem, 0, fbSize);
+
+    printf("HDMI Mirror: initialized - %dx%d, %d bpp, scale %dx\n",
+           fbVarInfo.xres, fbVarInfo.yres, fbVarInfo.bits_per_pixel, fbScale);
+}
+
+void CM4OG4::updateHDMIMirror(OledScreen &s) {
+    if (!fbMem || fbFd < 0 || !fbRowBuf) return;
+
+    // Skip update if screen hasn't changed (dirty tracking)
+    if (memcmp(s.pix_buf, prevPixBuf, 1024) == 0) return;
+    memcpy(prevPixBuf, s.pix_buf, 1024);
+
+    int bpp = fbVarInfo.bits_per_pixel / 8;
+    int lineLen = fbFixInfo.line_length;
+    int scaledRowBytes = 128 * fbScale * bpp;
+
+    for (int y = 0; y < 64; y++) {
+        // Build one horizontally-scaled row
+        if (bpp == 4) {
+            uint32_t *row32 = (uint32_t *)fbRowBuf;
+            for (int x = 0; x < 128; x++) {
+                uint32_t color = s.get_pixel(x, y) ? 0xFFFFFFFF : 0x00000000;
+                for (int sx = 0; sx < fbScale; sx++) {
+                    row32[x * fbScale + sx] = color;
+                }
+            }
+        } else if (bpp == 2) {
+            uint16_t *row16 = (uint16_t *)fbRowBuf;
+            for (int x = 0; x < 128; x++) {
+                uint16_t color = s.get_pixel(x, y) ? 0xFFFF : 0x0000;
+                for (int sx = 0; sx < fbScale; sx++) {
+                    row16[x * fbScale + sx] = color;
+                }
+            }
+        }
+
+        // Copy the row fbScale times for vertical scaling
+        for (int sy = 0; sy < fbScale; sy++) {
+            int py = fbOffsetY + y * fbScale + sy;
+            uint8_t *dest = fbMem + py * lineLen + fbOffsetX * bpp;
+            memcpy(dest, fbRowBuf, scaledRowBytes);
+        }
+    }
+}
+
+void CM4OG4::shutdownHDMIMirror() {
+    if (fbRowBuf) {
+        free(fbRowBuf);
+        fbRowBuf = NULL;
+    }
+    if (fbMem && fbMem != MAP_FAILED) {
+        memset(fbMem, 0, fbSize);  // Clear screen on exit
+        munmap(fbMem, fbSize);
+        fbMem = NULL;
+    }
+    if (fbFd >= 0) {
+        close(fbFd);
+        fbFd = -1;
+    }
+    printf("HDMI Mirror: shutdown\n");
+}
+#endif
 
 void CM4OG4::init(){
     // setup GPIO, this uses actual BCM pin numbers 
@@ -161,9 +295,12 @@ void CM4OG4::init(){
     digitalWrite(LEDG, HIGH);
     digitalWrite(LEDB, HIGH);
 
-    // GPIO for power status 
-    pwrStatus = 0; 
+    // GPIO for power status
+    pwrStatus = 0;
 
+#ifdef HDMI_MIRROR
+    initHDMIMirror();
+#endif
 }
 
 void CM4OG4::clearFlags() {
@@ -228,11 +365,15 @@ void CM4OG4::updateOLED(OledScreen &s){
     // spi will overwrite the buffer with input, so we need a tmp
     uint8_t tmp[1024];
     memcpy(tmp, s.pix_buf, 1024);
-    
+
     digitalWrite(OLED_DC, LOW);
     wiringPiSPIDataRW(0, oled_poscode, 3);
     digitalWrite(OLED_DC, HIGH);
     wiringPiSPIDataRW(0, tmp, 1024);
+
+#ifdef HDMI_MIRROR
+    updateHDMIMirror(s);
+#endif
 }
 
 
@@ -241,7 +382,9 @@ void CM4OG4::ping(){
 }
 
 void CM4OG4::shutdown() {
-
+#ifdef HDMI_MIRROR
+    shutdownHDMIMirror();
+#endif
 }
 
 void CM4OG4::setLED(unsigned stat) {

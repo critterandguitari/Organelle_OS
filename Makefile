@@ -75,7 +75,7 @@ organelle_cm3 : $(cm3_objects) obj/cm3/hw_interfaces/CM3GPIO.o
 	@mkdir -p fw_dir
 	$(CXX) -o fw_dir/mother_cm3 $(cm3_objects) obj/cm3/hw_interfaces/CM3GPIO.o -l wiringPi
 
-organelle_cm4 : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DSTORAGE_INDICATOR -DPWR_SWITCH -DMICSEL_SWITCH -DFIX_ABL_LINK
+organelle_cm4 : CXXFLAGS += -DCM4OG4_HW -DOLED_30FPS -DMICSEL_SWITCH -DBATTERY_METER -DSTORAGE_INDICATOR -DPWR_SWITCH -DMICSEL_SWITCH -DFIX_ABL_LINK #-DHDMI_MIRROR
 organelle_cm4 : $(cm4_objects) obj/cm4/hw_interfaces/CM4OG4.o
 	@mkdir -p fw_dir
 	$(CXX) -o fw_dir/mother_cm4 $(cm4_objects) obj/cm4/hw_interfaces/CM4OG4.o -l wiringPi

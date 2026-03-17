@@ -5,8 +5,8 @@
 #include <wiringPiSPI.h>
 #include <wiringShift.h>
 #include <wiringPiI2C.h>
-#include <stdio.h>  
-#include <stdlib.h>  
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
@@ -15,6 +15,14 @@
 #include "../OSC/SimpleWriter.h"
 #include "../SLIPEncodedSerial.h"
 #include "../Serial.h"
+
+#ifdef HDMI_MIRROR
+#include <linux/fb.h>
+#include <sys/mman.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 
 class CM4OG4
 {
@@ -69,6 +77,21 @@ class CM4OG4
         int fd0;
         int fd1;
 
+#ifdef HDMI_MIRROR
+        int fbFd;
+        uint8_t *fbMem;
+        struct fb_var_screeninfo fbVarInfo;
+        struct fb_fix_screeninfo fbFixInfo;
+        uint32_t fbSize;
+        int fbScale;
+        int fbOffsetX;
+        int fbOffsetY;
+        uint8_t *fbRowBuf;        // Pre-allocated scaled row buffer
+        uint8_t prevPixBuf[1024]; // Previous OLED buffer for dirty tracking
+        void initHDMIMirror();
+        void updateHDMIMirror(OledScreen &s);
+        void shutdownHDMIMirror();
+#endif
 };
 
 
