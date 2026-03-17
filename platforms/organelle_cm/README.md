@@ -160,23 +160,33 @@ do deploy stuff
 
 ## ^OGS2_v4.4.img
 
-sudo fw_dir/scripts/remount-rw.sh
-sudo apt-get update
-sudo apt-get install faust chuck lua5.4 liblua5.4-dev libsdl2-dev realvnc-vnc-server
-cd Organelle_OS/
-make clean
-git pull
-cd platforms/organelle_cm/cm3_kernel/
-sudo ./install_from_archive.sh stuff2.tar.gz manifest.txt 
-./verify_archive.sh stuff2.tar.gz 
-cd ../helpers
-sudo ./disable_services.sh
-cd ~/Organelle_OS
-make clean
-sudo make organelle_cm_deploy 
+    sudo fw_dir/scripts/remount-rw.sh
+    sudo apt-get update
+    sudo apt-get install faust chuck lua5.4 liblua5.4-dev libsdl2-dev realvnc-vnc-server
+    cd Organelle_OS/
+    make clean
+    git pull
+    cd platforms/organelle_cm/cm3_kernel/
+    sudo ./install_from_archive.sh stuff2.tar.gz manifest.txt 
+    ./verify_archive.sh stuff2.tar.gz 
+    cd ../helpers
+    sudo ./disable_services.sh
+    cd ~/Organelle_OS
+    make clean
+    sudo make organelle_cm_deploy 
 
 
 ## ^OGSMS2_v5.0_beta1.img
+
+set date time
+
+pull changes
+
+update Faust:
+
+install patches
+
+turn off SSH
 
 ## deploy stuff
 
