@@ -176,7 +176,7 @@ do deploy stuff
     sudo make organelle_cm_deploy 
 
 
-## ^OGSMS2_v5.0_beta1.img
+## ^OGSMS2_v5.0_beta2.img
 
 set date time -- is net time sync enabled or not?
 
