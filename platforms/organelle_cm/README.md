@@ -236,13 +236,16 @@ clean up
 
 remove all /sdcard/system-connections except music network
 
-run fsck from another machine. 
+run fsck from another machine, make sure unmounted, zero free space and check. 
     
+    sudo umount /dev/mmcblk0p1
+    sudo umount /dev/mmcblk0p2
+    sudo umount /dev/mmcblk0p3       
+    sudo zerofree -v /dev/mmcblk0p2
+    sudo zerofree -v /dev/mmcblk0p3
     sudo fsck /dev/mmcblk0p1
     sudo fsck /dev/mmcblk0p2
     sudo fsck /dev/mmcblk0p3
-    sudo zerofree -v /dev/mmcblk0p2
-    sudo zerofree -v /dev/mmcblk0p3
     sudo sync
     sudo dd if=/dev/mmcblk0 of=OGS2_v4.3.img bs=1M count=7360
     zip OGS2_v4.3.img.zip OGS2_v4.3.img
