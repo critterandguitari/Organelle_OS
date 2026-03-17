@@ -180,12 +180,19 @@ do deploy stuff
 
 set date time:
 
+    sudo fw_dir/scripts/remount-rw.sh
     sudo timedatectl set-time "2026-03-17 12:01"
 
 install patches:
 
-    sudo fw_dir/scripts/remount-rw.sh
-    cd /sdcard/ && rm -fr Patches && wget https://github.com/critterandguitari/Organelle_Patches/archive/refs/tags/OSv4.3.zip && unzip OSv4.3.zip && mv Organelle_Patches-OSv4.3 Patches && rm OSv4.3.zip
+    cd /sdcard/ 
+    rm -fr Patches
+    mkdir -p Patches/EXPLORE
+    wget https://github.com/critterandguitari/Organelle_Patches/archive/refs/tags/OSv4.3.zip
+    unzip OSv4.3.zip
+    mv Organelle_Patches-OSv4.3/* Patches/EXPLORE/
+    rm OSv4.3.zip
+    rm -r Organelle_Patches-OSv4.3
 
 pull changes 
 
@@ -200,7 +207,7 @@ update Faust:
     git clone https://github.com/grame-cncm/faustlibraries.git
     sudo cp faustlibraries/*.lib /usr/share/faust/
 
-Install and reorganize patches:
+Reboot and install PLAY patches
 
 turn off SSH:
 
