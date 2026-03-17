@@ -810,6 +810,19 @@ void MainMenu::buildMenu(signed mm_pos) {
             free(namelist);
         }
 
+        // move PLAY to first position if present
+        for (i = patchMenuOffset + 1; i < numMenuEntries; i++) {
+            if (strncmp(menuItems[i].name, "PLAY", 4) == 0) {
+                MenuItem playItem = menuItems[i];
+                // shift items down to make room at the front
+                for (int j = i; j > patchMenuOffset; j--) {
+                    menuItems[j] = menuItems[j - 1];
+                }
+                menuItems[patchMenuOffset] = playItem;
+                break;
+            }
+        }
+
         // end patches
 
         for (i = 0; i < numMenuEntries; i++) {
