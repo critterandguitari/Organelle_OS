@@ -178,15 +178,33 @@ do deploy stuff
 
 ## ^OGSMS2_v5.0_beta1.img
 
-set date time
+set date time -- is net time sync enabled or not?
 
-pull changes
+install patches:
+
+    sudo fw_dir/scripts/remount-rw.sh
+    cd /sdcard/ && rm -fr Patches && wget https://github.com/critterandguitari/Organelle_Patches/archive/refs/tags/OSv4.3.zip && unzip OSv4.3.zip && mv Organelle_Patches-OSv4.3 Patches && rm OSv4.3.zip
+
+pull changes 
+
+    cd ~/Organelle_OS
+    git pull
+    sudo make clean
+    sudo make organelle_cm_deploy 
 
 update Faust:
 
-install patches
+    cd /tmp
+    git clone https://github.com/grame-cncm/faustlibraries.git
+    sudo cp faustlibraries/*.lib /usr/share/faust/
 
-turn off SSH
+turn off SSH:
+
+    sudo systemctl disable ssh.service   
+
+do deploy stuff
+
+## ^OGSMS2_v5.0_beta1.img
 
 ## deploy stuff
 
