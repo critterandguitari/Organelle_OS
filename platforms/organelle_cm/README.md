@@ -198,6 +198,8 @@ update Faust:
     git clone https://github.com/grame-cncm/faustlibraries.git
     sudo cp faustlibraries/*.lib /usr/share/faust/
 
+Install and reorganize patches:
+
 turn off SSH:
 
     sudo systemctl disable ssh.service   
