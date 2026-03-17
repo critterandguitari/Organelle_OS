@@ -204,7 +204,7 @@ turn off SSH:
 
 do deploy stuff
 
-## ^OGSMS2_v5.0_beta1.img
+## ^OGSMS2_v5.0_beta2.img
 
 ## deploy stuff
 
