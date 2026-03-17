@@ -241,6 +241,8 @@ run fsck from another machine.
     sudo fsck /dev/mmcblk0p1
     sudo fsck /dev/mmcblk0p2
     sudo fsck /dev/mmcblk0p3
+    sudo zerofree -v /dev/mmcblk0p2
+    sudo zerofree -v /dev/mmcblk0p3
     sudo dd if=/dev/mmcblk0 of=OGS2_v4.3.img bs=1M count=7360
     zip OGS2_v4.3.img.zip OGS2_v4.3.img
 
