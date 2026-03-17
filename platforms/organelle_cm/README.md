@@ -178,7 +178,9 @@ do deploy stuff
 
 ## ^OGSMS2_v5.0_beta2.img
 
-set date time -- is net time sync enabled or not?
+set date time:
+
+    sudo timedatectl set-time "2026-03-17 12:01"
 
 install patches:
 
