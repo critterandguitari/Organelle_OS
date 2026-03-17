@@ -209,6 +209,10 @@ update Faust:
 
 Reboot and install PLAY patches
 
+adjust headphone level to 74 db and store:
+
+    sudo alsactl store
+
 turn off SSH:
 
     sudo systemctl disable ssh.service   
