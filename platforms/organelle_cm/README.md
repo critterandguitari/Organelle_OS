@@ -194,6 +194,8 @@ install patches:
     rm OSv4.3.zip
     rm -r Organelle_Patches-OSv4.3
 
+install PLAY patches using web
+
 pull changes 
 
     cd ~/Organelle_OS
@@ -220,6 +222,11 @@ turn off SSH:
 do deploy stuff
 
 ## ^OGSMS2_v5.0_beta3.img
+
+install updated PLAY patches
+do deploy stuff
+
+## ^OGSMS2_v5.0.img
 
 ## deploy stuff
 
