@@ -230,26 +230,42 @@ def connect(ssid, password):
 def start_ap_mode():
     """Start WiFi Access Point mode"""
     global state, connecting_timer, current_net
-    
+
     print("Starting AP mode...")
     og.alert("Starting AP mode...")
-    
+
     # Disconnect first to be sure
     try:
-        subprocess.run(["sudo", "nmcli", "device", "disconnect", "wlan0"], 
+        subprocess.run(["sudo", "nmcli", "device", "disconnect", "wlan0"],
                       capture_output=True, timeout=10)
     except:
         pass  # Ignore errors if already disconnected
-    
+
+    # Remove any previous hotspot profile
+    subprocess.run(["sudo", "nmcli", "connection", "delete", "Hotspot"],
+                   capture_output=True)
+
     # Start AP mode
     try:
-        result = subprocess.run([
-            "sudo", "nmcli", "device", "wifi", "hotspot",
-            "ifname", "wlan0",
-            "ssid", "ORGANELLE", "password", "coolmusic",
-            "band", "bg", "channel", "6"
+        # Create a connection profile with PMF optional so both older and newer
+        # clients (e.g. recent macOS which negotiates WPA3/PMF) can connect.
+        subprocess.run([
+            "sudo", "nmcli", "connection", "add",
+            "type", "wifi", "ifname", "wlan0",
+            "con-name", "Hotspot", "autoconnect", "no",
+            "ssid", "ORGANELLE",
+            "802-11-wireless.mode", "ap",
+            "802-11-wireless.band", "bg",
+            "802-11-wireless.channel", "6",
+            "802-11-wireless-security.key-mgmt", "wpa-psk",
+            "802-11-wireless-security.psk", "coolmusic",
+            "802-11-wireless-security.pmf", "2",  # optional — allows WPA2 and WPA3 clients
+            "ipv4.method", "shared"
         ], capture_output=True, text=True, check=True, timeout=15)
-        
+
+        subprocess.run(["sudo", "nmcli", "connection", "up", "Hotspot"],
+                       capture_output=True, text=True, check=True, timeout=15)
+
         state = AP_MODE
         print("AP mode started successfully")
         return True
@@ -258,8 +274,7 @@ def start_ap_mode():
         error_output = e.stderr if e.stderr else e.stdout
         error_msg = f"{error_output[:50]}..." if len(error_output) > 50 else f"{error_output}"
         print(f"Error starting AP mode: {error_output}")
-        
-        # Show error to user for 2 seconds
+
         og.alert_long(error_msg)
         time.sleep(3)
         return False
@@ -267,8 +282,7 @@ def start_ap_mode():
         state = CONNECTION_ERROR
         error_msg = "AP failed: Timeout"
         print("Timeout starting AP mode")
-        
-        # Show error to user for 2 seconds
+
         og.alert_long(error_msg)
         time.sleep(3)
         return False
