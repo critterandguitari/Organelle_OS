@@ -244,8 +244,10 @@ def start_ap_mode():
     # Start AP mode
     try:
         result = subprocess.run([
-            "sudo", "nmcli", "device", "wifi", "hotspot", 
-            "ssid", "ORGANELLE", "password", "coolmusic"
+            "sudo", "nmcli", "device", "wifi", "hotspot",
+            "ifname", "wlan0",
+            "ssid", "ORGANELLE", "password", "coolmusic",
+            "band", "bg", "channel", "6"
         ], capture_output=True, text=True, check=True, timeout=15)
         
         state = AP_MODE

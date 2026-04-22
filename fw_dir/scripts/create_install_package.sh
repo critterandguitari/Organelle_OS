@@ -1,4 +1,8 @@
 #!/bin/sh
+if [ -z "$1" ]; then
+    echo "Usage: create_install_package.sh <install_dir>"
+    exit 1
+fi
 echo create install package for $1
 
 INSTALL_DIR=$1
