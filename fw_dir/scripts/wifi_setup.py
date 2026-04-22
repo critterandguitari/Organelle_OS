@@ -456,25 +456,12 @@ def build_main_menu():
             menu.items.append(['Stop Web Server', stop_web])
         else:
             menu.items.append(['Start Web Server', start_web])
-    elif state == AP_MODE:
-        menu.header = 'AP Mode (ORGANELLE)'
-        
-        # Show AP mode IP (typically 10.42.0.1 for NetworkManager hotspot)
-        menu.items.append(['IP: 10.42.0.1', lambda: None])
-        menu.items.append(['Stop AP Mode', disconnect])
-        
-        # Web server control in AP mode
-        if web_server_state == WEB_SERVER_RUNNING:
-            menu.items.append(['Stop Web Server', stop_web])
-        else:
-            menu.items.append(['Start Web Server', start_web])
     elif state == DISCONNECTING:
         menu.header = 'Not Connected'
     elif state == CONNECTION_ERROR:
         menu.header = 'Problem Connecting'
         if has_wifi_adapter():
             menu.items.append(['Select Network   >', network_menu_action])
-            menu.items.append(['Start AP Mode', start_ap])
     else:
         # Check for Ethernet connection
         check_ethernet()
@@ -491,7 +478,6 @@ def build_main_menu():
         # Only show WiFi options if adapter present
         if has_wifi_adapter():
             menu.items.append(['Select Network   >', network_menu_action])
-            menu.items.append(['Start AP Mode', start_ap])
 
     # Home/quit
     menu.items.append(["Forget Saved Nets", show_forget_confirmation])
