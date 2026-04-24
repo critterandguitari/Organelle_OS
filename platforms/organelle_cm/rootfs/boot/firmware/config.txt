@@ -2,7 +2,7 @@
 dtparam=i2c_arm=on
 dtparam=spi=on
 camera_auto_detect=1
-dtoverlay=vc4-kms-v3d,noaudio
+dtoverlay=vc4-fkms-v3d,noaudio
 max_framebuffers=2
 disable_fw_kms_setup=1
 disable_overscan=1
