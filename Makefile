@@ -70,7 +70,7 @@ sdlpi : $(sdlpi_objects) obj/sdlpi/hw_interfaces/SDLPi.o
 	@mkdir -p fw_dir
 	$(CXX) $(SDL_LIBS) -o fw_dir/mother $(sdlpi_objects) obj/sdlpi/hw_interfaces/SDLPi.o
 
-organelle_cm3 : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER -DFIX_ABL_LINK
+organelle_cm3 : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER -DSTORAGE_INDICATOR -DFIX_ABL_LINK
 organelle_cm3 : $(cm3_objects) obj/cm3/hw_interfaces/CM3GPIO.o
 	@mkdir -p fw_dir
 	$(CXX) -o fw_dir/mother_cm3 $(cm3_objects) obj/cm3/hw_interfaces/CM3GPIO.o -l wiringPi

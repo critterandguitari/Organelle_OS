@@ -1,0 +1,8 @@
+#!/bin/sh
+PLATFORM=$(cat /proc/device-tree/model)
+if echo "$PLATFORM" | grep -q "Compute Module 4"; then
+    exec /usr/bin/startx "$@"
+else
+    exec /usr/bin/startx -- -logfile /tmp/Xorg.0.log "$@"
+fi
+
