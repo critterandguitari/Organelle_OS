@@ -143,8 +143,12 @@ def get_files(rootpath):
         root = "/"
 
     # If we are in the root directory, only allow 'sdcard' and 'usbdrive'
+    # Hide 'usbdrive' if nothing is actually mounted there
     if root == "/":
-        folders = [f for f in folders if f in ("sdcard", "usbdrive")]
+        allowed = ["sdcard"]
+        if os.path.ismount("/usbdrive"):
+            allowed.append("usbdrive")
+        folders = [f for f in folders if f in allowed]
 
     # Sort folders and files
     folders = sorted(folders, key=lambda s: s.lower())
