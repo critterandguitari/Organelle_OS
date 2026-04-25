@@ -68,30 +68,29 @@ def stop_vnc():
     quit()
 
 
-def start_vnc():
-    """Start VNC server"""
+def start_vnc(geometry):
+    """Start VNC server at the given geometry (e.g. '1920x1080')"""
     og.clear_screen()
     og.println(1, "Starting VNC...")
+    og.println(2, geometry)
     og.flip()
-    
+
     # Remount filesystem as read-write
     run_cmd(f"sudo {fw_dir}/scripts/remount-rw.sh 2>&1 | systemd-cat --identifier=Organelle")
-    
+
     # Try to start VNC
-    output = run_cmd("vncserver-virtual -geometry 1920x1080 2>&1 | systemd-cat --identifier=Organelle")
-    
+    output = run_cmd(f"vncserver-virtual -geometry {geometry} 2>&1 | systemd-cat --identifier=Organelle")
+
     quit()  # quit when it starts, bc this will get killed
-    
+
     time.sleep(1)
-    
 
 
-def toggle_action():
-    """Toggle VNC based on current state"""
-    if is_vnc_running():
-        stop_vnc()
-    else:
-        start_vnc()
+def start_vnc_1080():
+    start_vnc("1920x1080")
+
+def start_vnc_1440():
+    start_vnc("2560x1440")
        
 def show_status():
     """Show VNC server status"""
@@ -150,10 +149,11 @@ def main():
     # Initialize menu items
     if is_vnc_running():
         menu.items.append(['Status: Running', show_status])
-        menu.items.append(['Stop Server', toggle_action])
+        menu.items.append(['Stop Server', stop_vnc])
     else:
         menu.items.append(['Status: Stopped', show_status])
-        menu.items.append(['Start Server', toggle_action])
+        menu.items.append(['Start 1920x1080', start_vnc_1080])
+        menu.items.append(['Start 2560x1440', start_vnc_1440])
     
     menu.items.append(['< Home', quit])
     menu.selection = 0
