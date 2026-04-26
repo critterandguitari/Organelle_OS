@@ -228,6 +228,23 @@ do deploy stuff
 
 ## ^OGSMS2_v5.0.img
 
+install PLAY patches using web
+
+pull changes 
+
+    cd ~/Organelle_OS
+    git pull
+    sudo make clean
+    sudo make organelle_cm_deploy 
+
+make startx wrapper exec
+
+    sudo chmod +x /usr/local/bin/startx
+
+do deploy stuff
+
+## ^OGSMS2_v5.1.img
+
 ## deploy stuff
 
 common stuff before making disk image
