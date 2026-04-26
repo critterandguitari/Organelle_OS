@@ -1,6 +1,6 @@
-# Organelle CM4 aka S2 
+# Organelle CM 3,4 OG S, M, S2
 
-Configuring RPI CM4 disk image.
+Configuring RPI disk image for CM3 and CM4 based devices.
 
 Start with 2025-05-13-raspios-bookworm-armhf-lite
 
