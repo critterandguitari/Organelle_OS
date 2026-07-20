@@ -1,0 +1,31 @@
+[Unit]
+Description=Xpra virtual display for Pd Patch Editor
+After=network.target
+
+[Service]
+Type=simple
+User=music
+Group=music
+# $HOME (/home/music) is read-only during normal operation. xpra resolves
+# ~/.xpra (an extra legacy socket location it always tries in addition to
+# --socket-dir) and ~/.Xauthority against the real passwd-db home dir
+# regardless of the HOME env var, so it always tries to write under
+# /home/music and fails there. /home/music/.xpra and /home/music/.Xauthority
+# are shipped as symlinks (see rootfs/home/music/) pointing into this
+# writable tmpfs dir to work around that; recreate their targets on every
+# start since /tmp is cleared on reboot.
+Environment=HOME=/tmp/xpra-pd
+ExecStartPre=/bin/mkdir -p /tmp/xpra-pd/.xpra
+# xauth leaves .Xauthority-l/-c/-n lock siblings while editing the file; a
+# stale one left behind by a prior restart makes every subsequent "xauth add"
+# fail with "error in locking authority file", so Pd (which relies on a
+# valid cookie in this file to connect to :100) gets rejected even though
+# xpra itself came up fine. Start from a clean file on every start.
+ExecStartPre=/bin/sh -c 'rm -f /tmp/xpra-pd/.Xauthority*'
+ExecStartPre=/bin/touch /tmp/xpra-pd/.Xauthority
+ExecStart=/usr/bin/xpra start :100 --daemon=no --exit-with-children=no --speaker=no --microphone=no --pulseaudio=no --dbus-launch=no --socket-dir=/tmp/xpra-pd/sockets --html=on --bind-ws=0.0.0.0:10000
+ExecStop=/usr/bin/xpra stop :100 --socket-dir=/tmp/xpra-pd/sockets
+
+# Restart on failure if needed
+Restart=on-failure
+RestartSec=5

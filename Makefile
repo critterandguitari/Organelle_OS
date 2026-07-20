@@ -107,6 +107,8 @@ organelle_cm_deploy : organelle_cm3 organelle_cm4 organelle_cm_splash
 	@echo "copying version file to root for backwards compatiblility"
 	cp -fr fw_dir/version /root
 	@echo "copying systems files"
+	rm -rf /home/music/.xpra /home/music/.Xauthority
+	rm -rf tmp
 	mkdir tmp
 	cp -r platforms/organelle_cm/rootfs tmp/
 	chown -R root:root tmp/rootfs
