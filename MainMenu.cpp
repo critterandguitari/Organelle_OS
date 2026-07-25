@@ -277,8 +277,14 @@ void MainMenu::runPatch(const char* name, const char* arg) {
 
             std::string args = "-rt ";
             bool guimode = execScript("check-for-x.sh");
+            bool webguimode = !guimode && execScript("check-for-webgui.sh");
+            std::string displayPrefix;
             if (guimode) {
                 args += " -audiobuf 10";
+            } else if (webguimode) {
+                // route Pd's native GUI to the Xpra virtual display for the web patch editor
+                args += " -audiobuf 10";
+                displayPrefix = "DISPLAY=:100 ";
             } else {
                 args += " -nogui -audiobuf 6";
             }
@@ -289,12 +295,14 @@ void MainMenu::runPatch(const char* name, const char* arg) {
 
             // prepare cmd line
             if (hasMainPd) {
-                sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" main.pd )&",
+                sprintf(buf, "( cd /tmp/patch ; %s/usr/bin/pd %s \"%s\" main.pd )&",
+                        displayPrefix.c_str(),
                         args.c_str(),
                         mother.c_str());
             } else {
                 // patch has mother.pd but no main.pd
-                sprintf(buf, "( cd /tmp/patch ; /usr/bin/pd %s \"%s\" )&",
+                sprintf(buf, "( cd /tmp/patch ; %s/usr/bin/pd %s \"%s\" )&",
+                        displayPrefix.c_str(),
                         args.c_str(),
                         mother.c_str());
             }
@@ -630,6 +638,7 @@ void MainMenu::buildMenu(signed mm_pos) {
         addMenuItem(numMenuEntries++, "WiFi Setup", "wifi_setup.py", &MainMenu::runScriptPython);
         addMenuItem(numMenuEntries++, "VNC Setup", "vnc_control.py", &MainMenu::runScriptPython);
         addMenuItem(numMenuEntries++, "Pedal Setup", "pedal_setup.py", &MainMenu::runScriptPython);
+        addMenuItem(numMenuEntries++, "Patch Editor", "patch_editor_control.py", &MainMenu::runScriptPython);
         addMenuItem(numMenuEntries++, "Info", "info.py", &MainMenu::runScriptPython);
         if (favouriteMenu) {
             addMenuItem(numMenuEntries++, "Show Patches", "Show Patches", &MainMenu::runToggleFavourites);

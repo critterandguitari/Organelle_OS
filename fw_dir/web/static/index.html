@@ -72,6 +72,9 @@
             <div id="terminal-toggle" class="icon-button" title="Toggle Terminal">
                 <span class="material-icons">terminal</span>
             </div>
+            <div id="patcheditor-toggle" class="icon-button" title="Toggle Patch Editor">
+                <span class="material-icons">dashboard</span>
+            </div>
 	        <div style="clear:left;"></div>
             <ul class="breadcrumb" id="fsbreadcrumb">
         </div>
@@ -102,6 +105,9 @@
             <div id="markdown-container" style="display: none;"></div>
         </div>
         <div id="terminal-container" style="display: none;"></div>
+        <div id="patcheditor-container" style="display: none;">
+            <iframe id="patcheditor-frame" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
         <div id="vconsole-container" style="overflow-y: auto; ">
             <div id="vconsole-title-bar">
                 <span>Console</span>
@@ -287,6 +293,44 @@
         // Set up terminal toggle button
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('terminal-toggle').addEventListener('click', toggleTerminal);
+        });
+
+        // Patch Editor (Xpra html5 client) functionality
+        const XPRA_PORT = 10000;
+        let patchEditorActive = false;
+
+        function togglePatchEditor() {
+            const editorContainer = document.getElementById('editor-container');
+            const terminalContainer = document.getElementById('terminal-container');
+            const patchEditorContainer = document.getElementById('patcheditor-container');
+            const titleBar = document.getElementById('title-bar');
+            const toggleBtn = document.getElementById('patcheditor-toggle');
+            const frame = document.getElementById('patcheditor-frame');
+
+            patchEditorActive = !patchEditorActive;
+
+            if (patchEditorActive) {
+                // Show patch editor, hide editor/terminal
+                editorContainer.style.display = 'none';
+                terminalContainer.style.display = 'none';
+                titleBar.style.display = 'none';
+                patchEditorContainer.style.display = 'flex';
+                toggleBtn.style.backgroundColor = '#666';
+                // Only point the iframe at Xpra on first open, so we don't connect until needed
+                if (!frame.src) {
+                    frame.src = 'http://' + window.location.hostname + ':' + XPRA_PORT + '/';
+                }
+            } else {
+                // Show editor, hide patch editor (leave the iframe/session alive)
+                patchEditorContainer.style.display = 'none';
+                editorContainer.style.display = 'flex';
+                titleBar.style.display = 'block';
+                toggleBtn.style.backgroundColor = '#444';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('patcheditor-toggle').addEventListener('click', togglePatchEditor);
         });
 
     </script>

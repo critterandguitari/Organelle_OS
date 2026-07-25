@@ -245,6 +245,31 @@ do deploy stuff
 
 ## ^OGSMS2_v5.1.img
 
+install xpra + xpra-html5 for the web-based Pd patch editor (bookworm's own repo doesn't carry xpra-html5, so add the upstream Xpra apt repo first, per https://xpra.org/trac/wiki/Download):
+
+**Warning:** the Organelle M needs its custom audio driver, and `apt-get update`/`apt-get install` below can pull in a stock Raspberry Pi kernel/firmware package that replaces it, silently killing audio output (no error, sound just stops working). Before running anything in this section, check what's eligible to change and hold anything kernel/firmware related:
+
+    sudo apt-get update
+    apt list --upgradable
+    sudo apt-mark hold $(dpkg -l | awk '/^ii/ && /raspberrypi-kernel|raspberrypi-bootloader|linux-image|firmware/ {print $2}')
+
+After installing xpra/xpra-html5 below, confirm audio still works (`aplay`/load a patch) before doing anything else - if the hold list above missed something, better to catch it immediately than after a bunch of unrelated changes.
+
+    sudo apt-get install ca-certificates
+    sudo wget -O /usr/share/keyrings/xpra.asc https://xpra.org/xpra.asc
+    sudo wget -O /etc/apt/sources.list.d/xpra.sources https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/bookworm/xpra.sources
+    sudo apt-get update
+    sudo apt-get install xpra
+
+`xpra` has no armhf build in the xpra.org repo (amd64/arm64 only), so this pulls Raspbian's own archived `3.1.3-0.1` server build instead - that's expected, there's no newer armhf server available short of building from source. `xpra-html5` is arch-independent though, so a plain `apt-get install xpra-html5` grabs the latest release (v21 as of this writing), which does NOT speak the same protocol as a 3.1.3 server - the html5 client loads fine but every connection fails with "connection failed, invalid address". Pin it to an old version from the same era as the 3.1.3 server instead:
+
+    sudo apt-get install --allow-downgrades xpra-html5=5.3-r0-1
+
+If that fails with `dpkg: error processing archive ...: trying to overwrite '/usr/share/xpra/www/css/bootstrap.css', which is also in package xpra (3.1.3-0.1)` (the old xpra-html5 package's Replaces/Breaks metadata doesn't account for files bundled directly in xpra 3.1.3 - newer xpra-html5 releases declare this correctly, this old one doesn't), force it through and hold the version so a later `apt-get upgrade` doesn't silently pull v21 back in and break the connection again:
+
+    sudo dpkg -i --force-overwrite /var/cache/apt/archives/xpra-html5_5.3-r0-1_all.deb
+    sudo apt-mark hold xpra-html5
+
 ## deploy stuff
 
 common stuff before making disk image
