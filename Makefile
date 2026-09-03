@@ -59,6 +59,10 @@ obj/sdlpi/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
+obj/sdlpi/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
 # Convert object list to cm3 paths
 cm3_objects = $(addprefix obj/cm3/, $(objects))
 cm4_objects = $(addprefix obj/cm4/, $(objects))
@@ -68,7 +72,7 @@ sdlpi_objects = $(addprefix obj/sdlpi/, $(objects))
 sdlpi : CXXFLAGS += $(SDL_CFLAGS) -DSDLPI_HW -DORGANELLE_HW_WIDTH=800 -DORGANELLE_HW_HEIGHT=600
 sdlpi : $(sdlpi_objects) obj/sdlpi/hw_interfaces/SDLPi.o
 	@mkdir -p fw_dir
-	$(CXX) $(SDL_LIBS) -o fw_dir/mother $(sdlpi_objects) obj/sdlpi/hw_interfaces/SDLPi.o
+	$(CXX) -o fw_dir/mother $(sdlpi_objects) obj/sdlpi/hw_interfaces/SDLPi.o $(SDL_LIBS)
 
 organelle_cm3 : CXXFLAGS += -DCM3GPIO_HW -DMICSEL_SWITCH -DPWR_SWITCH -DOLED_30FPS -DBATTERY_METER -DFIX_ABL_LINK
 organelle_cm3 : $(cm3_objects) obj/cm3/hw_interfaces/CM3GPIO.o
