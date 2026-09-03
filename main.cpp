@@ -157,6 +157,7 @@ void navUp(OSCMessage &msg );
 void navDown(OSCMessage &msg );
 void navPress(OSCMessage &msg );
 void navRelease(OSCMessage &msg );
+void setKnobs(OSCMessage &msg );
 /* end internal OSC messages received */
 
 /* hardware input event handlers */
@@ -281,6 +282,9 @@ int main(int argc, char* argv[]) {
                     || msgIn.dispatch("/nav/down", navDown, 0)
                     || msgIn.dispatch("/nav/press", navPress, 0)
                     || msgIn.dispatch("/nav/release", navRelease, 0)
+
+                    // support for an external program to supply knob positions
+                    || msgIn.dispatch("/knobs/set", setKnobs, 0)
 
                     ;
                 if (!processed) {
@@ -921,6 +925,31 @@ void navPress(OSCMessage &msg ) {
 }
 void navRelease(OSCMessage &msg ) {
     menu.encoderRelease();
+}
+
+// Lets an external program supply the knob positions, for targets that have no
+// ADCs of their own to poll. The SDL build is one: SDLPi::pollKnobs() has
+// nothing to read, so controls.adcs[] stays at zero, knobs_[] with it, and
+// patchLoaded() announces /knobs 0 0 0 0 0 0 at every patch load.
+//
+// That has two consequences, both of which look like bugs elsewhere. Field 5
+// is the patch's own volume, so every patch starts muted. And the step from 0
+// up to a real value reads as a large knob movement, which releases the
+// override2 objects in mother.pd -- the ones meant to hold a knobs.txt preset
+// until the physical knob is genuinely moved -- so saved presets are lost too.
+//
+// Values are the same 0-1023 the ADCs would give: knob1-4, volume, expression.
+// Senders should repeat at roughly the 40 ms poll rate, because knobsInput()
+// filters 75/25 and so approaches a new value over several messages.
+void setKnobs(OSCMessage &msg ) {
+    for (unsigned i = 0; i < MAX_KNOBS; i++) {
+        if (!msg.isInt(i)) continue;
+        int32_t v = msg.getInt(i);
+        if (v < 0) v = 0;
+        if (v > 1023) v = 1023;
+        controls.adcs[i] = v;
+    }
+    controls.knobFlag = 1;
 }
 
 /* end internal OSC messages received */
