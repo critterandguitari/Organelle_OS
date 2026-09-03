@@ -27,6 +27,12 @@ splash_objects = \
 SDL_CFLAGS := $(shell pkg-config --cflags sdl2)
 SDL_LIBS := $(shell pkg-config --libs sdl2)
 
+# Size of the sdlpi window. The renderer integer-scales a 128x64 logical
+# surface, so anything that is not an exact multiple of it is letterboxed.
+# Override on the command line, e.g. make sdlpi SDLPI_WIDTH=384 SDLPI_HEIGHT=192
+SDLPI_WIDTH ?= 512
+SDLPI_HEIGHT ?= 256
+
 default :
 	@echo "platform not specified"
 
@@ -65,7 +71,7 @@ cm4_objects = $(addprefix obj/cm4/, $(objects))
 splash_cm_objects = $(addprefix obj/splash/, $(splash_objects))
 sdlpi_objects = $(addprefix obj/sdlpi/, $(objects))
 
-sdlpi : CXXFLAGS += $(SDL_CFLAGS) -DSDLPI_HW -DORGANELLE_HW_WIDTH=800 -DORGANELLE_HW_HEIGHT=600
+sdlpi : CXXFLAGS += $(SDL_CFLAGS) -DSDLPI_HW -DORGANELLE_HW_WIDTH=$(SDLPI_WIDTH) -DORGANELLE_HW_HEIGHT=$(SDLPI_HEIGHT)
 sdlpi : $(sdlpi_objects) obj/sdlpi/hw_interfaces/SDLPi.o
 	@mkdir -p fw_dir
 	$(CXX) $(SDL_LIBS) -o fw_dir/mother $(sdlpi_objects) obj/sdlpi/hw_interfaces/SDLPi.o
