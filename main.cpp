@@ -910,16 +910,25 @@ void sendShutdown(OSCMessage &msg ) {
     controls.shutdown();
 }
 
+// These reset the screen saver for the same reason encoderInput() and
+// keysInput() do: they are user input. Without it the timer stays pinned at
+// SCREENSAVER_TIMEOUT while the saver is up, so the very next updateScreenSaver()
+// tick -- at most a second later -- drops straight back into it, and navigating
+// by these messages alone is impossible.
 void navUp(OSCMessage &msg ) {
+    app.resetScreenSaver();
     menu.encoderUp();
 }
 void navDown(OSCMessage &msg ) {
+    app.resetScreenSaver();
     menu.encoderDown();
 }
 void navPress(OSCMessage &msg ) {
+    app.resetScreenSaver();
     menu.encoderPress();
 }
 void navRelease(OSCMessage &msg ) {
+    app.resetScreenSaver();
     menu.encoderRelease();
 }
 
